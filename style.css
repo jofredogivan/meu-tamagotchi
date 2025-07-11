@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meu Tamagotchi Fofinho</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <h1>🐾 Meu Tamagotchi Fofinho</h1>
+
+  <div id="top-info">
+    <div id="name">🐾 Nome: </div>
+    <div id="coins">🪙 Moedas: </div>
+  </div>
+
+  <div id="tamagotchi">
+    <img id="petImage" src="" alt="Tamagotchi" />
+
+    <div class="status-bar">🍽️ Fome
+      <div class="bar"><div id="hungerBar" class="bar-fill"></div></div>
+    </div>
+
+    <div class="status-bar">🎮 Diversão
+      <div class="bar"><div id="funBar" class="bar-fill"></div></div>
+    </div>
+
+    <div class="status-bar">💤 Energia
+      <div class="bar"><div id="energyBar" class="bar-fill"></div></div>
+    </div>
+
+    <div class="status-bar">❤️ Vida
+      <div class="bar"><div id="lifeBar" class="bar-fill"></div></div>
+    </div>
+
+    <div class="status-bar">⭐ XP <span id="nivelLabel">(1)</span>
+      <div class="bar"><div id="xpBar" class="bar-fill xp"></div></div>
+    </div>
+
+    <div id="status">😄 Estou ótimo!</div>
+
+    <div class="buttons">
+      <button onclick="alimentar()">🍖 Alimentar</button>
+      <button onclick="brincar()">🧸 Brincar</button>
+      <button onclick="dormir()">💤 Dormir</button>
+      <button onclick="abrirLoja()">🛒 Loja</button>
+      <button onclick="abrirInventario()">🎒 Inventário</button>
+      <button onclick="resetar()">🔄 Resetar</button>
+    </div>
+  </div>
+
+  <!-- Loja -->
+  <div class="popup" id="loja">
+    <h2>🛍️ Loja</h2>
+    <div class="item" onclick="comprar('pao')">🥖 Pão — 10 moedas</div>
+    <div class="item" onclick="comprar('suco')">🥤 Suco — 15 moedas</div>
+    <div class="item" onclick="comprar('bola')">⚽ Bola — 20 moedas</div>
+    <div class="item" onclick="comprar('urso')">🧸 Urso — 25 moedas</div>
+    <button onclick="fecharLoja()">Fechar</button>
+  </div>
+
+  <!-- Inventário -->
+  <div class="popup" id="inventario">
+    <h2>🎒 Inventário</h2>
+    <div id="itens"></div>
+    <button onclick="fecharInventario()">Fechar</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
