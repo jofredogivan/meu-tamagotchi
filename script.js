@@ -27,15 +27,25 @@ function salvarDados() {
 
 function atualizarImagem() {
   const img = document.getElementById("petImage");
+
   if (vida <= 0) {
-    img.src = "https://i.imgur.com/3dZgXEh.png"; // morto
+    img.src = "imgs/morto.png";
   } else if (nivel < 3) {
-    img.src = "https://i.imgur.com/yTnMMSb.png"; // bebê fofo
+    img.src = "imgs/bebe.png";
   } else if (nivel < 6) {
-    img.src = "https://i.imgur.com/SsUvYCh.png"; // criança kawaii
+    img.src = "imgs/crianca.png";
   } else {
-    img.src = "https://i.imgur.com/X3fKoMn.png"; // adulto fofo
+    // Várias formas adultas
+    const forma = localStorage.getItem("formaAdulta") || escolherFormaAdulta();
+    img.src = `imgs/adulto_${forma}.png`;
   }
+}
+
+function escolherFormaAdulta() {
+  const opcoes = ["guerreiro", "preguica", "artista", "tech"];
+  const forma = opcoes[Math.floor(Math.random() * opcoes.length)];
+  localStorage.setItem("formaAdulta", forma);
+  return forma;
 }
 
 function cor(p) {
