@@ -1,5 +1,5 @@
 let nome = "";
-let moedas = 20; // Inicia com 20 moedas
+let moedas = 20;
 let fome = 50, diversao = 50, energia = 50, vida = 100, xp = 0, nivel = 1;
 let inventario = [];
 let tickInterval;
@@ -21,14 +21,14 @@ function iniciarJogo() {
   document.getElementById("startScreen").style.display = "none";
   document.getElementById("tamagotchi").style.display = "block";
   atualizarTudo();
-  tickInterval = setInterval(tick, 60000); // Atualiza a cada 1 minuto
+  tickInterval = setInterval(tick, 60000);
   atualizarBotoesAcao();
 }
 
 function atualizarTudo() {
   atualizarBarras();
   atualizarImagem();
-  document.getElementById("moedas").innerText = moedas; // Atualiza a exibição de moedas
+  document.getElementById("moedas").innerText = moedas;
   document.getElementById("nivel").innerText = nivel;
   atualizarBotoesAcao();
 }
@@ -54,9 +54,9 @@ function atualizarImagem() {
     if (nivel < 3) {
         img.src = "imgs/bebe_doente.gif";
     } else if (nivel < 6) {
-        img.src = "imgs/crianca_doente.png";
+        img.src = "imgs/crianca_doente.png"; // Crie esta imagem se quiser específica
     } else {
-        img.src = "imgs/doente.gif";
+        img.src = "imgs/doente.gif"; // Crie esta imagem para adulto doente
     }
     return;
   }
@@ -65,11 +65,11 @@ function atualizarImagem() {
     if (nivel < 3) {
         img.src = "imgs/bebe.dormindo.gif";
     } else if (nivel < 6) {
-        img.src = "imgs/crianca.dormindo.gif";
+        img.src = "imgs/crianca.dormindo.gif"; // Crie esta imagem se quiser específica
     } else {
         let forma = localStorage.getItem("formaAdulta");
         if (forma) {
-            img.src = `imgs/adulto_${forma}.dormindo.gif`;
+            img.src = `imgs/adulto_${forma}.dormindo.gif`; // Crie esta imagem para adulto dormindo
         } else {
             img.src = "imgs/bebe.dormindo.gif";
         }
@@ -77,6 +77,7 @@ function atualizarImagem() {
     return;
   }
 
+  // Lógica de imagem normal (bebe, crianca, adulto)
   if (nivel < 3) {
     img.src = "imgs/bebe.gif";
   } else if (nivel < 6) {
@@ -110,23 +111,32 @@ function alimentar() {
   xp += 5;
   carePoints.alimentar += 1;
 
-  img.src = "imgs/bebe.comendo.gif";
+  img.src = "imgs/bebe.comendo.gif"; // Altera para GIF comendo
   atualizarBarras();
   document.getElementById("moedas").innerText = moedas;
   document.getElementById("nivel").innerText = nivel;
 
   setTimeout(() => {
-    atualizarImagem();
-  }, 4000);
+    atualizarImagem(); // Volta para imagem normal após a animação
+  }, 4000); // 4 segundos de animação
 }
 
 function brincar() {
   if (isSleeping || isSick || document.getElementById("gameVelha").style.display === "block") return;
   
+  const img = document.getElementById("petImage"); // Pega a imagem
   diversao = Math.min(diversao + 20, 100);
   xp += 5;
   carePoints.brincar += 1;
-  atualizarTudo();
+
+  img.src = "imgs/bebe.brincando.gif"; // NOVO: Altera para GIF brincando
+  atualizarBarras(); // Atualiza as barras imediatamente
+  document.getElementById("moedas").innerText = moedas; // Garante que moedas esteja atualizado
+  document.getElementById("nivel").innerText = nivel; // Garante que nível esteja atualizado
+
+  setTimeout(() => {
+    atualizarImagem(); // NOVO: Volta para imagem normal após a animação
+  }, 3000); // 3 segundos de animação (ajuste conforme o GIF)
 }
 
 function dormir() {
@@ -151,9 +161,8 @@ function tick() {
   const agora = new Date();
   const hora = agora.getHours();
 
-  // NOVO: Ganho de Moedas por Tempo
   if (!isSleeping && !isSick && document.getElementById("gameVelha").style.display !== "block") {
-      moedas += 1; // Ganha 1 moeda por minuto se não estiver dormindo, doente ou jogando
+      moedas += 1;
   }
 
   if (isSick) {
@@ -319,7 +328,7 @@ function usarItem(i) {
   
   if (item === "vacina") {
       if (isSick) {
-          isSick = false;
+          isSick = false; // Define como não doente
           vida = Math.min(vida + 20, 100);
           document.getElementById("status").innerText = `${nome} se sentiu melhor após a vacina!`;
       } else {
@@ -328,7 +337,7 @@ function usarItem(i) {
       }
   }
   inventario.splice(i, 1);
-  atualizarTudo();
+  atualizarTudo(); // Chama atualizarTudo que, por sua vez, chama atualizarImagem para refletir o estado
   fecharInventario();
 }
 
@@ -443,7 +452,7 @@ function checkResult() {
         if (currentPlayer === 'X') {
             diversao = Math.min(diversao + 15, 100);
             xp += 10;
-            moedas += 10; // NOVO: Ganho de moedas ao vencer o jogo da velha!
+            moedas += 10;
             document.getElementById("status").innerText = `${nome} se divertiu muito jogando! Você ganhou 10 moedas!`;
         } else {
             diversao = Math.min(diversao + 5, 100);
