@@ -1,19 +1,18 @@
 let nome = "";
-let moedas = 20;
+let moedas = 20; // Inicia com 20 moedas
 let fome = 50, diversao = 50, energia = 50, vida = 100, xp = 0, nivel = 1;
 let inventario = [];
 let tickInterval;
 let isSleeping = false;
 let sleepStartTime = 0;
-let isSick = false; // NOVA VARIÁVEL: Para controlar se está doente
-let sickChance = 0.03; // NOVA VARIÁVEL: 3% de chance de ficar doente por tick se vida baixa
+let isSick = false;
+let sickChance = 0.03;
 
-// NOVAS VARIÁVEIS: Pontos de cuidado para a evolução adulta
 let carePoints = {
     alimentar: 0,
     brincar: 0,
     dormir: 0,
-    geral: 0 // Para ações gerais ou XP
+    geral: 0
 };
 
 function iniciarJogo() {
@@ -29,7 +28,7 @@ function iniciarJogo() {
 function atualizarTudo() {
   atualizarBarras();
   atualizarImagem();
-  document.getElementById("moedas").innerText = moedas;
+  document.getElementById("moedas").innerText = moedas; // Atualiza a exibição de moedas
   document.getElementById("nivel").innerText = nivel;
   atualizarBotoesAcao();
 }
@@ -51,40 +50,33 @@ function atualizarImagem() {
     return;
   }
 
-  // NOVO: Imagem de doente tem prioridade
   if (isSick) {
-    // Você pode criar imgs/bebe_doente.gif, imgs/crianca_doente.png, etc.
-    // Por simplicidade, vamos usar uma genérica por enquanto ou uma para o bebê.
     if (nivel < 3) {
-        img.src = "imgs/bebe_doente.gif"; // Exemplo: se tiver essa imagem
+        img.src = "imgs/bebe_doente.gif";
     } else if (nivel < 6) {
-        img.src = "imgs/crianca_doente.png"; // Exemplo: se tiver essa imagem
+        img.src = "imgs/crianca_doente.png";
     } else {
-        // Para adultos doentes, pode ser uma imagem genérica ou um overlay.
-        // Por agora, vou usar uma genérica de bebê doente se as específicas não existirem.
-        img.src = "imgs/doente.gif"; // Crie uma imagem 'doente.gif'
+        img.src = "imgs/doente.gif";
     }
     return;
   }
 
-  // Se estiver dormindo, mantém a imagem de dormindo (se não estiver doente)
   if (isSleeping) {
     if (nivel < 3) {
         img.src = "imgs/bebe.dormindo.gif";
     } else if (nivel < 6) {
-        img.src = "imgs/crianca.dormindo.gif"; // Precisa criar
+        img.src = "imgs/crianca.dormindo.gif";
     } else {
-        let forma = localStorage.getItem("formaAdulta"); // Se já evoluiu, mostra a forma adulta dormindo
+        let forma = localStorage.getItem("formaAdulta");
         if (forma) {
-            img.src = `imgs/adulto_${forma}.dormindo.gif`; // Precisa criar
-        } else { // Se ainda não evoluiu para adulto, mas é nível >= 6 e está dormindo
-            img.src = "imgs/bebe.dormindo.gif"; // Fallback
+            img.src = `imgs/adulto_${forma}.dormindo.gif`;
+        } else {
+            img.src = "imgs/bebe.dormindo.gif";
         }
     }
     return;
   }
 
-  // Lógica de imagem normal (bebe, crianca, adulto - se não estiver doente nem dormindo)
   if (nivel < 3) {
     img.src = "imgs/bebe.gif";
   } else if (nivel < 6) {
@@ -92,19 +84,17 @@ function atualizarImagem() {
   } else {
     let forma = localStorage.getItem("formaAdulta");
     if (!forma) {
-      // NOVA LÓGICA DE EVOLUÇÃO BASEADA NOS PONTOS DE CUIDADO
       const sortedCare = Object.entries(carePoints).sort(([,a],[,b]) => b - a);
-      const topCareType = sortedCare[0][0]; // Pega o tipo de cuidado com mais pontos
+      const topCareType = sortedCare[0][0];
 
-      // Mapeamento dos tipos de cuidado para as formas adultas
       if (topCareType === 'brincar') {
-          forma = "guerreiro"; // Brincou muito, virou guerreiro
+          forma = "guerreiro";
       } else if (topCareType === 'alimentar') {
-          forma = "preguica"; // Comeu muito, virou preguiça
+          forma = "preguica";
       } else if (topCareType === 'dormir') {
-          forma = "mistico"; // Dormiu muito, virou místico (NOVA FORMA!)
-      } else { // Geral ou xp alto (default se não houver um dominante claro)
-          forma = "tech"; // Crescimento geral, virou tech
+          forma = "mistico";
+      } else {
+          forma = "tech";
       }
       localStorage.setItem("formaAdulta", forma);
     }
@@ -118,7 +108,7 @@ function alimentar() {
   const img = document.getElementById("petImage");
   fome = Math.min(fome + 20, 100);
   xp += 5;
-  carePoints.alimentar += 1; // NOVO: Adiciona ponto de cuidado
+  carePoints.alimentar += 1;
 
   img.src = "imgs/bebe.comendo.gif";
   atualizarBarras();
@@ -135,7 +125,7 @@ function brincar() {
   
   diversao = Math.min(diversao + 20, 100);
   xp += 5;
-  carePoints.brincar += 1; // NOVO: Adiciona ponto de cuidado
+  carePoints.brincar += 1;
   atualizarTudo();
 }
 
@@ -145,7 +135,7 @@ function dormir() {
   isSleeping = true;
   sleepStartTime = new Date().getTime();
   document.getElementById("status").innerText = "Seu Tamagotchi está dormindo... Zzz";
-  carePoints.dormir += 1; // NOVO: Adiciona ponto de cuidado
+  carePoints.dormir += 1;
   atualizarTudo();
 }
 
@@ -161,21 +151,24 @@ function tick() {
   const agora = new Date();
   const hora = agora.getHours();
 
-  // NOVO: Lógica de Doença
-  if (isSick) {
-    vida = Math.max(vida - 3, 0); // Perde vida mais rápido quando doente
-    fome = Math.max(fome - 1, 0); // Fica mais faminto
-    diversao = Math.max(diversao - 1, 0); // Menos divertido
-    energia = Math.max(energia - 1, 0); // Mais cansado
-    document.getElementById("status").innerText = `${nome} está doente! 😷 Use a vacina!`;
-    atualizarBarras(); // Atualiza apenas as barras para refletir a perda de vida
-    if (vida <= 0) { // Verifica se morreu por doença
-        atualizarTudo(); // Chama atualização final para imagem de morto
-    }
-    return; // Sai da função tick para não aplicar outras reduções se doente
+  // NOVO: Ganho de Moedas por Tempo
+  if (!isSleeping && !isSick && document.getElementById("gameVelha").style.display !== "block") {
+      moedas += 1; // Ganha 1 moeda por minuto se não estiver dormindo, doente ou jogando
   }
 
-  // Lógica de sono forçado ou acordar após 6 horas
+  if (isSick) {
+    vida = Math.max(vida - 3, 0);
+    fome = Math.max(fome - 1, 0);
+    diversao = Math.max(diversao - 1, 0);
+    energia = Math.max(energia - 1, 0);
+    document.getElementById("status").innerText = `${nome} está doente! 😷 Use a vacina!`;
+    atualizarBarras();
+    if (vida <= 0) {
+        atualizarTudo();
+    }
+    return;
+  }
+
   if (isSleeping) {
     energia = Math.min(energia + 5, 100);
     const tempoDormido = agora.getTime() - sleepStartTime;
@@ -188,20 +181,17 @@ function tick() {
     }
     return;
   } else {
-    // Sono natural entre 22h e 6h (se não estiver dormindo forçadamente)
     if (hora >= 22 || hora < 6) {
       energia = Math.min(energia + 5, 100);
       document.getElementById("status").innerText = "Seu Tamagotchi está com sono.";
     } else {
       energia = Math.max(energia - 1, 0);
-      // Mantém o status customizado se houver
       if (!document.getElementById("status").innerText.includes("nível") && !document.getElementById("status").innerText.includes("divertiu") && !document.getElementById("status").innerText.includes("venceu") && !document.getElementById("status").innerText.includes("empate")) {
         document.getElementById("status").innerText = "";
       }
     }
   }
 
-  // Fome a cada 3 horas (em hora cheia)
   if (agora.getMinutes() === 0 && hora % 3 === 0) {
     fome = Math.max(fome - 5, 0);
   }
@@ -214,7 +204,6 @@ function tick() {
     vida = Math.min(vida + 1, 100);
   }
 
-  // NOVO: Chance de ficar doente se vida baixa e não estiver doente
   if (vida < 40 && !isSick && Math.random() < sickChance) {
       isSick = true;
       document.getElementById("status").innerText = `${nome} parece doente... 😷`;
@@ -223,10 +212,10 @@ function tick() {
   if (xp >= nivel * 20) {
     xp = 0;
     nivel++;
-    localStorage.removeItem("formaAdulta"); // Reseta a forma adulta ao subir de nível para re-evoluir
+    localStorage.removeItem("formaAdulta");
     document.getElementById("status").innerText = `${nome} subiu para o nível ${nivel}!`;
   }
-  carePoints.geral += 1; // NOVO: Ponto de cuidado geral a cada tick
+  carePoints.geral += 1;
 
   atualizarTudo();
 }
@@ -249,11 +238,10 @@ function atualizarBotoesAcao() {
             return;
         }
 
-        // NOVO: Desabilita a maioria dos botões se estiver doente, exceto loja, inventário e usar item
         if (isSick) {
-            if (btn.id === "abrirLojaButton" || btn.id === "abrirInventarioButton" || btn.id === "acordarButton") { // Acordar também não é desabilitado, mas escondido se doente
+            if (btn.id === "abrirLojaButton" || btn.id === "abrirInventarioButton" || btn.id === "acordarButton") {
                 btn.disabled = false;
-                if (btn.id === "acordarButton") btn.style.display = "none"; // Esconde acordar se doente
+                if (btn.id === "acordarButton") btn.style.display = "none";
             } else {
                 btn.disabled = true;
                 btn.style.display = "inline-block";
@@ -261,7 +249,6 @@ function atualizarBotoesAcao() {
             return;
         }
 
-        // Lógica de sono (se não estiver doente nem jogando)
         if (isSleeping) {
             if (btn.id === "acordarButton") {
                 btn.style.display = "inline-block";
@@ -311,31 +298,33 @@ function fecharInventario() {
 }
 
 function comprar(item) {
-  const precos = { pao: 10, suco: 15, bola: 20, urso: 25, vacina: 30 }; // NOVO: Preço da vacina
+  const precos = { pao: 10, suco: 15, bola: 20, urso: 25, vacina: 30 };
   if (moedas >= precos[item]) {
     moedas -= precos[item];
     inventario.push(item);
     atualizarTudo();
+  } else {
+      document.getElementById("status").innerText = "Moedas insuficientes!";
   }
 }
 
 function usarItem(i) {
-  if (isSleeping || document.getElementById("gameVelha").style.display === "block") return; // Não impede usar se doente, para poder usar vacina
+  if (isSleeping || document.getElementById("gameVelha").style.display === "block") return;
   
   const item = inventario[i];
-  if (item === "pao") fome = Math.min(fome + 30, 100);
-  if (item === "suco") energia = Math.min(energia + 30, 100);
-  if (item === "bola") diversao = Math.min(diversao + 30, 100);
-  if (item === "urso") vida = Math.min(vida + 30, 100);
-  // NOVO: Usar Vacina
+  if (item === "pao") { fome = Math.min(fome + 30, 100); document.getElementById("status").innerText = `${nome} comeu pão!`; }
+  if (item === "suco") { energia = Math.min(energia + 30, 100); document.getElementById("status").innerText = `${nome} bebeu suco!`; }
+  if (item === "bola") { diversao = Math.min(diversao + 30, 100); document.getElementById("status").innerText = `${nome} brincou com a bola!`; }
+  if (item === "urso") { vida = Math.min(vida + 30, 100); document.getElementById("status").innerText = `${nome} abraçou o urso!`; }
+  
   if (item === "vacina") {
-      if (isSick) { // Só funciona se estiver doente
+      if (isSick) {
           isSick = false;
-          vida = Math.min(vida + 20, 100); // Recupera um pouco de vida
+          vida = Math.min(vida + 20, 100);
           document.getElementById("status").innerText = `${nome} se sentiu melhor após a vacina!`;
       } else {
           document.getElementById("status").innerText = `${nome} não está doente.`;
-          return; // Não remove a vacina se não for usada
+          return;
       }
   }
   inventario.splice(i, 1);
@@ -360,7 +349,7 @@ const winningConditions = [
 ];
 
 function iniciarJogoVelha() {
-    if (isSleeping || isSick) return; // Não pode jogar dormindo ou doente
+    if (isSleeping || isSick) return;
 
     document.getElementById("tamagotchi").style.display = "none";
     document.getElementById("gameVelha").style.display = "block";
@@ -454,7 +443,8 @@ function checkResult() {
         if (currentPlayer === 'X') {
             diversao = Math.min(diversao + 15, 100);
             xp += 10;
-            document.getElementById("status").innerText = `${nome} se divertiu muito jogando!`;
+            moedas += 10; // NOVO: Ganho de moedas ao vencer o jogo da velha!
+            document.getElementById("status").innerText = `${nome} se divertiu muito jogando! Você ganhou 10 moedas!`;
         } else {
             diversao = Math.min(diversao + 5, 100);
             xp += 5;
