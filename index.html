@@ -7,64 +7,53 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
-  <h1>🐾 Meu Tamagotchi Fofinho</h1>
-
-  <div id="top-info">
-    <div id="name">🐾 Nome: </div>
-    <div id="coins">🪙 Moedas: </div>
+  <div id="startScreen">
+    <h2>Dê um nome ao seu Tamagotchi:</h2>
+    <input type="text" id="inputNome" placeholder="Ex: Monstrinho" />
+    <br /><br />
+    <button onclick="iniciarJogo()">Começar</button>
   </div>
 
-  <div id="tamagotchi">
-    <img id="petImage" src="" alt="Tamagotchi" />
+  <div id="tamagotchi" style="display: none">
+    <h1>💖 Meu Tamagotchi Fofinho</h1>
+    <p><strong>Nome:</strong> <span id="nome"></span></p>
+    <p><strong>💰 Moedas:</strong> <span id="moedas">0</span></p>
 
-    <div class="status-bar">🍽️ Fome
-      <div class="bar"><div id="hungerBar" class="bar-fill"></div></div>
+    <img id="petImage" src="imgs/bebe.png" alt="Tamagotchi" width="180" />
+
+    <ul>
+      <li>🍽️ Fome: <progress id="fome" max="100" value="50"></progress></li>
+      <li>🎉 Diversão: <progress id="diversao" max="100" value="50"></progress></li>
+      <li>💤 Energia: <progress id="energia" max="100" value="50"></progress></li>
+      <li>❤️ Vida: <progress id="vida" max="100" value="100"></progress></li>
+      <li>✨ XP (<span id="nivel">1</span>)</li>
+    </ul>
+
+    <p id="status">Estou pronto para brincar!</p>
+
+    <button onclick="alimentar()">🍽️ Alimentar</button>
+    <button onclick="brincar()">🎉 Brincar</button>
+    <button onclick="dormir()">💤 Dormir</button>
+    <button onclick="abrirLoja()">🏪 Loja</button>
+    <button onclick="abrirInventario()">💼 Inventário</button>
+    <button onclick="resetar()">🗙️ Resetar</button>
+
+    <div id="loja" style="display: none">
+      <h2>🏪 Loja</h2>
+      <ul>
+        <li>🍞 Pão — 10 moedas <button onclick="comprar('pao')">Comprar</button></li>
+        <li>🥤 Suco — 15 moedas <button onclick="comprar('suco')">Comprar</button></li>
+        <li>⚽ Bola — 20 moedas <button onclick="comprar('bola')">Comprar</button></li>
+        <li>🐻 Urso — 25 moedas <button onclick="comprar('urso')">Comprar</button></li>
+      </ul>
+      <button onclick="fecharLoja()">Fechar</button>
     </div>
 
-    <div class="status-bar">🎮 Diversão
-      <div class="bar"><div id="funBar" class="bar-fill"></div></div>
+    <div id="inventario" style="display: none">
+      <h2>💼 Inventário</h2>
+      <ul id="itens"></ul>
+      <button onclick="fecharInventario()">Fechar</button>
     </div>
-
-    <div class="status-bar">💤 Energia
-      <div class="bar"><div id="energyBar" class="bar-fill"></div></div>
-    </div>
-
-    <div class="status-bar">❤️ Vida
-      <div class="bar"><div id="lifeBar" class="bar-fill"></div></div>
-    </div>
-
-    <div class="status-bar">⭐ XP <span id="nivelLabel">(1)</span>
-      <div class="bar"><div id="xpBar" class="bar-fill xp"></div></div>
-    </div>
-
-    <div id="status">😄 Estou ótimo!</div>
-
-    <div class="buttons">
-      <button onclick="alimentar()">🍖 Alimentar</button>
-      <button onclick="brincar()">🧸 Brincar</button>
-      <button onclick="dormir()">💤 Dormir</button>
-      <button onclick="abrirLoja()">🛒 Loja</button>
-      <button onclick="abrirInventario()">🎒 Inventário</button>
-      <button onclick="resetar()">🔄 Resetar</button>
-    </div>
-  </div>
-
-  <!-- Loja -->
-  <div class="popup" id="loja">
-    <h2>🛍️ Loja</h2>
-    <div class="item" onclick="comprar('pao')">🥖 Pão — 10 moedas</div>
-    <div class="item" onclick="comprar('suco')">🥤 Suco — 15 moedas</div>
-    <div class="item" onclick="comprar('bola')">⚽ Bola — 20 moedas</div>
-    <div class="item" onclick="comprar('urso')">🧸 Urso — 25 moedas</div>
-    <button onclick="fecharLoja()">Fechar</button>
-  </div>
-
-  <!-- Inventário -->
-  <div class="popup" id="inventario">
-    <h2>🎒 Inventário</h2>
-    <div id="itens"></div>
-    <button onclick="fecharInventario()">Fechar</button>
   </div>
 
   <script src="script.js"></script>
