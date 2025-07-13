@@ -1,72 +1,92 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Meu Tamagotchi Fofinho</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
+/* style.css */
 
-  <h1>🐾 Meu Tamagotchi Fofinho</h1>
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #ffeaf1;
+  color: #333;
+  margin: 0;
+  padding: 20px;
+  text-align: center;
+}
 
-  <div id="top-info">
-    <div id="name">🐾 Nome: </div>
-    <div id="coins">🪙 Moedas: </div>
-  </div>
+h1 {
+  font-size: 2em;
+  margin-bottom: 10px;
+}
 
-  <div id="tamagotchi">
-    <img id="petImage" src="" alt="Tamagotchi" />
+#tamagotchi img {
+  margin: 20px auto;
+  display: block;
+  border-radius: 20px;
+  max-width: 180px;
+}
 
-    <div class="status-bar">🍽️ Fome
-      <div class="bar"><div id="hungerBar" class="bar-fill"></div></div>
-    </div>
+progress {
+  width: 200px;
+  height: 20px;
+  border-radius: 10px;
+  overflow: hidden;
+  appearance: none;
+}
 
-    <div class="status-bar">🎮 Diversão
-      <div class="bar"><div id="funBar" class="bar-fill"></div></div>
-    </div>
+progress::-webkit-progress-bar {
+  background-color: #f0f0f0;
+  border-radius: 10px;
+}
 
-    <div class="status-bar">💤 Energia
-      <div class="bar"><div id="energyBar" class="bar-fill"></div></div>
-    </div>
+progress::-webkit-progress-value {
+  background-color: #f8a5c2;
+  border-radius: 10px;
+}
 
-    <div class="status-bar">❤️ Vida
-      <div class="bar"><div id="lifeBar" class="bar-fill"></div></div>
-    </div>
+button {
+  background-color: #ffb6c1;
+  border: none;
+  padding: 10px 15px;
+  margin: 5px;
+  border-radius: 15px;
+  font-size: 1em;
+  cursor: pointer;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+  transition: background 0.3s;
+}
 
-    <div class="status-bar">⭐ XP <span id="nivelLabel">(1)</span>
-      <div class="bar"><div id="xpBar" class="bar-fill xp"></div></div>
-    </div>
+button:hover {
+  background-color: #ff8fb8;
+}
 
-    <div id="status">😄 Estou ótimo!</div>
+#startScreen {
+  background: #fff0f5;
+  padding: 20px;
+  border-radius: 20px;
+  width: 320px;
+  margin: 30px auto;
+  box-shadow: 0 0 15px rgba(255,182,193,0.4);
+}
 
-    <div class="buttons">
-      <button onclick="alimentar()">🍖 Alimentar</button>
-      <button onclick="brincar()">🧸 Brincar</button>
-      <button onclick="dormir()">💤 Dormir</button>
-      <button onclick="abrirLoja()">🛒 Loja</button>
-      <button onclick="abrirInventario()">🎒 Inventário</button>
-      <button onclick="resetar()">🔄 Resetar</button>
-    </div>
-  </div>
+#loja, #inventario {
+  background: white;
+  border: 2px solid #ffb6c1;
+  padding: 15px;
+  border-radius: 20px;
+  width: 300px;
+  margin: 20px auto;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
 
-  <!-- Loja -->
-  <div class="popup" id="loja">
-    <h2>🛍️ Loja</h2>
-    <div class="item" onclick="comprar('pao')">🥖 Pão — 10 moedas</div>
-    <div class="item" onclick="comprar('suco')">🥤 Suco — 15 moedas</div>
-    <div class="item" onclick="comprar('bola')">⚽ Bola — 20 moedas</div>
-    <div class="item" onclick="comprar('urso')">🧸 Urso — 25 moedas</div>
-    <button onclick="fecharLoja()">Fechar</button>
-  </div>
+ul {
+  list-style: none;
+  padding: 0;
+}
 
-  <!-- Inventário -->
-  <div class="popup" id="inventario">
-    <h2>🎒 Inventário</h2>
-    <div id="itens"></div>
-    <button onclick="fecharInventario()">Fechar</button>
-  </div>
+li {
+  margin: 10px 0;
+  font-size: 1em;
+}
 
-  <script src="script.js"></script>
-</body>
-</html>
+#status {
+  margin: 10px auto;
+  font-style: italic;
+  font-size: 1.1em;
+  color: #d6336c;
+}
