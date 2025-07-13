@@ -1,61 +1,84 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Meu Tamagotchi Fofinho</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Meu Tamagotchi Fofinho</title>
+    <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div id="startScreen">
-    <h2>Dê um nome ao seu Tamagotchi:</h2>
-    <input type="text" id="inputNome" placeholder="Ex: Monstrinho" />
-    <br /><br />
-    <button onclick="iniciarJogo()">Começar</button>
-  </div>
-
-  <div id="tamagotchi" style="display: none">
-    <h1>💖 Meu Tamagotchi Fofinho</h1>
-    <p><strong>Nome:</strong> <span id="nome"></span></p>
-    <p><strong>💰 Moedas:</strong> <span id="moedas">0</span></p>
-
-    <img id="petImage" src="imgs/bebe.png" alt="Tamagotchi" width="180" />
-
-    <ul>
-      <li>🍽️ Fome: <progress id="fome" max="100" value="50"></progress></li>
-      <li>🎉 Diversão: <progress id="diversao" max="100" value="50"></progress></li>
-      <li>💤 Energia: <progress id="energia" max="100" value="50"></progress></li>
-      <li>❤️ Vida: <progress id="vida" max="100" value="100"></progress></li>
-      <li>✨ XP (<span id="nivel">1</span>)</li>
-    </ul>
-
-    <p id="status">Estou pronto para brincar!</p>
-
-    <button onclick="alimentar()">🍽️ Alimentar</button>
-    <button onclick="brincar()">🎉 Brincar</button>
-    <button onclick="dormir()">💤 Dormir</button>
-    <button onclick="abrirLoja()">🏪 Loja</button>
-    <button onclick="abrirInventario()">💼 Inventário</button>
-    <button onclick="resetar()">🗙️ Resetar</button>
-
-    <div id="loja" style="display: none">
-      <h2>🏪 Loja</h2>
-      <ul>
-        <li>🍞 Pão — 10 moedas <button onclick="comprar('pao')">Comprar</button></li>
-        <li>🥤 Suco — 15 moedas <button onclick="comprar('suco')">Comprar</button></li>
-        <li>⚽ Bola — 20 moedas <button onclick="comprar('bola')">Comprar</button></li>
-        <li>🐻 Urso — 25 moedas <button onclick="comprar('urso')">Comprar</button></li>
-      </ul>
-      <button onclick="fecharLoja()">Fechar</button>
+    <div id="startScreen">
+        <h2>Dê um nome ao seu Tamagotchi:</h2>
+        <input type="text" id="inputNome" placeholder="Ex: Monstrinho" />
+        <br /><br />
+        <button onclick="iniciarJogo()">Começar</button>
     </div>
 
-    <div id="inventario" style="display: none">
-      <h2>💼 Inventário</h2>
-      <ul id="itens"></ul>
-      <button onclick="fecharInventario()">Fechar</button>
-    </div>
-  </div>
+    <div id="tamagotchi" style="display: none">
+        <h1>💖 Meu Tamagotchi Fofinho</h1>
+        <p><strong>Nome:</strong> <span id="nome"></span></p>
+        <p><strong>💰 Moedas:</strong> <span id="moedas">0</span></p>
 
-  <script src="script.js"></script>
+        <img id="petImage" src="imgs/bebe.png" alt="Tamagotchi" width="180" />
+
+        <ul>
+            <li>🍽️ Fome: <progress id="fome" max="100" value="50"></progress></li>
+            <li>🎉 Diversão: <progress id="diversao" max="100" value="50"></progress></li>
+            <li>💤 Energia: <progress id="energia" max="100" value="50"></progress></li>
+            <li>❤️ Vida: <progress id="vida" max="100" value="100"></progress></li>
+            <li>✨ XP (<span id="nivel">1</span>)</li>
+        </ul>
+
+        <p id="status">Estou pronto para brincar!</p>
+
+        <div id="actions">
+            <button onclick="alimentar()">🍽️ Alimentar</button>
+            <button onclick="brincar()">🎉 Brincar</button>
+            <button onclick="dormir()" id="dormirButton">💤 Dormir</button>
+            <button onclick="acordar()" id="acordarButton" style="display: none;">☀️ Acordar</button> 
+            <button onclick="abrirLoja()">🏪 Loja</button>
+            <button onclick="abrirInventario()">💼 Inventário</button>
+            <button onclick="iniciarJogoVelha()">🎮 Jogar!</button>
+            <button onclick="resetar()" id="resetButton">🗙️ Resetar</button>
+        </div>
+
+        <div id="loja" style="display: none">
+            <h2>🏪 Loja</h2>
+            <ul>
+                <li>🍞 Pão — 10 moedas <button onclick="comprar('pao')">Comprar</button></li>
+                <li>🥤 Suco — 15 moedas <button onclick="comprar('suco')">Comprar</button></li>
+                <li>⚽ Bola — 20 moedas <button onclick="comprar('bola')">Comprar</button></li>
+                <li>🐻 Urso — 25 moedas <button onclick="comprar('urso')">Comprar</button></li>
+            </ul>
+            <button onclick="fecharLoja()">Fechar</button>
+        </div>
+
+        <div id="inventario" style="display: none">
+            <h2>💼 Inventário</h2>
+            <ul id="itens"></ul>
+            <button onclick="fecharInventario()">Fechar</button>
+        </div>
+    </div>
+
+    <div id="gameVelha" style="display: none; text-align: center; margin-top: 20px;">
+        <h2>🎮 Jogo da Velha</h2>
+        <div id="board" style="display: grid; grid-template-columns: repeat(3, 80px); grid-template-rows: repeat(3, 80px); width: 240px; margin: 0 auto; border: 2px solid #333;">
+            <div class="cell" id="cell-0"></div>
+            <div class="cell" id="cell-1"></div>
+            <div class="cell" id="cell-2"></div>
+            <div class="cell" id="cell-3"></div>
+            <div class="cell" id="cell-4"></div>
+            <div class="cell" id="cell-5"></div>
+            <div class="cell" id="cell-6"></div>
+            <div class="cell" id="cell-7"></div>
+            <div class="cell" id="cell-8"></div>
+        </div>
+        <p id="gameStatus" style="margin-top: 10px; font-weight: bold;"></p>
+        <button onclick="resetGameVelha()" style="margin-top: 10px;">Reiniciar Jogo</button>
+        <button onclick="voltarParaTamagotchi()" style="margin-top: 10px;">Voltar para Tamagotchi</button>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
