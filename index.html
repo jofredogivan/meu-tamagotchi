@@ -37,8 +37,8 @@
             <button onclick="brincar()">🎉 Brincar</button>
             <button onclick="dormir()" id="dormirButton">💤 Dormir</button>
             <button onclick="acordar()" id="acordarButton" style="display: none;">☀️ Acordar</button> 
-            <button onclick="abrirLoja()">🏪 Loja</button>
-            <button onclick="abrirInventario()">💼 Inventário</button>
+            <button onclick="abrirLoja()" id="abrirLojaButton">🏪 Loja</button>
+            <button onclick="abrirInventario()" id="abrirInventarioButton">💼 Inventário</button>
             <button onclick="iniciarJogoVelha()">🎮 Jogar!</button>
             <button onclick="resetar()" id="resetButton">🗙️ Resetar</button>
         </div>
@@ -50,6 +50,7 @@
                 <li>🥤 Suco — 15 moedas <button onclick="comprar('suco')">Comprar</button></li>
                 <li>⚽ Bola — 20 moedas <button onclick="comprar('bola')">Comprar</button></li>
                 <li>🐻 Urso — 25 moedas <button onclick="comprar('urso')">Comprar</button></li>
+                <li>💉 Vacina — 30 moedas <button onclick="comprar('vacina')">Comprar</button></li> 
             </ul>
             <button onclick="fecharLoja()">Fechar</button>
         </div>
