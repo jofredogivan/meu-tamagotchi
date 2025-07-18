@@ -47,17 +47,18 @@ function showScreen(screenElement) {
 // Função para obter o caminho da imagem com base no estado e nível
 function getPetImagePath(currentPet) {
     // ATENÇÃO CRÍTICA: SUBSTITUA 'meu-tamagotchi' pelo NOME EXATO do seu repositório GitHub!
-    // Ex: Se o seu repositório for 'tamagotchi-game', use '/tamagotchi-game/'
-    const GITHUB_REPO_NAME = 'meu-tamagotchi'; // <<< ALTERAR AQUI PARA O NOME DO SEU REPOSITÓRIO!
+    // Ex: Se o seu repositório for 'tamagotchi-game', use 'tamagotchi-game' (sem as barras)
+    const GITHUB_REPO_NAME = 'meu-tamagotchi'; // <<< ALTERAR APENAS ESTA STRING!
 
     let baseDir;
     // Verifica se estamos no ambiente local (file://) ou no GitHub Pages (http/https)
     if (window.location.protocol === 'file:') {
-        // Caminho relativo para testes locais
+        // Para ambiente LOCAL: O caminho é relativo à pasta do script
         baseDir = './imgs/';
     } else {
-        // Caminho absoluto para GitHub Pages (raiz do site do GitHub Pages + nome do repositório + imgs/)
-        baseDir = `/${GITHUB_REPO_NAME}/imgs/`;
+        // Para GitHub Pages: Construa o caminho completo usando o nome do repositório
+        // Isso resolve o erro 404 pois ele vai procurar em /meu-tamagotchi/imgs/
+        baseDir = `/${GITHUB_REPO_NAME}/imgs/`; 
     }
 
     // Lógica especial para imagens de ovo antes de chocar
@@ -89,6 +90,7 @@ function getPetImagePath(currentPet) {
 
 // Lógica de Atualização do Display
 function updateDisplay() {
+    // Garantir que os elementos existem antes de tentar acessá-los
     if (petNameDisplay) petNameDisplay.textContent = pet.level > 0 ? `Nome: ${pet.name}` : 'Nome: ???';
     if (moodDisplay) moodDisplay.textContent = `Humor: ${pet.mood}`;
     if (statusDisplay) statusDisplay.textContent = `Status: ${pet.status}`;
@@ -103,11 +105,13 @@ function updateDisplay() {
 function updateStatusIcons() {
     const icons = [hungerIcon, funIcon, energyIcon, lifeIcon];
     
+    // Esconde ícones se o pet for um ovo
     if (pet.isEgg) {
         icons.forEach(icon => { if (icon) icon.classList.add('hidden'); });
         return;
     }
 
+    // Mostra/esconde e pisca ícones com base nos status do pet
     if (hungerIcon) {
         if (pet.hunger < 40) { hungerIcon.classList.remove('hidden'); hungerIcon.classList.toggle('blinking', pet.hunger < 20); }
         else { hungerIcon.classList.add('hidden'); hungerIcon.classList.remove('blinking'); }
@@ -131,7 +135,7 @@ function updateStatusIcons() {
 
 // Função para gerenciar a eclosão (com imagens de ovo)
 function hatchEgg() {
-    if (!petImage) return;
+    if (!petImage) return; // Garante que petImage foi carregado
 
     if (pet.hatchProgress < 33) {
         petImage.src = getPetImagePath({ isEgg: true, level: 0, type: 'ovo' });
@@ -157,12 +161,12 @@ function hatchEgg() {
     disableActionButtons(true); // Botões desabilitados enquanto é ovo
 }
 
-// Atualiza a imagem do Tamagotchi e gerencia os botões
+// Atualiza a imagem do Tamagotchi e gerencia os botões de ação
 function updatePetImage() {
-    if (!petImage) return;
+    if (!petImage) return; // Garante que petImage foi carregado
 
     if (pet.isEgg) {
-        hatchEgg(); // Gerencia as imagens do ovo
+        hatchEgg(); // Gerencia as imagens do ovo e a transição
         return;
     }
 
@@ -178,7 +182,7 @@ function updatePetImage() {
     }
 
     if (!pet.isAlive) {
-        disableActionButtons(true);
+        disableActionButtons(true); // Desabilita todos os botões se o pet estiver morto
         if (!restartBtn) { // Adiciona o botão "Recomeçar Jogo" se não existir
             const newRestartBtn = document.createElement('button');
             newRestartBtn.id = 'restartButton';
@@ -200,7 +204,7 @@ function updatePetImage() {
         }
         if (restartBtn) restartBtn.remove(); // Remove o botão de reiniciar se o pet estiver dormindo
     } else if (pet.isEating || pet.isBrincando) {
-        disableActionButtons(true);
+        disableActionButtons(true); // Desabilita outros botões enquanto comendo ou brincando
         if (restartBtn) restartBtn.remove(); // Remove o botão de reiniciar
     } else {
         disableActionButtons(false); // Habilita os botões normais
@@ -227,11 +231,14 @@ function wakeUpPet() {
 
 function restartGame() {
     clearInterval(gameInterval); // Limpa o intervalo do jogo atual
-    // Chama initializeGame para redefinir o estado do jogo e a tela
+    // Chama initializeGame para redefinir o estado do jogo e a tela de início
     initializeGame();
 }
 
 function checkStatus() {
+    // Garante que pet está definido antes de acessar suas propriedades
+    if (!pet || typeof pet.isEgg === 'undefined') return; 
+
     if (pet.isEgg) {
         pet.mood = 'Esperando...';
         pet.status = 'Em desenvolvimento';
@@ -268,6 +275,13 @@ function checkStatus() {
 function startGameLoop() {
     if (gameInterval) clearInterval(gameInterval); // Limpa qualquer intervalo anterior
     gameInterval = setInterval(() => {
+        // Adiciona uma verificação para garantir que 'pet' está definido
+        if (!pet || typeof pet.isEgg === 'undefined') {
+            clearInterval(gameInterval); // Se pet não está definido, para o loop
+            console.error("Objeto 'pet' não definido, parando game loop.");
+            return;
+        }
+
         if (pet.isEgg) {
             pet.hatchProgress += (100 / pet.hatchTimer);
             if (pet.hatchProgress >= 100) {
@@ -332,15 +346,15 @@ function handleStartGame() {
         alert('Por favor, dê um nome ao seu Tamagotchi!');
         return;
     }
-    pet.name = nameValue;
     
     // Reinicializa pet para um novo jogo (importante para "Recomeçar")
     pet = {
         name: nameValue, // Usa o nome inserido
         hunger: 100, fun: 100, energy: 100, life: 100,
-        level: 0, coins: 0,
+        level: 0, coins: 0, // Inicia como ovo (level 0)
         isSleeping: false, isAlive: true, isEating: false, isEgg: true,
-        hatchProgress: 0, hatchTimer: 60, ageProgress: 0, ageToChild: 120,
+        hatchProgress: 0, hatchTimer: 60, // 60 segundos para chocar
+        ageProgress: 0, ageToChild: 120, // 120 segundos para evoluir de bebê para criança
         lastSaveTime: Date.now(), inventory: [],
         mood: 'Esperando...', status: 'Em desenvolvimento', isBrincando: false
     };
