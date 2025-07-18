@@ -1,5 +1,16 @@
-// --- Funções Auxiliares - DEFINIDAS NO ESCOPO GLOBAL ---
-// Estas funções precisam ser acessíveis por todo o script.
+// --- Variáveis Globais (elementos HTML e estado do jogo) ---
+// Declaradas aqui para serem acessíveis por todas as funções. Serão inicializadas em initializeGame().
+let startScreen, tamagotchiScreen, petNameInput, startGameBtn;
+let petNameDisplay, moodDisplay, statusDisplay, petImage;
+let hungerIcon, funIcon, energyIcon, lifeIcon;
+let levelDisplay, coinsDisplay;
+let feedButton, playButton, sleepButton, shopButton, inventoryButton, gamesButton;
+
+let pet = {}; // Objeto pet será inicializado em initializeGame()
+let gameInterval; // Para o loop principal do jogo
+
+// --- Funções Auxiliares ---
+// Estas funções são definidas no escopo global para serem acessíveis por todo o script.
 function getElement(id) {
     const element = document.getElementById(id);
     if (!element) {
@@ -19,43 +30,31 @@ function showGameMessage(message, duration = 3000) {
     }
 }
 
-// --- Referências aos Elementos HTML (Declarações globais ou no escopo acessível) ---
-// Serão inicializadas dentro de initializeGame() após o DOM carregar.
-let startScreen;
-let tamagotchiScreen;
-let petNameInput;
-let startGameBtn;
+// --- Lógica de Exibição de Telas ---
+function hideAllScreens() {
+    if (startScreen) startScreen.style.display = 'none';
+    if (tamagotchiScreen) tamagotchiScreen.style.display = 'none';
+}
 
-let petNameDisplay;
-let moodDisplay;
-let statusDisplay;
-let petImage;
-
-let hungerIcon;
-let funIcon;
-let energyIcon;
-let lifeIcon;
-
-let levelDisplay;
-let coinsDisplay;
-
-let feedButton;
-let playButton;
-let sleepButton;
-let shopButton;
-let inventoryButton;
-let gamesButton;
-
-// --- Variáveis do Jogo (Globais ou facilmente acessíveis) ---
-let pet = {}; // Será inicializado em initializeGame
-let gameInterval;
+function showScreen(screenElement) {
+    hideAllScreens();
+    if (screenElement) {
+        screenElement.style.display = 'flex';
+    }
+}
 
 // Função para obter o caminho da imagem com base no estado e nível
 function getPetImagePath(currentPet) {
     // ATENÇÃO: SUBSTITUA 'meu-tamagotchi' pelo NOME EXATO do seu repositório GitHub
-    // Ex: Se o seu repositório for 'tamagotchi-game', use '/tamagotchi-game/'
-    const GITHUB_REPO_PATH = '/meu-tamagotchi/'; 
-    let baseDir = GITHUB_REPO_PATH + 'imgs/';
+    // Se você estiver testando LOCALMENTE, pode usar um caminho relativo como './imgs/'
+    // Mas para o GitHub Pages, precisamos do nome do repositório.
+    // A melhor prática é usar um caminho absoluto do root do seu GitHub Pages:
+    const GITHUB_REPO_PATH = '/meu-tamagotchi/'; // <<< MUDAR AQUI PARA O SEU REPOSITÓRIO!
+    
+    // Verifica se estamos no ambiente local (file://) ou no GitHub Pages (http/https)
+    // Se o protocolo for 'file:', use um caminho relativo direto
+    // Caso contrário (GitHub Pages), use o caminho absoluto do repositório
+    let baseDir = window.location.protocol === 'file:' ? './imgs/' : GITHUB_REPO_PATH + 'imgs/';
 
     // Lógica especial para imagens de ovo antes de chocar
     if (currentPet.isEgg) {
@@ -83,19 +82,6 @@ function getPetImagePath(currentPet) {
     // Imagem padrão (normal) para o nível atual
     // Remove o '.' extra do prefixo (ex: "bebe" + ".gif" ou "crianca" + ".gif")
     return baseDir + prefix.slice(0, -1) + suffix; 
-}
-
-// Lógica de Exibição de Telas
-function hideAllScreens() {
-    if (startScreen) startScreen.style.display = 'none';
-    if (tamagotchiScreen) tamagotchiScreen.style.display = 'none';
-}
-
-function showScreen(screenElement) {
-    hideAllScreens();
-    if (screenElement) {
-        screenElement.style.display = 'flex';
-    }
 }
 
 // Lógica de Atualização do Display
@@ -324,85 +310,7 @@ function startGameLoop() {
     }, 1000);
 }
 
-// --- Função de Inicialização do Jogo ---
-// Esta função é chamada uma vez quando o DOM é carregado ou para reiniciar o jogo.
-function initializeGame() {
-    // Re-inicializa as referências aos elementos HTML
-    startScreen = getElement('startScreen');
-    tamagotchiScreen = getElement('tamagotchiScreen');
-    petNameInput = getElement('petNameInput');
-    startGameBtn = getElement('startGameBtn');
-
-    petNameDisplay = getElement('petName');
-    moodDisplay = getElement('mood');
-    statusDisplay = getElement('status');
-    petImage = getElement('petImage');
-
-    hungerIcon = getElement('hungerIcon');
-    funIcon = getElement('funIcon');
-    energyIcon = getElement('energyIcon');
-    lifeIcon = getElement('lifeIcon');
-
-    levelDisplay = getElement('nivel');
-    coinsDisplay = getElement('moedas');
-
-    feedButton = getElement('feedButton');
-    playButton = getElement('playButton');
-    sleepButton = getElement('sleepButton');
-    shopButton = getElement('shopButton');
-    inventoryButton = getElement('inventoryButton');
-    gamesButton = getElement('gamesButton');
-
-    // Estado inicial do pet para um novo jogo
-    pet = {
-        name: '',
-        hunger: 100,
-        fun: 100,
-        energy: 100,
-        life: 100,
-        level: 0,
-        coins: 0,
-        isSleeping: false,
-        isAlive: true,
-        isEating: false,
-        isEgg: true,
-        hatchProgress: 0,
-        hatchTimer: 60,
-        ageProgress: 0,
-        ageToChild: 120,
-        lastSaveTime: Date.now(),
-        inventory: [],
-        mood: 'Normal',
-        status: 'Bem',
-        isBrincando: false
-    };
-
-    // Remove event listeners antigos se existirem para evitar duplicações ao reiniciar
-    if (startGameBtn) {
-        startGameBtn.removeEventListener('click', handleStartGame);
-        startGameBtn.addEventListener('click', handleStartGame);
-    }
-    if (feedButton) feedButton.removeEventListener('click', handleFeed);
-    if (playButton) playButton.removeEventListener('click', handlePlay);
-    if (sleepButton) sleepButton.removeEventListener('click', handleSleep);
-    if (shopButton) shopButton.removeEventListener('click', handleShop);
-    if (inventoryButton) inventoryButton.removeEventListener('click', handleInventory);
-    if (gamesButton) gamesButton.removeEventListener('click', handleGames);
-
-    // Adiciona event listeners (agora como funções separadas)
-    if (feedButton) feedButton.addEventListener('click', handleFeed);
-    if (playButton) playButton.addEventListener('click', handlePlay);
-    if (sleepButton) sleepButton.addEventListener('click', handleSleep);
-    if (shopButton) shopButton.addEventListener('click', handleShop);
-    if (inventoryButton) inventoryButton.addEventListener('click', handleInventory);
-    if (gamesButton) gamesButton.addEventListener('click', handleGames);
-
-    showScreen(startScreen); // Inicia na tela de nome
-    updateDisplay(); // Atualiza o display inicial
-}
-
-
-// --- Handlers de Eventos dos Botões (separados para clareza e evitar duplicação) ---
+// --- Handlers de Eventos dos Botões (separados para clareza) ---
 function handleStartGame() {
     const nameValue = petNameInput ? petNameInput.value.trim() : '';
     if (nameValue === "") {
@@ -506,6 +414,94 @@ function handleGames() {
     if (pet.isSleeping) { showGameMessage(`${pet.name} está dormindo! Não o incomode.`); return; }
     if (pet.isEating || pet.isBrincando) { showGameMessage(`${pet.name} está ocupado!`); return; }
     showGameMessage('Os jogos ainda não estão disponíveis!');
+}
+
+// --- Função de Inicialização do Jogo ---
+// Esta função é chamada uma vez quando o DOM é carregado ou para reiniciar o jogo.
+function initializeGame() {
+    // Inicializa as referências aos elementos HTML
+    startScreen = getElement('startScreen');
+    tamagotchiScreen = getElement('tamagotchiScreen');
+    petNameInput = getElement('petNameInput');
+    startGameBtn = getElement('startGameBtn');
+
+    petNameDisplay = getElement('petName');
+    moodDisplay = getElement('mood');
+    statusDisplay = getElement('status');
+    petImage = getElement('petImage');
+
+    hungerIcon = getElement('hungerIcon');
+    funIcon = getElement('funIcon');
+    energyIcon = getElement('energyIcon');
+    lifeIcon = getElement('lifeIcon');
+
+    levelDisplay = getElement('nivel');
+    coinsDisplay = getElement('moedas');
+
+    feedButton = getElement('feedButton');
+    playButton = getElement('playButton');
+    sleepButton = getElement('sleepButton');
+    shopButton = getElement('shopButton');
+    inventoryButton = getElement('inventoryButton');
+    gamesButton = getElement('gamesButton');
+
+    // Estado inicial do pet para um novo jogo
+    pet = {
+        name: '',
+        hunger: 100,
+        fun: 100,
+        energy: 100,
+        life: 100,
+        level: 0,
+        coins: 0,
+        isSleeping: false,
+        isAlive: true,
+        isEating: false,
+        isEgg: true,
+        hatchProgress: 0,
+        hatchTimer: 60,
+        ageProgress: 0,
+        ageToChild: 120,
+        lastSaveTime: Date.now(),
+        inventory: [],
+        mood: 'Normal',
+        status: 'Bem',
+        isBrincando: false
+    };
+
+    // Remove event listeners antigos antes de adicionar novos para evitar duplicações ao reiniciar
+    // É importante remover SOMENTE se o elemento e o listener existem.
+    if (startGameBtn) {
+        startGameBtn.removeEventListener('click', handleStartGame);
+        startGameBtn.addEventListener('click', handleStartGame);
+    }
+    if (feedButton) {
+        feedButton.removeEventListener('click', handleFeed);
+        feedButton.addEventListener('click', handleFeed);
+    }
+    if (playButton) {
+        playButton.removeEventListener('click', handlePlay);
+        playButton.addEventListener('click', handlePlay);
+    }
+    if (sleepButton) {
+        sleepButton.removeEventListener('click', handleSleep);
+        sleepButton.addEventListener('click', handleSleep);
+    }
+    if (shopButton) {
+        shopButton.removeEventListener('click', handleShop);
+        shopButton.addEventListener('click', handleShop);
+    }
+    if (inventoryButton) {
+        inventoryButton.removeEventListener('click', handleInventory);
+        inventoryButton.addEventListener('click', handleInventory);
+    }
+    if (gamesButton) {
+        gamesButton.removeEventListener('click', handleGames);
+        gamesButton.addEventListener('click', handleGames);
+    }
+    
+    showScreen(startScreen); // Inicia na tela de nome
+    updateDisplay(); // Atualiza o display inicial
 }
 
 
