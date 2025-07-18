@@ -175,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Função para obter o caminho da imagem com base no estado e nível
     function getPetImagePath(currentPet) {
         // ATENÇÃO: SUBSTITUA 'meu-tamagotchi' pelo NOME EXATO do seu repositório GitHub
-        // Ex: Se o seu repositório for 'tamagotchi-game', use '/tamagotchi-game/imgs/'
+        // Ex: Se o seu repositório for 'tamagotchi-game', use '/tamagotchi-game/'
         const GITHUB_REPO_PATH = '/meu-tamagotchi/'; 
         let baseDir = GITHUB_REPO_PATH + 'imgs/';
 
@@ -466,7 +466,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Botão Brincar
     if (playButton) {
         playButton.addEventListener('click', () => {
-            if (pet.isEgg) { showGameMessage('O ovo não sabe brincar!', 1500); return; }
+            if (pet.isEgg) { showGameMessage('Ovo não sabe brincar!', 1500); return; }
             if (!pet.isAlive) { showGameMessage('Não posso brincar com um Tamagotchi morto...'); return; }
             if (pet.isSleeping) { showGameMessage(`${pet.name} está dormindo! Não o incomode.`); return; }
             if (pet.energy < 20) { showGameMessage(`${pet.name} está muito cansado para brincar.`); return; }
