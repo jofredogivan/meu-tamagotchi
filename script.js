@@ -457,7 +457,7 @@ function initializeGame() {
     petNameDisplay = getElement('petName');
     moodDisplay = getElement('mood');
     statusDisplay = getElement('status');
-    petImage = getElement('petImage');
+    petImage = getElement('petImage'); // AQUI É CRÍTICO!
 
     hungerIcon = getElement('hungerIcon');
     funIcon = getElement('funIcon');
