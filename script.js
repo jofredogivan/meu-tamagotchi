@@ -10,7 +10,7 @@ let pet = {}; // Objeto pet será inicializado em initializeGame()
 let gameInterval; // Para o loop principal do jogo
 
 // --- Funções Auxiliares ---
-// Estas funções são definidas no escopo global para serem acessíveis por todo o script.
+// Definidas no escopo global para serem acessíveis por todo o script.
 function getElement(id) {
     const element = document.getElementById(id);
     if (!element) {
@@ -34,6 +34,7 @@ function showGameMessage(message, duration = 3000) {
 function hideAllScreens() {
     if (startScreen) startScreen.style.display = 'none';
     if (tamagotchiScreen) tamagotchiScreen.style.display = 'none';
+    // Adicione outras telas que você possa ter (ex: gameOverScreen.style.display = 'none';)
 }
 
 function showScreen(screenElement) {
@@ -45,16 +46,19 @@ function showScreen(screenElement) {
 
 // Função para obter o caminho da imagem com base no estado e nível
 function getPetImagePath(currentPet) {
-    // ATENÇÃO: SUBSTITUA 'meu-tamagotchi' pelo NOME EXATO do seu repositório GitHub
-    // Se você estiver testando LOCALMENTE, pode usar um caminho relativo como './imgs/'
-    // Mas para o GitHub Pages, precisamos do nome do repositório.
-    // A melhor prática é usar um caminho absoluto do root do seu GitHub Pages:
-    const GITHUB_REPO_PATH = '/meu-tamagotchi/'; // <<< MUDAR AQUI PARA O SEU REPOSITÓRIO!
-    
+    // ATENÇÃO CRÍTICA: SUBSTITUA 'meu-tamagotchi' pelo NOME EXATO do seu repositório GitHub!
+    // Ex: Se o seu repositório for 'tamagotchi-game', use '/tamagotchi-game/'
+    const GITHUB_REPO_NAME = 'meu-tamagotchi'; // <<< ALTERAR AQUI PARA O NOME DO SEU REPOSITÓRIO!
+
+    let baseDir;
     // Verifica se estamos no ambiente local (file://) ou no GitHub Pages (http/https)
-    // Se o protocolo for 'file:', use um caminho relativo direto
-    // Caso contrário (GitHub Pages), use o caminho absoluto do repositório
-    let baseDir = window.location.protocol === 'file:' ? './imgs/' : GITHUB_REPO_PATH + 'imgs/';
+    if (window.location.protocol === 'file:') {
+        // Caminho relativo para testes locais
+        baseDir = './imgs/';
+    } else {
+        // Caminho absoluto para GitHub Pages (raiz do site do GitHub Pages + nome do repositório + imgs/)
+        baseDir = `/${GITHUB_REPO_NAME}/imgs/`;
+    }
 
     // Lógica especial para imagens de ovo antes de chocar
     if (currentPet.isEgg) {
@@ -80,8 +84,7 @@ function getPetImagePath(currentPet) {
     }
     
     // Imagem padrão (normal) para o nível atual
-    // Remove o '.' extra do prefixo (ex: "bebe" + ".gif" ou "crianca" + ".gif")
-    return baseDir + prefix.slice(0, -1) + suffix; 
+    return baseDir + prefix.slice(0, -1) + suffix; // Remove o '.' extra do prefixo
 }
 
 // Lógica de Atualização do Display
@@ -93,7 +96,7 @@ function updateDisplay() {
     if (levelDisplay) levelDisplay.textContent = pet.level;
     if (coinsDisplay) coinsDisplay.textContent = pet.coins;
     
-    updatePetImage();
+    updatePetImage(); // Atualiza a imagem com base no estado atual do pet
     updateStatusIcons();
 }
 
@@ -139,19 +142,19 @@ function hatchEgg() {
     } else if (pet.hatchProgress < 100) {
         petImage.src = getPetImagePath({ isEgg: true, level: 0, type: 'ovo.quebrado' });
         showGameMessage(`Está quase!`);
-    } else {
+    } else { // Chocou!
         pet.isEgg = false;
-        pet.level = 1;
+        pet.level = 1; // Nível 1: Bebê
         showGameMessage(`${pet.name} chocou! Bem-vindo(a) ao mundo!`, 3000);
         
-        petImage.src = getPetImagePath(pet);
-        disableActionButtons(false);
+        petImage.src = getPetImagePath(pet); // Define a imagem do bebê imediatamente
+        disableActionButtons(false); // Habilita os botões após chocar
         
-        clearInterval(gameInterval);
-        startGameLoop();
+        clearInterval(gameInterval); // Para o intervalo do ovo
+        startGameLoop(); // Inicia o loop normal do Tamagotchi
         return;
     }
-    disableActionButtons(true);
+    disableActionButtons(true); // Botões desabilitados enquanto é ovo
 }
 
 // Atualiza a imagem do Tamagotchi e gerencia os botões
@@ -159,22 +162,24 @@ function updatePetImage() {
     if (!petImage) return;
 
     if (pet.isEgg) {
-        hatchEgg();
+        hatchEgg(); // Gerencia as imagens do ovo
         return;
     }
 
-    petImage.src = getPetImagePath(pet);
+    petImage.src = getPetImagePath(pet); // Define a imagem com base no estado e nível
 
+    // Lógica de desabilitar/habilitar botões e gerenciar o botão "Acordar" / "Recomeçar"
     const wakeBtn = document.getElementById('wakeUpButton');
     const restartBtn = document.getElementById('restartButton');
 
+    // Remove o botão de acordar se não estiver dormindo
     if (wakeBtn && !pet.isSleeping) {
         wakeBtn.remove();
     }
 
     if (!pet.isAlive) {
         disableActionButtons(true);
-        if (!restartBtn) {
+        if (!restartBtn) { // Adiciona o botão "Recomeçar Jogo" se não existir
             const newRestartBtn = document.createElement('button');
             newRestartBtn.id = 'restartButton';
             newRestartBtn.textContent = 'Recomeçar Jogo';
@@ -182,28 +187,29 @@ function updatePetImage() {
             getElement('actions').appendChild(newRestartBtn);
         }
     } else if (pet.isSleeping) {
-        if (!wakeBtn) {
+        if (!wakeBtn) { // Adiciona o botão de acordar se não existir
             const newWakeBtn = document.createElement('button');
             newWakeBtn.id = 'wakeUpButton';
             newWakeBtn.textContent = 'Acordar';
             newWakeBtn.addEventListener('click', wakeUpPet);
             getElement('actions').appendChild(newWakeBtn);
         }
-        disableActionButtons(true);
-        if (getElement('wakeUpButton')) {
-            getElement('wakeUpButton').disabled = false;
+        disableActionButtons(true); // Desabilita outros botões enquanto dorme
+        if (getElement('wakeUpButton')) { // Garante que o botão existe antes de tentar habilitar
+            getElement('wakeUpButton').disabled = false; // Habilita apenas o botão de acordar
         }
-        if (restartBtn) restartBtn.remove();
+        if (restartBtn) restartBtn.remove(); // Remove o botão de reiniciar se o pet estiver dormindo
     } else if (pet.isEating || pet.isBrincando) {
         disableActionButtons(true);
-        if (restartBtn) restartBtn.remove();
+        if (restartBtn) restartBtn.remove(); // Remove o botão de reiniciar
     } else {
-        disableActionButtons(false);
-        if (restartBtn) restartBtn.remove();
+        disableActionButtons(false); // Habilita os botões normais
+        if (restartBtn) restartBtn.remove(); // Remove o botão de reiniciar
     }
 }
 
 function disableActionButtons(shouldDisable) {
+    // Adiciona uma verificação se o botão existe antes de tentar desabilitar
     const buttons = [feedButton, playButton, sleepButton, shopButton, inventoryButton, gamesButton];
     buttons.forEach(button => {
         if (button) button.disabled = shouldDisable;
@@ -214,14 +220,15 @@ function wakeUpPet() {
     if (pet.isSleeping) {
         pet.isSleeping = false;
         showGameMessage(`${pet.name} acordou!`);
-        updatePetImage();
+        updatePetImage(); // Atualiza para o estado normal do pet
         updateDisplay();
     }
 }
 
 function restartGame() {
-    clearInterval(gameInterval);
-    initializeGame(); // Volta para a tela inicial e reinicia o pet
+    clearInterval(gameInterval); // Limpa o intervalo do jogo atual
+    // Chama initializeGame para redefinir o estado do jogo e a tela
+    initializeGame();
 }
 
 function checkStatus() {
@@ -231,6 +238,7 @@ function checkStatus() {
         return;
     }
     
+    // Lógica de humor
     if (pet.hunger < 30 || pet.fun < 30 || pet.energy < 30) {
         pet.mood = 'Triste';
     } else if (pet.hunger > 80 && pet.fun > 80 && pet.energy > 80) {
@@ -239,6 +247,7 @@ function checkStatus() {
         pet.mood = 'Normal';
     }
 
+    // Lógica de status (ordem de prioridade importa)
     if (!pet.isAlive) {
         pet.status = 'Morto';
     } else if (pet.isSleeping) {
@@ -247,9 +256,9 @@ function checkStatus() {
         pet.status = 'Comendo';
     } else if (pet.isBrincando) {
         pet.status = 'Brincando';
-    } else if (pet.life < 50) {
+    } else if (pet.life < 50) { // Doente
         pet.status = 'Doente';
-    } else if (pet.energy < 20) {
+    } else if (pet.energy < 20) { // Cansado
         pet.status = 'Cansado';
     } else {
         pet.status = 'Bem';
@@ -257,57 +266,63 @@ function checkStatus() {
 }
 
 function startGameLoop() {
-    if (gameInterval) clearInterval(gameInterval);
+    if (gameInterval) clearInterval(gameInterval); // Limpa qualquer intervalo anterior
     gameInterval = setInterval(() => {
         if (pet.isEgg) {
             pet.hatchProgress += (100 / pet.hatchTimer);
             if (pet.hatchProgress >= 100) {
                 pet.hatchProgress = 100;
-                hatchEgg();
+                hatchEgg(); // Chama a eclosão quando o progresso chega a 100
             }
             updateDisplay();
-            return;
+            return; // Não executa a lógica de decadência enquanto for ovo
         }
 
+        // Lógica de evolução do Tamagotchi (de bebê para criança)
         if (pet.isAlive && pet.level === 1 && pet.ageProgress < pet.ageToChild) {
             pet.ageProgress++;
             if (pet.ageProgress >= pet.ageToChild) {
-                pet.level = 2;
+                pet.level = 2; // Evolui para criança
                 showGameMessage(`${pet.name} evoluiu para Criança!`, 4000);
+                // Opcional: Resetar alguns status ou dar um bônus na evolução
                 pet.hunger = Math.min(100, pet.hunger + 10);
                 pet.fun = Math.min(100, pet.fun + 10);
                 pet.energy = Math.min(100, pet.energy + 10);
             }
         }
 
+        // Lógica principal do jogo (decadência de status, morte)
         if (pet.isAlive) {
+            // Diminui os atributos apenas se não estiver dormindo, comendo ou brincando
             if (!pet.isSleeping && !pet.isEating && !pet.isBrincando) {
                 pet.hunger = Math.max(0, pet.hunger - 1);
                 pet.fun = Math.max(0, pet.fun - 1);
                 pet.energy = Math.max(0, pet.energy - 0.5);
                 pet.life = Math.max(0, pet.life - 0.2);
 
+                // Se qualquer atributo crítico chegar a zero, a vida diminui mais rápido
                 if (pet.hunger === 0 || pet.fun === 0 || pet.energy === 0) {
                     pet.life = Math.max(0, pet.life - 1);
                 }
             }
             
-            checkStatus();
-            updateDisplay();
+            checkStatus(); // Atualiza humor e status
+            updateDisplay(); // Atualiza a interface
 
             if (pet.life === 0) {
                 pet.isAlive = false;
                 showGameMessage(`Oh não! ${pet.name} não aguentou...`, 5000);
-                updatePetImage();
-                clearInterval(gameInterval);
+                updatePetImage(); // Para mostrar a imagem de morto
+                clearInterval(gameInterval); // Para o loop do jogo
             }
         } else if (pet.isSleeping) {
+            // Recupera energia e vida quando dormindo
             pet.energy = Math.min(100, pet.energy + 2);
             pet.life = Math.min(100, pet.life + 0.5);
             checkStatus();
             updateDisplay();
         }
-    }, 1000);
+    }, 1000); // Roda a cada 1 segundo
 }
 
 // --- Handlers de Eventos dos Botões (separados para clareza) ---
@@ -452,16 +467,16 @@ function initializeGame() {
         fun: 100,
         energy: 100,
         life: 100,
-        level: 0,
+        level: 0, // 0 para ovo
         coins: 0,
         isSleeping: false,
         isAlive: true,
         isEating: false,
         isEgg: true,
         hatchProgress: 0,
-        hatchTimer: 60,
+        hatchTimer: 60, // 60 segundos para chocar
         ageProgress: 0,
-        ageToChild: 120,
+        ageToChild: 120, // 120 segundos para evoluir de bebê para criança
         lastSaveTime: Date.now(),
         inventory: [],
         mood: 'Normal',
@@ -469,39 +484,27 @@ function initializeGame() {
         isBrincando: false
     };
 
-    // Remove event listeners antigos antes de adicionar novos para evitar duplicações ao reiniciar
-    // É importante remover SOMENTE se o elemento e o listener existem.
-    if (startGameBtn) {
-        startGameBtn.removeEventListener('click', handleStartGame);
-        startGameBtn.addEventListener('click', handleStartGame);
-    }
-    if (feedButton) {
-        feedButton.removeEventListener('click', handleFeed);
-        feedButton.addEventListener('click', handleFeed);
-    }
-    if (playButton) {
-        playButton.removeEventListener('click', handlePlay);
-        playButton.addEventListener('click', handlePlay);
-    }
-    if (sleepButton) {
-        sleepButton.removeEventListener('click', handleSleep);
-        sleepButton.addEventListener('click', handleSleep);
-    }
-    if (shopButton) {
-        shopButton.removeEventListener('click', handleShop);
-        shopButton.addEventListener('click', handleShop);
-    }
-    if (inventoryButton) {
-        inventoryButton.removeEventListener('click', handleInventory);
-        inventoryButton.addEventListener('click', handleInventory);
-    }
-    if (gamesButton) {
-        gamesButton.removeEventListener('click', handleGames);
-        gamesButton.addEventListener('click', handleGames);
-    }
+    // Remove event listeners antigos antes de adicionar novos para evitar duplicações
+    // (Importante ao reiniciar o jogo)
+    if (startGameBtn) startGameBtn.removeEventListener('click', handleStartGame);
+    if (feedButton) feedButton.removeEventListener('click', handleFeed);
+    if (playButton) playButton.removeEventListener('click', handlePlay);
+    if (sleepButton) sleepButton.removeEventListener('click', handleSleep);
+    if (shopButton) shopButton.removeEventListener('click', handleShop);
+    if (inventoryButton) inventoryButton.removeEventListener('click', handleInventory);
+    if (gamesButton) gamesButton.removeEventListener('click', handleGames);
+
+    // Adiciona event listeners (agora as funções de handler separadas)
+    if (startGameBtn) startGameBtn.addEventListener('click', handleStartGame);
+    if (feedButton) feedButton.addEventListener('click', handleFeed);
+    if (playButton) playButton.addEventListener('click', handlePlay);
+    if (sleepButton) sleepButton.addEventListener('click', handleSleep);
+    if (shopButton) shopButton.addEventListener('click', handleShop);
+    if (inventoryButton) inventoryButton.addEventListener('click', handleInventory);
+    if (gamesButton) gamesButton.addEventListener('click', handleGames);
     
     showScreen(startScreen); // Inicia na tela de nome
-    updateDisplay(); // Atualiza o display inicial
+    updateDisplay(); // Atualiza o display inicial (mostrará o ovo na imagem padrão)
 }
 
 
