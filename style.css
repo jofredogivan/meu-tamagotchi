@@ -1,138 +1,94 @@
-/* Import da fonte Pixel Art */
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-
-/* Reset básico para garantir consistência */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
 body {
-    font-family: 'Press Start 2P', cursive; /* Voltando à fonte principal, pois as imagens cuidarão do visual */
-    background-color: #333;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    overflow: hidden;
+    margin: 0;
+    background-color: #333;
+    font-family: 'Press Start 2P', cursive;
+    overflow: hidden; /* Evita barras de rolagem desnecessárias */
 }
 
 #game-boy-console {
-    width: 320px;
-    height: 480px;
-    background-color: #c0c0c0;
+    width: 320px; /* Largura do console Game Boy */
+    height: 500px; /* Altura do console Game Boy */
+    background-color: #ccc;
     border-radius: 20px;
-    box-shadow: 
-        inset 0 0 0 5px #d0d0d0,
-        inset 0 0 0 10px #a0a0a0,
-        0 20px 0 0 rgba(0,0,0,0.5);
-    position: relative;
-    border: 5px solid #808080;
-
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+    padding: 20px;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: 30px;
+    position: relative;
 }
 
 #game-screen-display {
-    width: 270px;
-    height: 250px;
-    background-color: #8cacbc;
+    width: 260px; /* Largura da tela do Game Boy */
+    height: 220px; /* Altura da tela do Game Boy */
+    background-color: #add8e6; /* Cor da tela do Game Boy */
+    border: 8px solid #555;
     border-radius: 5px;
-    border: 3px solid #222;
-    box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    color: #222;
-    font-size: 0.9em;
-    text-align: center;
-    line-height: 1.5;
-    overflow-y: auto;
-    position: relative;
+    margin-bottom: 20px;
+    overflow: hidden; /* Garante que o conteúdo não vaze */
+    position: relative; /* Para posicionar telas de jogo internamente */
 }
-
-/* Novo estilo para a imagem do pet */
-img#petImage {
-    width: 120px;  /* Tamanho ideal para as imagens do pet */
-    height: 120px; /* Para manter proporção e layout */
-    margin: 10px 0;
-    object-fit: contain; /* Garante que a imagem se ajuste sem cortar */
-}
-
 
 .game-screen {
     width: 100%;
     height: 100%;
-    display: none;
+    display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    text-align: center;
+    background-color: #9bbc0f; /* Cor do fundo da tela do Tamagotchi */
+    color: #222;
     padding: 10px;
     box-sizing: border-box;
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 14px; /* Tamanho da fonte para o conteúdo do jogo */
 }
 
+/* Esconde todas as telas por padrão e mostra apenas a ativa */
+#startScreen, #tamagotchiScreen {
+    display: none;
+}
+
+/* Estilo para a tela de início */
 #startScreen {
-    display: flex;
+    background-color: #9bbc0f; /* Verde Game Boy */
+    display: flex; /* Exibe a tela de início por padrão, será manipulado pelo JS */
+    color: #222;
+    font-size: 12px;
 }
 
-#controls {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    width: 100%;
-    margin-top: 20px;
-    flex-grow: 1;
-    padding: 0 10px;
-}
-
-#actions {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-content: flex-start;
-    width: 100%;
-    max-width: 280px;
-    padding: 10px 0;
-}
-
-#actions button {
-    width: calc(50% - 20px);
-    max-width: 130px;
-    padding: 8px 12px;
-    font-size: 0.65em;
-    margin: 5px;
-}
-
-input[type="text"], input[type="number"] {
-    font-family: 'Press Start 2P', cursive;
-    background-color: #e0e0e0;
+#petNameInput {
+    padding: 8px;
     border: 2px solid #555;
-    padding: 6px;
-    margin: 8px 0;
+    border-radius: 4px;
+    background-color: #e0e0e0;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 12px;
     color: #333;
     text-align: center;
-    border-radius: 3px;
-    font-size: 0.8em;
-    width: 80%;
-    max-width: 200px;
+    max-width: 80%; /* Para não vazar em telas menores */
 }
 
 button {
-    font-family: 'Press Start 2P', cursive;
-    background-color: #4a4a4a;
-    color: #eee;
-    border: 2px solid #222;
+    background-color: #444;
+    color: white;
+    border: none;
+    padding: 10px 15px;
     border-radius: 5px;
-    padding: 8px 12px;
-    margin: 5px;
     cursor: pointer;
-    box-shadow: 2px 2px 0 #111;
-    transition: background-color 0.1s;
-    white-space: nowrap;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 10px;
+    margin: 5px; /* Espaçamento entre botões */
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+    transition: background-color 0.2s;
 }
 
 button:hover {
@@ -140,111 +96,105 @@ button:hover {
 }
 
 button:active {
-    background-color: #333;
-    box-shadow: 1px 1px 0 #000;
-    transform: translateY(1px);
+    background-color: #222;
+    box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.7);
 }
 
 button:disabled {
     background-color: #777;
-    color: #bbb;
     cursor: not-allowed;
+    opacity: 0.7;
     box-shadow: none;
-    transform: none;
+}
+
+#petImage {
+    width: 80px; /* Tamanho da imagem do pet */
+    height: 80px;
+    image-rendering: pixelated; /* Mantém a pixelização para estilo retro */
+    margin-bottom: 10px;
+}
+
+#controls {
+    display: flex;
+    flex-wrap: wrap; /* Permite que os botões quebrem a linha */
+    justify-content: center;
+    margin-top: 20px;
+}
+
+#actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px; /* Espaçamento entre os botões de ação */
 }
 
 #gameMessage {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     background-color: rgba(0, 0, 0, 0.7);
     color: white;
-    padding: 5px 10px;
+    padding: 10px 15px;
     border-radius: 5px;
-    position: absolute;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 100;
-    font-size: 0.6em;
-    white-space: nowrap;
+    font-size: 12px;
+    z-index: 10;
+    white-space: nowrap; /* Impede quebras de linha */
     opacity: 0;
-    transition: opacity 0.5s ease-in-out;
+    transition: opacity 0.3s ease-in-out;
+    pointer-events: none; /* Permite clicar através da mensagem */
 }
 
 #gameMessage.visible {
     opacity: 1;
 }
 
-#petName, #mood, #status {
-    font-size: 0.7em;
-    margin: 3px 0;
-}
-
-#nivel, #moedas {
-    font-size: 0.7em;
-}
-
 #status-icons {
+    margin-top: 10px;
     display: flex;
-    justify-content: center;
     gap: 10px;
-    margin-top: 5px;
-    margin-bottom: 10px;
-    height: 30px;
-    align-items: center;
 }
 
 .status-icon {
-    font-size: 1.8em;
-    cursor: default;
-    opacity: 1;
-    transition: opacity 0.3s ease-in-out;
+    font-size: 20px; /* Tamanho dos emojis */
+    display: inline-block; /* Garante que as propriedades de transformação funcionem */
 }
 
 .status-icon.hidden {
-    opacity: 0;
-}
-
-@keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
+    display: none;
 }
 
 .status-icon.blinking {
-    animation: blink 1s step-end infinite;
+    animation: blink-animation 1s infinite alternate;
 }
 
-@media (max-width: 400px) {
-    body {
-        background-color: #c0c0c0;
-    }
-    #game-boy-console {
-        width: 100vw;
-        height: 100vh;
-        border-radius: 0;
-        border: none;
-        box-shadow: none;
-        margin: 0;
-        padding-top: 0;
-    }
-    #game-screen-display {
-        width: 90%;
-        height: 70%;
-        margin-top: 5vh;
-        border: none;
-    }
-    #controls {
-        margin-top: 20px;
-    }
-    #actions button {
-        width: calc(33% - 10px);
-    }
-    #petName, #mood, #status, #nivel, #moedas {
-        font-size: 0.6em;
-    }
-    .status-icon {
-        font-size: 1.5em;
-    }
-    img#petImage { /* Ajuste para telas menores se necessário */
-        width: 100px;
-        height: 100px;
-    }
+@keyframes blink-animation {
+    from { opacity: 1; }
+    to { opacity: 0.3; }
+}
+
+/* Estilos para popups de jogo (Game Over, Loja, etc.) */
+.game-popup {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #9bbc0f; /* Fundo verde Game Boy */
+    border: 4px solid #222;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    color: #222;
+    z-index: 20; /* Garante que fique acima de outras coisas */
+    display: none; /* Escondido por padrão */
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+}
+
+.game-popup h2 {
+    font-size: 16px;
+    margin-top: 0;
+}
+
+.game-popup button {
+    margin-top: 15px;
 }
