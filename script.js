@@ -149,20 +149,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Estágios do ovo baseados no progresso
         if (pet.hatchProgress < 33) {
-            petImage.src = 'imgs/ovo.gif';
+            petImage.src = getPetImagePath({ isEgg: true, level: 0, type: 'ovo' }); // Força a imagem do ovo
             showGameMessage(`O ovo está quietinho...`);
         } else if (pet.hatchProgress < 66) {
-            petImage.src = 'imgs/ovo.rachando.gif';
+            petImage.src = getPetImagePath({ isEgg: true, level: 0, type: 'ovo.rachando' }); // Força a imagem do ovo rachando
             showGameMessage(`O ovo está rachando!`, 1500);
         } else if (pet.hatchProgress < 100) {
-            petImage.src = 'imgs/ovo.quebrado.gif';
+            petImage.src = getPetImagePath({ isEgg: true, level: 0, type: 'ovo.quebrado' }); // Força a imagem do ovo quebrado
             showGameMessage(`Está quase!`);
         } else { // Chocou!
             pet.isEgg = false;
             pet.level = 1; // Nível 1: Bebê
             showGameMessage(`${pet.name} chocou! Bem-vindo(a) ao mundo!`, 3000);
             
-            petImage.src = 'imgs/bebe.gif'; 
+            petImage.src = getPetImagePath(pet); // Define a imagem do bebê imediatamente e inicia o loop do jogo normal
             disableActionButtons(false); // Habilita os botões após chocar
             
             clearInterval(gameInterval); // Para o intervalo do ovo
@@ -174,11 +174,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Função para obter o caminho da imagem com base no estado e nível
     function getPetImagePath(currentPet) {
-        let baseDir = 'imgs/';
+        // ATENÇÃO: SUBSTITUA 'meu-tamagotchi' pelo NOME EXATO do seu repositório GitHub
+        // Ex: Se o seu repositório for 'tamagotchi-game', use '/tamagotchi-game/imgs/'
+        const GITHUB_REPO_PATH = '/meu-tamagotchi/'; 
+        let baseDir = GITHUB_REPO_PATH + 'imgs/';
+
+        // Lógica especial para imagens de ovo antes de chocar
+        if (currentPet.isEgg) {
+            if (currentPet.type === 'ovo.rachando') return baseDir + 'ovo.rachando.gif';
+            if (currentPet.type === 'ovo.quebrado') return baseDir + 'ovo.quebrado.gif';
+            return baseDir + 'ovo.gif'; // Imagem padrão do ovo
+        }
+
         let prefix = currentPet.level === 1 ? 'bebe.' : 'crianca.'; // Prefixo baseado no nível
         let suffix = '.gif'; // Assumindo GIFs para a maioria das animações
 
-        // Lógica de prioridade para as imagens
+        // Lógica de prioridade para as imagens do pet (não ovo)
         if (!currentPet.isAlive) {
             return baseDir + 'morto.png'; // Sempre morto.png
         } else if (currentPet.isSleeping) {
@@ -482,7 +493,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Botão Dormir
     if (sleepButton) {
         sleepButton.addEventListener('click', () => {
-            if (pet.isEgg) { showGameMessage('O ovo não precisa dormir!', 1500); return; }
+            if (pet.isEgg) { showGameMessage('Ovo não precisa dormir!', 1500); return; }
             if (!pet.isAlive) { showGameMessage('Não posso fazer um Tamagotchi morto dormir...'); return; }
             if (pet.isSleeping) { showGameMessage(`${pet.name} já está dormindo.`); return; }
 
