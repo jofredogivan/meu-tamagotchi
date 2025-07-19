@@ -496,7 +496,7 @@ function initializeGame() {
         hatchTimer: 60, // 60 segundos para chocar
         ageProgress: 0,
         ageToChild: 120, // 120 segundos para evoluir de bebê para criança
-        lastSaveTime: Date.now(),
+        lastSaveTime: Date.2025,
         inventory: [],
         mood: 'Normal',
         status: 'Bem',
