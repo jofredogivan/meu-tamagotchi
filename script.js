@@ -61,32 +61,36 @@ function getPetImagePath(currentPet) {
         baseDir = `/${GITHUB_REPO_NAME}/imgs/`; 
     }
 
+    let finalPath;
+
     // Lógica especial para imagens de ovo antes de chocar
     if (currentPet.isEgg) {
-        if (currentPet.type === 'ovo.rachando') return baseDir + 'ovo.rachando.gif';
-        if (currentPet.type === 'ovo.quebrado') return baseDir + 'ovo.quebrado.gif';
-        return baseDir + 'ovo.gif'; // Imagem padrão do ovo
-    }
-
-    let prefix = currentPet.level === 1 ? 'bebe.' : 'crianca.'; // Prefixo baseado no nível
-    let suffix = '.gif'; // Assumindo GIFs para a maioria das animações
-
-    // Lógica de prioridade para as imagens do pet (não ovo)
-    if (!currentPet.isAlive) {
-        return baseDir + 'morto.png'; // Sempre morto.png
+        if (currentPet.type === 'ovo.rachando') finalPath = baseDir + 'ovo.rachando.gif';
+        else if (currentPet.type === 'ovo.quebrado') finalPath = baseDir + 'ovo.quebrado.gif';
+        else finalPath = baseDir + 'ovo.gif'; // Imagem padrão do ovo
+    } else if (!currentPet.isAlive) {
+        finalPath = baseDir + 'morto.png'; // Sempre morto.png
     } else if (currentPet.isSleeping) {
-        return baseDir + prefix + 'dormindo' + suffix;
+        let prefix = currentPet.level === 1 ? 'bebe.' : 'crianca.';
+        finalPath = baseDir + prefix + 'dormindo.gif';
     } else if (currentPet.isEating) {
-        return baseDir + prefix + 'comendo' + suffix;
+        let prefix = currentPet.level === 1 ? 'bebe.' : 'crianca.';
+        finalPath = baseDir + prefix + 'comendo.gif';
     } else if (currentPet.isBrincando) {
-        return baseDir + prefix + 'brincando' + suffix;
+        let prefix = currentPet.level === 1 ? 'bebe.' : 'crianca.';
+        finalPath = baseDir + prefix + 'brincando.gif';
     } else if (currentPet.status === 'Doente') { // Reutilizando a lógica de status
-        return baseDir + prefix + 'doente' + suffix;
+        let prefix = currentPet.level === 1 ? 'bebe.' : 'crianca.';
+        finalPath = baseDir + prefix + 'doente.gif';
+    } else {
+        // Imagem padrão (normal) para o nível atual
+        // O slice(0, -1) remove o '.' extra do prefixo 'bebe.' ou 'crianca.' para formar 'bebe.gif' ou 'crianca.gif'
+        let prefix = currentPet.level === 1 ? 'bebe.' : 'crianca.';
+        finalPath = baseDir + prefix.slice(0, -1) + '.gif'; 
     }
-    
-    // Imagem padrão (normal) para o nível atual
-    // O slice(0, -1) remove o '.' extra do prefixo 'bebe.' ou 'crianca.' para formar 'bebe.gif' ou 'crianca.gif'
-    return baseDir + prefix.slice(0, -1) + suffix; 
+
+    console.log("Caminho gerado da imagem:", finalPath); // Esta linha vai nos ajudar a depurar!
+    return finalPath;
 }
 
 // Lógica de Atualização do Display
@@ -104,11 +108,12 @@ function updateDisplay() {
 }
 
 function updateStatusIcons() {
-    const icons = [hungerIcon, funIcon, energyIcon, lifeIcon];
-    
     // Esconde ícones se o pet for um ovo
     if (pet.isEgg) {
-        icons.forEach(icon => { if (icon) icon.classList.add('hidden'); });
+        if (hungerIcon) hungerIcon.classList.add('hidden');
+        if (funIcon) funIcon.classList.add('hidden');
+        if (energyIcon) energyIcon.classList.add('hidden');
+        if (lifeIcon) lifeIcon.classList.add('hidden');
         return;
     }
 
