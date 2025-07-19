@@ -786,16 +786,95 @@ function handleCellClick(clickedCellEvent) {
     const clickedCell = clickedCellEvent.target;
     const clickedCellIndex = parseInt(clickedCell.getAttribute('data-cell-index'));
 
-    // Se a célula já estiver preenchida ou o jogo não estiver ativo, não faz nada
-    if (board[clickedCellIndex] !== '' || !gameActive) {
+    // Se a célula já estiver preenchida ou o jogo não estiver ativo, ou NÃO for a vez do jogador 'X'
+    if (board[clickedCellIndex] !== '' || !gameActive || currentPlayer !== 'X') {
         return;
     }
 
-    // Preenche a célula e atualiza o tabuleiro
+    // Preenche a célula e atualiza o tabuleiro para o jogador 'X'
     board[clickedCellIndex] = currentPlayer;
     clickedCell.textContent = currentPlayer;
     clickedCell.classList.add(`player-${currentPlayer.toLowerCase()}`); // Adiciona classe para cor
 
+    checkTicTacToeResult(); // Verifica o resultado após a jogada do jogador 'X'
+
+    // Se o jogo ainda estiver ativo e for a vez do Tamagotchi (O), faz a jogada dele
+    if (gameActive && currentPlayer === 'O') {
+        setTimeout(tamagotchiMove, 800); // Adiciona um pequeno atraso para simular o "pensamento"
+    }
+}
+
+// NOVO: Função para a jogada do Tamagotchi (IA)
+function tamagotchiMove() {
+    if (!gameActive) return;
+
+    let bestMove = findBestMove(board, 'O'); // Tenta encontrar a melhor jogada para 'O'
+    if (bestMove === -1) { // Se não encontrou uma jogada vitoriosa ou defensiva imediata
+        bestMove = findBestMove(board, 'X'); // Tenta encontrar uma jogada para bloquear 'X'
+    }
+
+    if (bestMove !== -1) {
+        // Se encontrou uma jogada estratégica (ganhar ou bloquear)
+        makeTicTacToeMove(bestMove, 'O');
+    } else {
+        // Se não houver jogadas estratégicas, faz uma jogada aleatória
+        let availableCells = [];
+        for (let i = 0; i < board.length; i++) {
+            if (board[i] === '') {
+                availableCells.push(i);
+            }
+        }
+        if (availableCells.length > 0) {
+            const randomIndex = Math.floor(Math.random() * availableCells.length);
+            makeTicTacToeMove(availableCells[randomIndex], 'O');
+        }
+    }
+}
+
+// NOVO: Função para auxiliar a IA a encontrar a melhor jogada (MiniMax simplificado ou verificação direta)
+function findBestMove(currentBoard, player) {
+    let opponent = (player === 'X') ? 'O' : 'X';
+
+    // 1. Tentar ganhar
+    for (let i = 0; i < winningConditions.length; i++) {
+        const [a, b, c] = winningConditions[i];
+        if (currentBoard[a] === player && currentBoard[b] === player && currentBoard[c] === '') return c;
+        if (currentBoard[a] === player && currentBoard[c] === player && currentBoard[b] === '') return b;
+        if (currentBoard[b] === player && currentBoard[c] === player && currentBoard[a] === '') return a;
+    }
+
+    // 2. Tentar bloquear o oponente
+    for (let i = 0; i < winningConditions.length; i++) {
+        const [a, b, c] = winningConditions[i];
+        if (currentBoard[a] === opponent && currentBoard[b] === opponent && currentBoard[c] === '') return c;
+        if (currentBoard[a] === opponent && currentBoard[c] === opponent && currentBoard[b] === '') return b;
+        if (currentBoard[b] === opponent && currentBoard[c] === opponent && currentBoard[a] === '') return a;
+    }
+
+    // 3. Priorizar o centro
+    if (currentBoard[4] === '') return 4;
+
+    // 4. Priorizar cantos
+    const corners = [0, 2, 6, 8];
+    for (let i = 0; i < corners.length; i++) {
+        if (currentBoard[corners[i]] === '') return corners[i];
+    }
+
+    // 5. Priorizar laterais
+    const sides = [1, 3, 5, 7];
+    for (let i = 0; i < sides.length; i++) {
+        if (currentBoard[sides[i]] === '') return sides[i];
+    }
+
+    return -1; // Nenhuma jogada estratégica encontrada
+}
+
+// NOVO: Função para efetuar uma jogada no tabuleiro
+function makeTicTacToeMove(index, player) {
+    board[index] = player;
+    const cellElement = ticTacToeBoard.children[index];
+    cellElement.textContent = player;
+    cellElement.classList.add(`player-${player.toLowerCase()}`);
     checkTicTacToeResult();
 }
 
