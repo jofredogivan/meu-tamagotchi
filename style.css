@@ -24,14 +24,14 @@ body {
 }
 
 #game-screen-display {
-    width: 280px; /* Aumenta a largura da tela */
+    width: 280px; /* Aumenta a largura da tela para dar mais espaço */
     height: 250px; /* Aumenta a altura da tela */
     background-color: #add8e6; /* Cor da tela do Game Boy */
     border: 8px solid #555;
     border-radius: 5px;
     margin-bottom: 20px;
     overflow: hidden; /* Garante que o conteúdo não vaze */
-    position: relative; /* Para posicionar telas de jogo internamente */
+    position: relative; /* Essencial para o posicionamento de elementos filhos */
 }
 
 .game-screen {
@@ -108,14 +108,13 @@ button:disabled {
 }
 
 #petImage {
-    width: 120px; /* Aumenta o tamanho da imagem do pet */
-    height: 120px; /* Aumenta o tamanho da imagem do pet */
+    width: 120px; /* Define a largura da imagem do pet */
+    height: 120px; /* Define a altura da imagem do pet */
     image-rendering: pixelated; /* Mantém a pixelização para estilo retro */
     margin-bottom: 10px;
-    /* Adicione estas linhas para centralizar a imagem dentro da tela */
-    display: block; /* Garante que margin auto funcione */
-    margin-left: auto;
-    margin-right: auto;
+    display: block; /* Essencial para que margin: auto funcione */
+    margin-left: auto; /* Centraliza horizontalmente */
+    margin-right: auto; /* Centraliza horizontalmente */
 }
 
 #controls {
