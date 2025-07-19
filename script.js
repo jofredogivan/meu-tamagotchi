@@ -4,7 +4,11 @@ let startScreen, tamagotchiScreen, petNameInput, startGameBtn;
 let petNameDisplay, moodDisplay, statusDisplay, petImage;
 let hungerIcon, funIcon, energyIcon, lifeIcon;
 let levelDisplay, coinsDisplay;
-let feedButton, playButton, sleepButton, shopButton, inventoryButton, gamesButton;
+let feedButton, playButton, sleepButton, shopButton, inventoryButton, gamesButton, vaccinateButton; // Adicionado vaccinateButton
+
+// Mova GITHUB_REPO_NAME para o escopo global
+// ATENÇÃO CRÍTICA: SUBSTITUA 'meu-tamagotchi' pelo NOME EXATO do seu repositório GitHub!
+const GITHUB_REPO_NAME = 'meu-tamagotchi'; // <<< VERIFIQUE ESTA STRING NOVAMENTE!
 
 let pet = {}; // Objeto pet será inicializado em initializeGame()
 let gameInterval; // Para o loop principal do jogo
@@ -46,18 +50,13 @@ function showScreen(screenElement) {
 
 // Função para obter o caminho da imagem com base no estado e nível
 function getPetImagePath(currentPet) {
-    // ATENÇÃO CRÍTICA: SUBSTITUA 'meu-tamagotchi' pelo NOME EXATO do seu repositório GitHub!
-    // Ex: Se o seu repositório for 'tamagotchi-game', use 'tamagotchi-game' (sem as barras)
-    const GITHUB_REPO_NAME = 'meu-tamagotchi'; // <<< ALTERAR APENAS ESTA STRING!
-
     let baseDir;
     // Verifica se estamos no ambiente local (file://) ou no GitHub Pages (http/https)
     if (window.location.protocol === 'file:') {
         // Para ambiente LOCAL: O caminho é relativo à pasta do script
-        baseDir = './imgs/';
+        baseDir = './imgs/'; 
     } else {
         // Para GitHub Pages: Construa o caminho completo usando o nome do repositório
-        // Isso resolve o erro 404 pois ele vai procurar em /meu-tamagotchi/imgs/
         baseDir = `/${GITHUB_REPO_NAME}/imgs/`; 
     }
 
@@ -76,10 +75,10 @@ function getPetImagePath(currentPet) {
     } else if (currentPet.isEating) {
         let prefix = currentPet.level === 1 ? 'bebe.' : 'crianca.';
         finalPath = baseDir + prefix + 'comendo.gif';
-    } else if (currentPet.isBrincando) {
+    } else if (currentPet.isBrincando) { // VERIFICAÇÃO PARA IMAGEM BRINCANDO
         let prefix = currentPet.level === 1 ? 'bebe.' : 'crianca.';
         finalPath = baseDir + prefix + 'brincando.gif';
-    } else if (currentPet.status === 'Doente') { // Reutilizando a lógica de status
+    } else if (currentPet.isSick) { // NOVO: VERIFICAÇÃO PARA IMAGEM DOENTE
         let prefix = currentPet.level === 1 ? 'bebe.' : 'crianca.';
         finalPath = baseDir + prefix + 'doente.gif';
     } else {
@@ -133,8 +132,12 @@ function updateStatusIcons() {
         else { energyIcon.classList.add('hidden'); energyIcon.classList.remove('blinking'); }
     }
 
+    // NOVO: Ícone de vida/doença
     if (lifeIcon) {
-        if (pet.life < 50) { lifeIcon.classList.remove('hidden'); lifeIcon.classList.toggle('blinking', pet.life < 20); }
+        if (pet.isSick || pet.life < 50) { // Mostra se estiver doente OU vida baixa
+            lifeIcon.classList.remove('hidden'); 
+            lifeIcon.classList.toggle('blinking', pet.isSick || pet.life < 20); // Pisca se doente ou vida muito baixa
+        }
         else { lifeIcon.classList.add('hidden'); lifeIcon.classList.remove('blinking'); }
     }
 }
@@ -209,8 +212,11 @@ function updatePetImage() {
             getElement('wakeUpButton').disabled = false; // Habilita apenas o botão de acordar
         }
         if (restartBtn) restartBtn.remove(); // Remove o botão de reiniciar se o pet estiver dormindo
-    } else if (pet.isEating || pet.isBrincando) {
-        disableActionButtons(true); // Desabilita outros botões enquanto comendo ou brincando
+    } else if (pet.isEating || pet.isBrincando || pet.isSick) { // Adicionado 'isSick' aqui
+        disableActionButtons(true); // Desabilita outros botões enquanto comendo, brincando ou doente (exceto vacina)
+        if (pet.isSick) { // Se doente, habilita apenas o vacinar
+            if (vaccinateButton) vaccinateButton.disabled = false;
+        }
         if (restartBtn) restartBtn.remove(); // Remove o botão de reiniciar
     } else {
         disableActionButtons(false); // Habilita os botões normais
@@ -219,8 +225,7 @@ function updatePetImage() {
 }
 
 function disableActionButtons(shouldDisable) {
-    // Adiciona uma verificação se o botão existe antes de tentar desabilitar
-    const buttons = [feedButton, playButton, sleepButton, shopButton, inventoryButton, gamesButton];
+    const buttons = [feedButton, playButton, sleepButton, shopButton, inventoryButton, gamesButton, vaccinateButton]; // Adicionado vaccinateButton
     buttons.forEach(button => {
         if (button) button.disabled = shouldDisable;
     });
@@ -252,7 +257,7 @@ function checkStatus() {
     }
     
     // Lógica de humor
-    if (pet.hunger < 30 || pet.fun < 30 || pet.energy < 30) {
+    if (pet.hunger < 30 || pet.fun < 30 || pet.energy < 30 || pet.isSick) { // isSick afeta o humor
         pet.mood = 'Triste';
     } else if (pet.hunger > 80 && pet.fun > 80 && pet.energy > 80) {
         pet.mood = 'Radiante';
@@ -269,7 +274,7 @@ function checkStatus() {
         pet.status = 'Comendo';
     } else if (pet.isBrincando) {
         pet.status = 'Brincando';
-    } else if (pet.life < 50) { // Doente
+    } else if (pet.isSick) { // NOVO: Status doente
         pet.status = 'Doente';
     } else if (pet.energy < 20) { // Cansado
         pet.status = 'Cansado';
@@ -313,12 +318,24 @@ function startGameLoop() {
 
         // Lógica principal do jogo (decadência de status, morte)
         if (pet.isAlive) {
+            // Chance de ficar doente se a vida estiver baixa e não estiver já doente
+            if (pet.life < 30 && !pet.isSick && Math.random() < 0.01) { // 1% de chance a cada segundo
+                pet.isSick = true;
+                showGameMessage(`${pet.name} parece doente! Use uma vacina!`, 4000);
+            }
+
             // Diminui os atributos apenas se não estiver dormindo, comendo ou brincando
             if (!pet.isSleeping && !pet.isEating && !pet.isBrincando) {
                 pet.hunger = Math.max(0, pet.hunger - 1);
                 pet.fun = Math.max(0, pet.fun - 1);
                 pet.energy = Math.max(0, pet.energy - 0.5);
-                pet.life = Math.max(0, pet.life - 0.2);
+                
+                // Vida diminui mais rápido se estiver doente
+                if (pet.isSick) {
+                    pet.life = Math.max(0, pet.life - 2); // Diminui 2 pontos por segundo se doente
+                } else {
+                    pet.life = Math.max(0, pet.life - 0.2);
+                }
 
                 // Se qualquer atributo crítico chegar a zero, a vida diminui mais rápido
                 if (pet.hunger === 0 || pet.fun === 0 || pet.energy === 0) {
@@ -358,7 +375,7 @@ function handleStartGame() {
         name: nameValue, // Usa o nome inserido
         hunger: 100, fun: 100, energy: 100, life: 100,
         level: 0, coins: 0, // Inicia como ovo (level 0)
-        isSleeping: false, isAlive: true, isEating: false, isEgg: true,
+        isSleeping: false, isAlive: true, isEating: false, isEgg: true, isSick: false, // NOVO: isSick
         hatchProgress: 0, hatchTimer: 60, // 60 segundos para chocar
         ageProgress: 0, ageToChild: 120, // 120 segundos para evoluir de bebê para criança
         lastSaveTime: Date.now(), inventory: [],
@@ -375,6 +392,7 @@ function handleFeed() {
     if (pet.isEgg) { showGameMessage('O ovo não precisa ser alimentado!', 1500); return; }
     if (!pet.isAlive) { showGameMessage('Não posso alimentar um Tamagotchi morto...'); return; }
     if (pet.isSleeping) { showGameMessage(`${pet.name} está dormindo! Não o incomode.`); return; }
+    if (pet.isSick) { showGameMessage(`${pet.name} está doente e não quer comer!`); return; } // Não come se doente
     if (pet.hunger > 90) { showGameMessage(`${pet.name} não está com tanta fome.`); return; }
 
     pet.isEating = true;
@@ -396,6 +414,7 @@ function handlePlay() {
     if (pet.isEgg) { showGameMessage('Ovo não sabe brincar!', 1500); return; }
     if (!pet.isAlive) { showGameMessage('Não posso brincar com um Tamagotchi morto...'); return; }
     if (pet.isSleeping) { showGameMessage(`${pet.name} está dormindo! Não o incomode.`); return; }
+    if (pet.isSick) { showGameMessage(`${pet.name} está doente e não quer brincar!`); return; } // Não brinca se doente
     if (pet.energy < 20) { showGameMessage(`${pet.name} está muito cansado para brincar.`); return; }
     if (pet.fun > 90) { showGameMessage(`${pet.name} já está se divertindo o bastante.`); return; }
 
@@ -420,6 +439,7 @@ function handleSleep() {
     if (pet.isEgg) { showGameMessage('Ovo não precisa dormir!', 1500); return; }
     if (!pet.isAlive) { showGameMessage('Não posso fazer um Tamagotchi morto dormir...'); return; }
     if (pet.isSleeping) { showGameMessage(`${pet.name} já está dormindo.`); return; }
+    if (pet.isSick) { showGameMessage(`${pet.name} está doente e precisa de vacina, não de sono!`); return; } // Não dorme se doente
 
     pet.isSleeping = true;
     updatePetImage();
@@ -427,11 +447,31 @@ function handleSleep() {
     updateDisplay();
 }
 
+// NOVO: Função para Vacinar o pet
+function handleVaccinate() {
+    if (pet.isEgg) { showGameMessage('Ovo não precisa de vacina!', 1500); return; }
+    if (!pet.isAlive) { showGameMessage('Não posso vacinar um Tamagotchi morto...'); return; }
+    if (!pet.isSick) { showGameMessage(`${pet.name} não está doente no momento.`); return; }
+    if (pet.isSleeping) { showGameMessage(`${pet.name} está dormindo! Não o incomode.`); return; }
+
+    showGameMessage(`Vacinando ${pet.name}...`);
+    disableActionButtons(true); // Desabilita botões durante a vacinação
+
+    setTimeout(() => {
+        pet.isSick = false; // Cura o pet
+        pet.life = Math.min(100, pet.life + 15); // Recupera um pouco de vida
+        pet.coins = Math.max(0, pet.coins - 5); // Custa 5 moedas
+        showGameMessage(`${pet.name} foi vacinado e se sente melhor! (-5 Moedas)`);
+        updatePetImage();
+        updateDisplay();
+    }, 1500);
+}
+
 function handleShop() {
     if (pet.isEgg) { showGameMessage('A loja não vende itens para ovos!', 1500); return; }
     if (!pet.isAlive) { showGameMessage('A loja não atende fantasmas...'); return; }
     if (pet.isSleeping) { showGameMessage(`${pet.name} está dormindo! Não o incomode.`); return; }
-    if (pet.isEating || pet.isBrincando) { showGameMessage(`${pet.name} está ocupado!`); return; }
+    if (pet.isEating || pet.isBrincando || pet.isSick) { showGameMessage(`${pet.name} está ocupado!`); return; } // Adicionado isSick
     showGameMessage('A loja ainda está fechada!');
 }
 
@@ -439,15 +479,15 @@ function handleInventory() {
     if (pet.isEgg) { showGameMessage('Ovo não tem inventário!', 1500); return; }
     if (!pet.isAlive) { showGameMessage('Fantasmas não precisam de inventário...'); return; }
     if (pet.isSleeping) { showGameMessage(`${pet.name} está dormindo! Não o incomode.`); return; }
-    if (pet.isEating || pet.isBrincando) { showGameMessage(`${pet.name} está ocupado!`); return; }
+    if (pet.isEating || pet.isBrincando || pet.isSick) { showGameMessage(`${pet.name} está ocupado!`); return; } // Adicionado isSick
     showGameMessage('Seu inventário está vazio!');
 }
 
 function handleGames() {
     if (pet.isEgg) { showGameMessage('Ovo não joga!', 1500); return; }
     if (!pet.isAlive) { showGameMessage('Fantasmas não jogam...'); return; }
-    if (pet.isSleeping) { showGameMessage(`${pet.name} está dormindo! Não o incomode.`); return; }
-    if (pet.isEating || pet.isBrincando) { showGameMessage(`${pet.name} está ocupado!`); return; }
+    if (pet.isSleeping) { showGameGameMessage(`${pet.name} está dormindo! Não o incomode.`); return; }
+    if (pet.isEating || pet.isBrincando || pet.isSick) { showGameMessage(`${pet.name} está ocupado!`); return; } // Adicionado isSick
     showGameMessage('Os jogos ainda não estão disponíveis!');
 }
 
@@ -479,6 +519,7 @@ function initializeGame() {
     shopButton = getElement('shopButton');
     inventoryButton = getElement('inventoryButton');
     gamesButton = getElement('gamesButton');
+    vaccinateButton = getElement('vaccinateButton'); // NOVO: Referência ao botão de vacinar
 
     // Estado inicial do pet para um novo jogo
     pet = {
@@ -493,6 +534,7 @@ function initializeGame() {
         isAlive: true,
         isEating: false,
         isEgg: true,
+        isSick: false, // NOVO: Estado de doença
         hatchProgress: 0,
         hatchTimer: 60, // 60 segundos para chocar
         ageProgress: 0,
@@ -513,6 +555,7 @@ function initializeGame() {
     if (shopButton) shopButton.removeEventListener('click', handleShop);
     if (inventoryButton) inventoryButton.removeEventListener('click', handleInventory);
     if (gamesButton) gamesButton.removeEventListener('click', handleGames);
+    if (vaccinateButton) vaccinateButton.removeEventListener('click', handleVaccinate); // NOVO: Remover listener do vacinar
 
     // Adiciona event listeners (agora as funções de handler separadas)
     if (startGameBtn) startGameBtn.addEventListener('click', handleStartGame);
@@ -522,11 +565,15 @@ function initializeGame() {
     if (shopButton) shopButton.addEventListener('click', handleShop);
     if (inventoryButton) inventoryButton.addEventListener('click', handleInventory);
     if (gamesButton) gamesButton.addEventListener('click', handleGames);
+    if (vaccinateButton) vaccinateButton.addEventListener('click', handleVaccinate); // NOVO: Adicionar listener do vacinar
     
+    // Logs de depuração
+    console.log("Protocolo da URL:", window.location.protocol); 
+    console.log("Nome do Repositório (configurado no JS):", GITHUB_REPO_NAME); 
+
     showScreen(startScreen); // Inicia na tela de nome
     updateDisplay(); // Atualiza o display inicial (mostrará o ovo na imagem padrão)
 }
-
 
 // Garante que o script só rode depois que todo o HTML for carregado
 document.addEventListener('DOMContentLoaded', initializeGame);
