@@ -5,6 +5,9 @@ let hungerIcon, funIcon, energyIcon, lifeIcon;
 let levelDisplay, coinsDisplay; // Nível agora será a fase de vida
 let feedButton, playButton, sleepButton, shopButton, inventoryButton, gamesButton, vaccinateButton;
 
+// NOVOS ELEMENTOS HTML PARA CUIDADO DO OVO
+let eggStatusGroup, eggWarmthIcon, eggWarmthDisplay, warmEggButton;
+
 // NOVOS ELEMENTOS HTML PARA LOJA/INVENTÁRIO
 let shopScreen, shopItemsContainer, shopBackButton;
 let inventoryScreen, inventoryItemsContainer, inventoryBackButton;
@@ -106,37 +109,44 @@ function getPetImagePath(currentPet) {
     if (!currentPet.isAlive) {
         finalPath = baseDir + 'morto.png'; // Imagem de morte tem prioridade
     } else if (currentPet.isEgg) {
-        if (currentPet.type === 'ovo.rachando') finalPath = baseDir + 'ovo.rachando.gif';
-        else if (currentPet.type === 'ovo.quebrado') finalPath = baseDir + 'ovo.quebrado.gif';
-        else finalPath = baseDir + 'ovo.gif'; 
+        // Lógica de imagem do ovo baseada no eggWarmth
+        if (currentPet.eggWarmth < 30) {
+            finalPath = baseDir + 'ovo_frio.gif'; // Você precisará criar esta imagem
+        } else if (currentPet.ageCounter > currentPet.hatchTimerSeconds * 0.66) {
+            finalPath = baseDir + 'ovo_quebrado.gif'; // Quase chocando
+        } else if (currentPet.ageCounter > currentPet.hatchTimerSeconds * 0.33) {
+            finalPath = baseDir + 'ovo_rachando.gif'; // Rachando
+        } else {
+            finalPath = baseDir + 'ovo.gif'; // Ovo normal
+        }
     } else if (currentPet.isSleeping) {
         let prefix = '';
         if (currentPet.level === 1) prefix = 'bebe.';
         else if (currentPet.level === 2) prefix = 'crianca.';
         else if (currentPet.level === 3) prefix = 'adulto_padrao.'; // Pode haver variações de adulto dormindo
         else if (currentPet.level === 4) prefix = 'velho.'; // Pode haver variações de velho dormindo
-        finalPath = baseDir + prefix + 'dormindo.gif'; // Você precisaria criar essas imagens
+        finalPath = baseDir + prefix + 'dormindo.gif'; 
     } else if (currentPet.isEating) {
         let prefix = '';
         if (currentPet.level === 1) prefix = 'bebe.';
         else if (currentPet.level === 2) prefix = 'crianca.';
         else if (currentPet.level === 3) prefix = 'adulto_padrao.'; // Pode haver variações de adulto comendo
         else if (currentPet.level === 4) prefix = 'velho.'; // Pode haver variações de velho comendo
-        finalPath = baseDir + prefix + 'comendo.gif'; // Você precisaria criar essas imagens
+        finalPath = baseDir + prefix + 'comendo.gif'; 
     } else if (currentPet.isBrincando) { 
         let prefix = '';
         if (currentPet.level === 1) prefix = 'bebe.';
         else if (currentPet.level === 2) prefix = 'crianca.';
         else if (currentPet.level === 3) prefix = 'adulto_padrao.'; // Pode haver variações de adulto brincando
         else if (currentPet.level === 4) prefix = 'velho.'; // Pode haver variações de velho brincando
-        finalPath = baseDir + prefix + 'brincando.gif'; // Você precisaria criar essas imagens
+        finalPath = baseDir + prefix + 'brincando.gif'; 
     } else if (currentPet.isSick) { 
         let prefix = '';
         if (currentPet.level === 1) prefix = 'bebe.';
         else if (currentPet.level === 2) prefix = 'crianca.';
         else if (currentPet.level === 3) prefix = 'adulto_padrao.'; // Pode haver variações de adulto doente
         else if (currentPet.level === 4) prefix = 'velho.'; // Pode haver variações de velho doente
-        finalPath = baseDir + prefix + 'doente.gif'; // Você precisaria criar essas imagens
+        finalPath = baseDir + prefix + 'doente.gif'; 
     } else {
         // Imagem normal do pet por nível e tipo adulto
         if (currentPet.level === 1) {
@@ -144,11 +154,11 @@ function getPetImagePath(currentPet) {
         } else if (currentPet.level === 2) {
             finalPath = baseDir + 'crianca.gif'; 
         } else if (currentPet.level === 3) {
-            finalPath = baseDir + `adulto_${currentPet.adultType}.gif`; // Usa o tipo adulto
+            finalPath = baseDir + `adulto_${currentPet.adultType}.gif`; 
         } else if (currentPet.level === 4) {
             finalPath = baseDir + 'velho.gif'; 
         } else {
-            finalPath = baseDir + 'ovo.gif'; // Fallback ou para Nível 0 antes de chocar
+            finalPath = baseDir + 'ovo.gif'; 
         }
     }
 
@@ -167,9 +177,11 @@ function updateDisplay() {
         if (pet.isEgg) levelText = 'Ovo';
         else if (pet.level === 1) levelText = 'Bebê';
         else if (pet.level === 2) levelText = 'Criança';
-        else if (pet.level === 3) levelText = `Adulto (${pet.adultType.charAt(0).toUpperCase() + pet.adultType.slice(1)})`; // Capitaliza o tipo
+        else if (pet.level === 3) levelText = `Adulto (${pet.adultType.charAt(0).toUpperCase() + pet.adultType.slice(1)})`; 
         else if (pet.level === 4) levelText = 'Velho';
-        levelDisplay.textContent = `Nível: ${levelText} (Idade: ${pet.age})`;
+        
+        const ageInDays = pet.age.toFixed(1); 
+        levelDisplay.textContent = `Nível: ${levelText} (Idade: ${ageInDays} dias)`;
     }
     if (coinsDisplay) coinsDisplay.textContent = pet.coins;
     
@@ -178,6 +190,19 @@ function updateDisplay() {
 }
 
 function updateStatusIcons() {
+    // Gerencia visibilidade do status do ovo
+    if (eggStatusGroup) {
+        if (pet.isEgg && pet.isAlive) {
+            eggStatusGroup.classList.remove('hidden');
+            eggWarmthDisplay.textContent = `Aquecimento: ${pet.eggWarmth.toFixed(0)}%`;
+            eggWarmthIcon.classList.toggle('cold', pet.eggWarmth < 40);
+            eggWarmthIcon.classList.toggle('critical', pet.eggWarmth < 20);
+        } else {
+            eggStatusGroup.classList.add('hidden');
+        }
+    }
+
+    // Gerencia visibilidade dos ícones de status do pet
     if (pet.isEgg || !pet.isAlive) { // Esconde ícones para ovo e morto
         if (hungerIcon) hungerIcon.classList.add('hidden');
         if (funIcon) funIcon.classList.add('hidden');
@@ -214,27 +239,33 @@ function updateStatusIcons() {
 function hatchEgg() {
     if (!petImage) return; 
 
-    if (pet.hatchProgress < 33) {
-        petImage.src = getPetImagePath({ isEgg: true, level: 0, type: 'ovo' });
-        showGameMessage(`O ovo está quietinho...`);
-    } else if (pet.hatchProgress < 66) {
-        petImage.src = getPetImagePath({ isEgg: true, level: 0, type: 'ovo.rachando' });
-        showGameMessage(`O ovo está rachando!`, 1500);
-    } else if (pet.hatchProgress < 100) {
-        petImage.src = getPetImagePath({ isEgg: true, level: 0, type: 'ovo.quebrado' });
-        showGameMessage(`Está quase!`);
-    } else { 
+    // O hatchTimer agora representa 12 horas (43200 segundos)
+    const totalHatchTicks = pet.hatchTimerSeconds; // Total de segundos para chocar
+    const currentHatchProgress = pet.ageCounter; // Segundos passados no ovo
+
+    // Imagem do ovo baseada no eggWarmth e progresso
+    petImage.src = getPetImagePath(pet);
+
+    if (pet.eggWarmth <= 0) {
+        pet.isAlive = false; // Ovo morre se esfriar demais
+        showGameMessage(`Oh não! O ovo esfriou demais e não sobreviveu...`, 5000);
+        updatePetImage();
+        clearInterval(gameInterval);
+        return;
+    }
+
+    if (currentHatchProgress >= totalHatchTicks) {
         pet.isEgg = false;
         pet.level = 1; // Transforma em Bebê
-        pet.age = 1; // Começa a idade em 1 após chocar
+        pet.age = pet.evolutionThresholds.baby; // Define idade inicial de bebê (0.5 dias)
         showGameMessage(`${pet.name} chocou! Bem-vindo(a) ao mundo!`, 3000);
         
         petImage.src = getPetImagePath(pet); 
         disableActionButtons(false); 
         
-        // Não reinicia o intervalo aqui, a lógica principal de idade já está no loop
         return;
     }
+    // Se ainda é ovo, mantém os botões de ação desabilitados, exceto o de aquecer
     disableActionButtons(true); 
 }
 
@@ -244,7 +275,26 @@ function updatePetImage() {
 
     if (pet.isEgg) {
         hatchEgg(); 
+        // Gerencia a visibilidade do botão de aquecer
+        if (warmEggButton) warmEggButton.classList.remove('hidden');
+        if (feedButton) feedButton.classList.add('hidden');
+        if (playButton) playButton.classList.add('hidden');
+        if (sleepButton) sleepButton.classList.add('hidden');
+        if (vaccinateButton) vaccinateButton.classList.add('hidden');
+        if (shopButton) shopButton.classList.add('hidden'); // Loja também escondida para ovo
+        if (inventoryButton) inventoryButton.classList.add('hidden'); // Inventário também escondido
+        if (gamesButton) gamesButton.classList.add('hidden'); // Minigames também escondido
         return;
+    } else {
+        // Se não é ovo, esconde o botão de aquecer
+        if (warmEggButton) warmEggButton.classList.add('hidden');
+        if (feedButton) feedButton.classList.remove('hidden');
+        if (playButton) playButton.classList.remove('hidden');
+        if (sleepButton) sleepButton.classList.remove('hidden');
+        if (vaccinateButton) vaccinateButton.classList.remove('hidden');
+        if (shopButton) shopButton.classList.remove('hidden');
+        if (inventoryButton) inventoryButton.classList.remove('hidden');
+        if (gamesButton) gamesButton.classList.remove('hidden');
     }
 
     petImage.src = getPetImagePath(pet); 
@@ -264,6 +314,7 @@ function updatePetImage() {
             newRestartBtn.textContent = 'Recomeçar Jogo';
             newRestartBtn.addEventListener('click', restartGame);
             getElement('actions').appendChild(newRestartBtn);
+            if (restartButton) restartButton.classList.remove('hidden');
         }
     } else if (pet.isSleeping) {
         if (!wakeBtn) { 
@@ -295,6 +346,8 @@ function disableActionButtons(shouldDisable) {
     buttons.forEach(button => {
         if (button) button.disabled = shouldDisable;
     });
+    // O botão de aquecer é gerenciado separadamente
+    if (warmEggButton) warmEggButton.disabled = !pet.isEgg || shouldDisable;
 }
 
 function wakeUpPet() {
@@ -309,6 +362,7 @@ function wakeUpPet() {
 function restartGame() {
     clearInterval(gameInterval); 
     initializeGame();
+    showScreen(startScreen); // Volta para a tela inicial
 }
 
 function checkStatus() {
@@ -316,7 +370,11 @@ function checkStatus() {
 
     if (pet.isEgg) {
         pet.mood = 'Esperando...';
-        pet.status = 'Em desenvolvimento';
+        if (pet.eggWarmth < 30) {
+            pet.status = 'Esfriando!';
+        } else {
+            pet.status = 'Em desenvolvimento';
+        }
         return;
     }
     
@@ -347,27 +405,16 @@ function checkStatus() {
 
 // --- Funções para determinar o tipo adulto ---
 function determineAdultType() {
-    // Para simplificar, vamos usar uma média dos atributos durante a fase de criança
-    // Você pode armazenar histórico de médias ou somas se quiser uma lógica mais complexa
-    
-    // Supondo que você queira basear no estado atual ou em um histórico simples
-    // Para uma implementação mais robusta, você precisaria registrar os estados ao longo da vida da criança
-    
     let avgCareScore = (pet.hunger + pet.fun + pet.energy + pet.life) / 4;
 
-    if (pet.hungerHistory && pet.funHistory && pet.energyHistory) {
-        // Exemplo: se tivéssemos um histórico de como ele foi cuidado na infância
-        // Vamos usar uma simplificação para esta versão
-    }
-
     if (avgCareScore > 90) {
-        return 'feliz'; // Mantido em excelente estado
+        return 'feliz'; 
     } else if (pet.fun > 80 && avgCareScore > 70) {
-        return 'ativo'; // Brincou muito
+        return 'ativo'; 
     } else if (pet.hunger > 80 && avgCareScore > 70) {
-        return 'forte'; // Bem alimentado
+        return 'forte'; 
     } else {
-        return 'padrao'; // Cuidado médio ou negligência leve
+        return 'padrao'; 
     }
 }
 
@@ -381,42 +428,51 @@ function startGameLoop() {
             return;
         }
 
-        if (!pet.isAlive) { // Se o pet estiver morto, não faça nada
+        if (!pet.isAlive) { 
             clearInterval(gameInterval);
-            updateDisplay(); // Garante que a imagem de morto esteja visível
+            updateDisplay(); 
             return;
         }
 
+        // Lógica de tempo "realista"
+        pet.ageCounter++; // A cada segundo real
+        if (pet.ageCounter >= pet.ageIntervalSeconds) {
+            pet.age += 1; // Avança 1 "dia" no Tamagotchi
+            pet.ageCounter = 0; // Reseta o contador de segundos
+        }
+
         if (pet.isEgg) {
-            pet.hatchProgress += (100 / pet.hatchTimer); // Incrementa progresso de eclosão
-            if (pet.hatchProgress >= 100) {
-                pet.hatchProgress = 100;
-                hatchEgg(); 
-                // Após chocar, o nível e idade são definidos e o loop continua
+            // Decaimento de Aquecimento do Ovo
+            pet.eggWarmth = Math.max(0, pet.eggWarmth - (100 / pet.hatchTimerSeconds)); // Decai para 0 em hatchTimerSeconds
+            
+            if (pet.eggWarmth <= 0) {
+                pet.isAlive = false; // Ovo morre se não for aquecido
+                showGameMessage(`Oh não! O ovo esfriou demais e não sobreviveu. Inicie um novo jogo.`, 5000);
+                updatePetImage();
+                clearInterval(gameInterval);
+                return;
             }
+
+            // A lógica de eclosão está dentro de hatchEgg(), que é chamada por updatePetImage()
             updateDisplay();
             return; 
         }
 
-        // Incrementa a idade do Tamagotchi (a cada 1 segundo = 1 unidade de idade)
-        pet.age++; 
-
-        // Lógica de evolução
-        if (pet.age >= pet.evolutionThresholds.child && pet.level === 1) {
+        // Lógica de evolução (baseada nos "dias" de pet.age)
+        if (pet.level === 1 && pet.age >= pet.evolutionThresholds.child) {
             pet.level = 2; // Evolui para Criança
             showGameMessage(`${pet.name} cresceu e virou uma Criança!`, 4000);
-            // Recompensa a evolução com um pequeno boost
             pet.hunger = Math.min(100, pet.hunger + 10);
             pet.fun = Math.min(100, pet.fun + 10);
             pet.energy = Math.min(100, pet.energy + 10);
-        } else if (pet.age >= pet.evolutionThresholds.adult && pet.level === 2) {
+        } else if (pet.level === 2 && pet.age >= pet.evolutionThresholds.adult) {
             pet.level = 3; // Evolui para Adulto
-            pet.adultType = determineAdultType(); // Define o tipo de adulto
+            pet.adultType = determineAdultType(); 
             showGameMessage(`${pet.name} se tornou um Adulto (${pet.adultType.charAt(0).toUpperCase() + pet.adultType.slice(1)})!`, 4000);
             pet.hunger = Math.min(100, pet.hunger + 10);
             pet.fun = Math.min(100, pet.fun + 10);
             pet.energy = Math.min(100, pet.energy + 10);
-        } else if (pet.age >= pet.evolutionThresholds.elder && pet.level === 3) {
+        } else if (pet.level === 3 && pet.age >= pet.evolutionThresholds.elder) {
             pet.level = 4; // Evolui para Velho
             showGameMessage(`${pet.name} está envelhecendo e se tornou Velho.`, 4000);
             pet.hunger = Math.min(100, pet.hunger + 5);
@@ -424,31 +480,43 @@ function startGameLoop() {
             pet.energy = Math.min(100, pet.energy + 5);
         }
 
-        // Lógica para doença (chance um pouco maior para velhos)
-        let sickChance = (pet.level === 4) ? 0.02 : 0.01; // 2% para velhos, 1% para outros
-        if (pet.life < 30 && !pet.isSick && Math.random() < sickChance) { 
+        // Lógica para doença (chance baseada no tempo, maior para velhos)
+        const decayPerSecond = 1 / pet.ageIntervalSeconds; 
+        let sickChancePerSecond = (pet.level === 4) ? 0.000005 : 0.000002; 
+        
+        if (pet.life < 30 && !pet.isSick && Math.random() < sickChancePerSecond) { 
             pet.isSick = true;
             showGameMessage(`${pet.name} parece doente! Use um remédio!`, 4000);
         }
 
-        // Lógica de decadência de atributos (mais rápida para velhos)
-        let decayRate = (pet.level === 4) ? 1.5 : 1; // Velhos perdem atributos mais rápido
+        // Lógica de decadência de atributos
+        const hungerDecayPerSecond = (pet.level === 4 ? 20 : 10) * decayPerSecond; 
+        const funDecayPerSecond = (pet.level === 4 ? 15 : 8) * decayPerSecond;    
+        const energyDecayPerSecond = (pet.level === 4 ? 10 : 5) * decayPerSecond;  
+        const lifeDecayPerSecond = (pet.level === 4 ? 5 : 1) * decayPerSecond;     
+
         if (!pet.isSleeping && !pet.isEating && !pet.isBrincando) {
-            pet.hunger = Math.max(0, pet.hunger - (1 * decayRate));
-            pet.fun = Math.max(0, pet.fun - (1 * decayRate));
-            pet.energy = Math.max(0, pet.energy - (0.5 * decayRate));
+            pet.hunger = Math.max(0, pet.hunger - hungerDecayPerSecond);
+            pet.fun = Math.max(0, pet.fun - funDecayPerSecond);
+            pet.energy = Math.max(0, pet.energy - energyDecayPerSecond);
             
             if (pet.isSick) {
-                pet.life = Math.max(0, pet.life - (2 * decayRate)); 
+                pet.life = Math.max(0, pet.life - (lifeDecayPerSecond * 4)); 
             } else {
-                pet.life = Math.max(0, pet.life - (0.2 * decayRate));
+                pet.life = Math.max(0, pet.life - lifeDecayPerSecond);
             }
 
-            if (pet.hunger === 0 || pet.fun === 0 || pet.energy === 0) {
-                pet.life = Math.max(0, pet.life - (1 * decayRate));
+            if (pet.hunger < 10 || pet.fun < 10 || pet.energy < 10) { 
+                pet.life = Math.max(0, pet.life - (lifeDecayPerSecond * 2));
             }
         }
         
+        // Ganhos de atributos durante o sono
+        if (pet.isSleeping) {
+            pet.energy = Math.min(100, pet.energy + (10 * decayPerSecond)); 
+            pet.life = Math.min(100, pet.life + (2 * decayPerSecond)); 
+        }
+
         checkStatus(); 
         updateDisplay(); 
 
@@ -458,18 +526,13 @@ function startGameLoop() {
             showGameMessage(`Oh não! ${pet.name} não aguentou...`, 5000);
             updatePetImage(); 
             clearInterval(gameInterval); 
-        } else if (pet.age >= pet.evolutionThresholds.death) { // Morte por envelhecimento
+        } else if (pet.age >= pet.evolutionThresholds.death) { 
             pet.isAlive = false;
             showGameMessage(`Lamentável! ${pet.name} viveu uma vida plena e faleceu de velhice.`, 5000);
             updatePetImage();
             clearInterval(gameInterval);
-        } else if (pet.isSleeping) {
-            pet.energy = Math.min(100, pet.energy + (2 * decayRate)); // Recarrega energia mais rápido
-            pet.life = Math.min(100, pet.life + (0.5 * decayRate)); // Recarrega vida mais rápido
-            checkStatus();
-            updateDisplay();
         }
-    }, 1000); // O loop roda a cada 1 segundo (1 "dia" de idade)
+    }, 1000); // O loop roda a cada 1 segundo (1 "tick" real)
 }
 
 // --- Handlers de Eventos dos Botões ---
@@ -485,23 +548,42 @@ function handleStartGame() {
         hunger: 100, fun: 100, energy: 100, life: 100,
         level: 0, coins: 0, 
         isSleeping: false, isAlive: true, isEating: false, isEgg: true, isSick: false, 
-        hatchProgress: 0, hatchTimer: 60, // 60 segundos para chocar
-        age: 0, // Idade inicial em 0
-        evolutionThresholds: { // Limiares para evolução (idade em "dias")
-            child: 25,   // Bebê de 1 a 24
-            adult: 50,   // Criança de 25 a 49
-            elder: 75,   // Adulto de 50 a 74
-            death: 100   // Velho de 75 a 99, morte em 100
+        hatchProgress: 0, 
+        hatchTimerSeconds: 43200, // 12 horas em segundos (para o ovo chocar)
+        eggWarmth: 100, // Novo: Aquecimento do ovo (0-100)
+        age: 0, 
+        ageCounter: 0, 
+        ageIntervalSeconds: 3600, 
+        evolutionThresholds: { 
+            baby: 0.5,    
+            child: 1.5,   
+            adult: 3.5,   
+            elder: 6.5,   
+            death: 7.5    
         },
-        adultType: 'padrao', // Tipo padrão até ser determinado
+        adultType: 'padrao', 
         lastSaveTime: Date.now(), inventory: [], 
         mood: 'Esperando...', status: 'Em desenvolvimento', isBrincando: false
     };
 
     updateDisplay();
     showScreen(tamagotchiScreen);
-    showGameMessage(`Um ovo foi colocado! Cuide bem dele para que ele choque.`, 3000);
+    showGameMessage(`Um ovo foi colocado! Ele chocará em aproximadamente 12 horas. Cuide da temperatura dele!`, 3000);
     startGameLoop(); // Inicia o loop do jogo
+}
+
+function handleWarmEgg() {
+    if (!pet.isEgg) { showGameMessage('Isso não é um ovo!', 1500); return; }
+    if (!pet.isAlive) { showGameMessage('Não posso aquecer um ovo morto...', 1500); return; }
+
+    if (pet.eggWarmth >= 95) {
+        showGameMessage('O ovo já está bem aquecido!', 1500);
+        return;
+    }
+
+    pet.eggWarmth = Math.min(100, pet.eggWarmth + 10); // Aumenta o aquecimento
+    showGameMessage('Você está aquecendo o ovo...');
+    updateDisplay();
 }
 
 function handleFeed() {
@@ -570,7 +652,7 @@ function handleVaccinate() {
     if (pet.isSleeping) { showGameMessage(`${pet.name} está dormindo! Não o incomode.`); return; }
     if (pet.coins < 5) { showGameMessage('Você não tem moedas suficientes para o remédio! (Custa 5 moedas)', 2500); return; }
 
-    showGameMessage(`Dando remédio para ${pet.name}...`); // Mudei para remédio
+    showGameMessage(`Dando remédio para ${pet.name}...`); 
     disableActionButtons(true); 
 
     setTimeout(() => {
@@ -753,7 +835,6 @@ function showSubGameScreen(subScreenElement) {
 function initRPSGame() {
     showSubGameScreen(rpsGameScreen);
     rpsResult.textContent = 'Faça sua escolha!';
-    // Reabilita os botões de escolha e esconde os de "jogar novamente" e "voltar"
     rpsRockBtn.disabled = false;
     rpsPaperBtn.disabled = false;
     rpsScissorsBtn.disabled = false;
@@ -762,7 +843,6 @@ function initRPSGame() {
 }
 
 function playRPS(playerChoice) {
-    // Desabilita botões de escolha
     rpsRockBtn.disabled = true;
     rpsPaperBtn.disabled = true;
     rpsScissorsBtn.disabled = true;
@@ -775,7 +855,7 @@ function playRPS(playerChoice) {
 
     if (playerChoice === tamagotchiChoice) {
         result = `Empate! Tamagotchi escolheu ${tamagotchiChoice}.`;
-        reward = 1; // Pequena recompensa por empate
+        reward = 1; 
     } else if (
         (playerChoice === 'pedra' && tamagotchiChoice === 'tesoura') ||
         (playerChoice === 'papel' && tamagotchiChoice === 'pedra') ||
@@ -783,18 +863,17 @@ function playRPS(playerChoice) {
     ) {
         result = `Você Venceu! Tamagotchi escolheu ${tamagotchiChoice}.`;
         reward = 5;
-        pet.fun = Math.min(100, pet.fun + 10); // Aumenta um pouco a diversão
+        pet.fun = Math.min(100, pet.fun + 10); 
     } else {
         result = `Você Perdeu! Tamagotchi escolheu ${tamagotchiChoice}.`;
         reward = 0;
-        pet.fun = Math.max(0, pet.fun - 5); // Diminui um pouco a diversão
+        pet.fun = Math.max(0, pet.fun - 5); 
     }
 
     pet.coins += reward;
     updateDisplay();
     rpsResult.textContent = result + ` Você ganhou ${reward} moedas!`;
 
-    // Mostra os botões de "jogar novamente" e "voltar"
     rpsPlayAgainBtn.style.display = 'block';
     rpsBackToGamesBtn.style.display = 'block';
 }
@@ -802,16 +881,16 @@ function playRPS(playerChoice) {
 // --- Jogo: Adivinhe o Número (Number Guessing) ---
 function initNumberGuessingGame() {
     showSubGameScreen(numberGuessingGameScreen);
-    secretNumber = Math.floor(Math.random() * 100) + 1; // Número entre 1 e 100
+    secretNumber = Math.floor(Math.random() * 100) + 1; 
     attempts = 0;
     ngInstructions.textContent = 'Estou pensando em um número entre 1 e 100. Tente adivinhar!';
     ngGuessInput.value = '';
     ngResult.textContent = '';
-    ngSubmitGuessBtn.disabled = false; // Habilita o botão de submissão
-    ngGuessInput.disabled = false; // Habilita o input
+    ngSubmitGuessBtn.disabled = false; 
+    ngGuessInput.disabled = false; 
     ngPlayAgainBtn.style.display = 'none';
     ngBackToGamesBtn.style.display = 'none';
-    console.log("Número secreto:", secretNumber); // Para depuração
+    console.log("Número secreto:", secretNumber); 
 }
 
 function submitNumberGuess() {
@@ -826,13 +905,13 @@ function submitNumberGuess() {
 
     if (guess === secretNumber) {
         ngResult.textContent = `Parabéns! Você adivinhou o número ${secretNumber} em ${attempts} tentativas!`;
-        const reward = Math.max(1, 15 - attempts); // Recompensa baseada em tentativas
+        const reward = Math.max(1, 15 - attempts); 
         pet.coins += reward;
         pet.fun = Math.min(100, pet.fun + 15);
         showGameMessage(`Você ganhou ${reward} moedas!`, 2000);
         updateDisplay();
-        ngSubmitGuessBtn.disabled = true; // Desabilita o botão após acertar
-        ngGuessInput.disabled = true; // Desabilita o input
+        ngSubmitGuessBtn.disabled = true; 
+        ngGuessInput.disabled = true; 
         ngPlayAgainBtn.style.display = 'block';
         ngBackToGamesBtn.style.display = 'block';
     } else if (guess < secretNumber) {
@@ -840,12 +919,11 @@ function submitNumberGuess() {
     } else {
         ngResult.textContent = `Tente um número MENOR. Tentativas: ${attempts}`;
     }
-    ngGuessInput.value = ''; // Limpa o input
+    ngGuessInput.value = ''; 
 }
 
 
 // --- Jogo: Jogo da Velha (Tic Tac Toe) ---
-// Variáveis Globais para o Jogo da Velha
 const winningConditions = [
     [0, 1, 2],
     [3, 4, 5],
@@ -853,27 +931,29 @@ const winningConditions = [
     [0, 3, 6],
     [1, 4, 7],
     [2, 5, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
     [0, 4, 8],
     [2, 4, 6]
-]; // Todas as combinações vencedoras
+]; 
 
 function initTicTacToeGame() {
     showSubGameScreen(ticTacToeGameScreen);
-    ticTacToePlayAgainBtn.style.display = 'none'; // Esconde o botão de jogar novamente
-    ticTacToeBackToGamesBtn.style.display = 'none'; // Esconde o botão de voltar
+    ticTacToePlayAgainBtn.style.display = 'none'; 
+    ticTacToeBackToGamesBtn.style.display = 'none'; 
 
-    board = ['', '', '', '', '', '', '', '', '']; // Limpa o tabuleiro
-    currentPlayer = 'X'; // Começa com o jogador 'X'
-    gameActive = true; // O jogo está ativo
+    board = ['', '', '', '', '', '', '', '', '']; 
+    currentPlayer = 'X'; 
+    gameActive = true; 
 
     const cells = ticTacToeBoard.querySelectorAll('.cell');
     cells.forEach((cell, index) => {
-        cell.textContent = ''; // Limpa o texto da célula
-        cell.className = 'cell'; // Limpa classes de jogador e vencedor
-        // Remove listener anterior antes de adicionar um novo para evitar duplicações
+        cell.textContent = ''; 
+        cell.className = 'cell'; 
         cell.removeEventListener('click', handleCellClick);
-        cell.addEventListener('click', handleCellClick); // Adiciona o evento de clique
-        cell.style.pointerEvents = 'auto'; // Habilita o clique
+        cell.addEventListener('click', handleCellClick); 
+        cell.style.pointerEvents = 'auto'; 
     });
 
     ticTacToeStatus.textContent = `É a vez do Jogador ${currentPlayer}`;
@@ -883,38 +963,32 @@ function handleCellClick(clickedCellEvent) {
     const clickedCell = clickedCellEvent.target;
     const clickedCellIndex = parseInt(clickedCell.getAttribute('data-cell-index'));
 
-    // Se a célula já estiver preenchida ou o jogo não estiver ativo, ou NÃO for a vez do jogador 'X'
     if (board[clickedCellIndex] !== '' || !gameActive || currentPlayer !== 'X') {
         return;
     }
 
-    // Preenche a célula e atualiza o tabuleiro para o jogador 'X'
     board[clickedCellIndex] = currentPlayer;
     clickedCell.textContent = currentPlayer;
-    clickedCell.classList.add(`player-${currentPlayer.toLowerCase()}`); // Adiciona classe para cor
+    clickedCell.classList.add(`player-${currentPlayer.toLowerCase()}`); 
 
-    checkTicTacToeResult(); // Verifica o resultado após a jogada do jogador 'X'
+    checkTicTacToeResult(); 
 
-    // Se o jogo ainda estiver ativo e for a vez do Tamagotchi (O), faz a jogada dele
     if (gameActive && currentPlayer === 'O') {
-        setTimeout(tamagotchiMove, 800); // Adiciona um pequeno atraso para simular o "pensamento"
+        setTimeout(tamagotchiMove, 800); 
     }
 }
 
-// NOVO: Função para a jogada do Tamagotchi (IA)
 function tamagotchiMove() {
     if (!gameActive) return;
 
-    let bestMove = findBestMove(board, 'O'); // Tenta encontrar a melhor jogada para 'O'
-    if (bestMove === -1) { // Se não encontrou uma jogada vitoriosa ou defensiva imediata
-        bestMove = findBestMove(board, 'X'); // Tenta encontrar uma jogada para bloquear 'X'
+    let bestMove = findBestMove(board, 'O'); 
+    if (bestMove === -1) { 
+        bestMove = findBestMove(board, 'X'); 
     }
 
     if (bestMove !== -1) {
-        // Se encontrou uma jogada estratégica (ganhar ou bloquear)
         makeTicTacToeMove(bestMove, 'O');
     } else {
-        // Se não houver jogadas estratégicas, faz uma jogada aleatória
         let availableCells = [];
         for (let i = 0; i < board.length; i++) {
             if (board[i] === '') {
@@ -928,11 +1002,9 @@ function tamagotchiMove() {
     }
 }
 
-// NOVO: Função para auxiliar a IA a encontrar a melhor jogada (MiniMax simplificado ou verificação direta)
 function findBestMove(currentBoard, player) {
     let opponent = (player === 'X') ? 'O' : 'X';
 
-    // 1. Tentar ganhar
     for (let i = 0; i < winningConditions.length; i++) {
         const [a, b, c] = winningConditions[i];
         if (currentBoard[a] === player && currentBoard[b] === player && currentBoard[c] === '') return c;
@@ -940,7 +1012,6 @@ function findBestMove(currentBoard, player) {
         if (currentBoard[b] === player && currentBoard[c] === player && currentBoard[a] === '') return a;
     }
 
-    // 2. Tentar bloquear o oponente
     for (let i = 0; i < winningConditions.length; i++) {
         const [a, b, c] = winningConditions[i];
         if (currentBoard[a] === opponent && currentBoard[b] === opponent && currentBoard[c] === '') return c;
@@ -948,25 +1019,21 @@ function findBestMove(currentBoard, player) {
         if (currentBoard[b] === opponent && currentBoard[c] === opponent && currentBoard[a] === '') return a;
     }
 
-    // 3. Priorizar o centro
     if (currentBoard[4] === '') return 4;
 
-    // 4. Priorizar cantos
     const corners = [0, 2, 6, 8];
     for (let i = 0; i < corners.length; i++) {
         if (currentBoard[corners[i]] === '') return corners[i];
     }
 
-    // 5. Priorizar laterais
     const sides = [1, 3, 5, 7];
     for (let i = 0; i < sides.length; i++) {
         if (currentBoard[sides[i]] === '') return sides[i];
     }
 
-    return -1; // Nenhuma jogada estratégica encontrada
+    return -1; 
 }
 
-// NOVO: Função para efetuar uma jogada no tabuleiro
 function makeTicTacToeMove(index, player) {
     board[index] = player;
     const cellElement = ticTacToeBoard.children[index];
@@ -984,11 +1051,10 @@ function checkTicTacToeResult() {
         let c = board[winCondition[2]];
 
         if (a === '' || b === '' || c === '') {
-            continue; // Ignora se alguma célula está vazia
+            continue; 
         }
         if (a === b && b === c) {
             roundWon = true;
-            // Adiciona classe para destacar as células vencedoras
             winningConditions[i].forEach(index => {
                 ticTacToeBoard.children[index].classList.add('winning-cell');
             });
@@ -1000,25 +1066,23 @@ function checkTicTacToeResult() {
         ticTacToeStatus.textContent = `Jogador ${currentPlayer} Venceu!`;
         gameActive = false;
         disableTicTacToeCells();
-        showGameReward(currentPlayer); // Atribui recompensa
+        showGameReward(currentPlayer); 
         ticTacToePlayAgainBtn.style.display = 'block';
         ticTacToeBackToGamesBtn.style.display = 'block';
         return;
     }
 
-    // Verifica se houve empate
-    let roundDraw = !board.includes(''); // Se não houver células vazias, é empate
+    let roundDraw = !board.includes(''); 
     if (roundDraw) {
         ticTacToeStatus.textContent = 'Empate!';
         gameActive = false;
         disableTicTacToeCells();
-        showGameReward('draw'); // Recompensa por empate
+        showGameReward('draw'); 
         ticTacToePlayAgainBtn.style.display = 'block';
         ticTacToeBackToGamesBtn.style.display = 'block';
         return;
     }
 
-    // Se o jogo continua, troca o jogador
     currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
     ticTacToeStatus.textContent = `É a vez do Jogador ${currentPlayer}`;
 }
@@ -1026,7 +1090,7 @@ function checkTicTacToeResult() {
 function disableTicTacToeCells() {
     const cells = ticTacToeBoard.querySelectorAll('.cell');
     cells.forEach(cell => {
-        cell.style.pointerEvents = 'none'; // Desabilita cliques nas células
+        cell.style.pointerEvents = 'none'; 
     });
 }
 
@@ -1034,15 +1098,15 @@ function showGameReward(winner) {
     let reward = 0;
     let message = '';
 
-    if (winner === 'X') { // O jogador é 'X'
+    if (winner === 'X') { 
         reward = 10;
         pet.coins += reward;
         pet.fun = Math.min(100, pet.fun + 20);
         message = `Você ganhou ${reward} moedas!`;
-    } else if (winner === 'O') { // O Tamagotchi é 'O' (pode ser ajustado para um AI depois)
-        reward = 2; // Menor recompensa se o Tamagotchi "vence"
+    } else if (winner === 'O') { 
+        reward = 2; 
         pet.coins += reward;
-        pet.fun = Math.min(100, pet.fun + 5); // Tamagotchi fica um pouco feliz
+        pet.fun = Math.min(100, pet.fun + 5); 
         message = `Tamagotchi venceu, você ganhou ${reward} moedas.`;
     } else if (winner === 'draw') {
         reward = 5;
@@ -1056,9 +1120,7 @@ function showGameReward(winner) {
 
 
 // --- Função de Inicialização do Jogo ---
-// Esta função é chamada uma vez quando o DOM é carregado ou para reiniciar o jogo.
 function initializeGame() {
-    // Inicializa as referências aos elementos HTML
     startScreen = getElement('startScreen');
     tamagotchiScreen = getElement('tamagotchiScreen');
     petNameInput = getElement('petNameInput');
@@ -1074,7 +1136,13 @@ function initializeGame() {
     energyIcon = getElement('energyIcon');
     lifeIcon = getElement('lifeIcon');
 
-    levelDisplay = getElement('nivel'); // Agora exibe Nível/Fase e Idade
+    // NOVOS ELEMENTOS DO OVO
+    eggStatusGroup = getElement('eggStatusGroup');
+    eggWarmthIcon = getElement('eggWarmthIcon');
+    eggWarmthDisplay = getElement('eggWarmthDisplay');
+    warmEggButton = getElement('warmEggButton');
+
+    levelDisplay = getElement('nivel'); 
     coinsDisplay = getElement('moedas');
 
     feedButton = getElement('feedButton');
@@ -1085,7 +1153,6 @@ function initializeGame() {
     gamesButton = getElement('gamesButton');
     vaccinateButton = getElement('vaccinateButton'); 
 
-    // Referências para as novas telas de Loja/Inventário
     shopScreen = getElement('shopScreen');
     shopItemsContainer = getElement('shopItems');
     shopBackButton = getElement('shopBackButton');
@@ -1094,7 +1161,6 @@ function initializeGame() {
     inventoryItemsContainer = getElement('inventoryItems');
     inventoryBackButton = getElement('inventoryBackButton');
 
-    // Referências para as novas telas de Minigames
     gamesScreen = getElement('gamesScreen');
     gamesListContainer = getElement('gamesList'); 
     gamesBackButton = getElement('gamesBackButton');
@@ -1102,7 +1168,6 @@ function initializeGame() {
     numberGuessingBtn = getElement('numberGuessingBtn');
     ticTacToeBtn = getElement('ticTacToeBtn');
 
-    // Referências para elementos de Pedra, Papel, Tesoura
     rpsGameScreen = getElement('rpsGame');
     rpsResult = getElement('rpsResult');
     rpsRockBtn = getElement('rpsRock');
@@ -1111,7 +1176,6 @@ function initializeGame() {
     rpsPlayAgainBtn = getElement('rpsPlayAgainBtn');
     rpsBackToGamesBtn = getElement('rpsBackToGamesBtn');
 
-    // Referências para elementos de Adivinhe o Número
     numberGuessingGameScreen = getElement('numberGuessingGame');
     ngInstructions = getElement('ngInstructions');
     ngGuessInput = getElement('ngGuessInput');
@@ -1120,7 +1184,6 @@ function initializeGame() {
     ngPlayAgainBtn = getElement('ngPlayAgainBtn');
     ngBackToGamesBtn = getElement('ngBackToGamesBtn');
 
-    // Referências para elementos do Jogo da Velha (Tic Tac Toe)
     ticTacToeGameScreen = getElement('ticTacToeGame');
     ticTacToeBoard = getElement('ticTacToeBoard');
     ticTacToeStatus = getElement('ticTacToeStatus');
@@ -1135,15 +1198,20 @@ function initializeGame() {
         level: 0, coins: 0, 
         isSleeping: false, isAlive: true, isEating: false, isEgg: true, isSick: false, 
         isBrincando: false, 
-        hatchProgress: 0, hatchTimer: 60, // 60 segundos para chocar
-        age: 0, // Idade inicial em 0
-        evolutionThresholds: { // Limiares para evolução (idade em "dias")
-            child: 25,   // Bebê de 1 a 24
-            adult: 50,   // Criança de 25 a 49
-            elder: 75,   // Adulto de 50 a 74
-            death: 100   // Morte por idade em 100
+        hatchProgress: 0, 
+        hatchTimerSeconds: 43200, 
+        eggWarmth: 100, // NOVO: Inicializa o aquecimento do ovo
+        age: 0, 
+        ageCounter: 0, 
+        ageIntervalSeconds: 3600, 
+        evolutionThresholds: { 
+            baby: 0.5,    
+            child: 1.5,   
+            adult: 3.5,   
+            elder: 6.5,   
+            death: 7.5    
         },
-        adultType: 'padrao', // Tipo padrão até ser determinado
+        adultType: 'padrao', 
         lastSaveTime: Date.now(),
         inventory: [], 
         mood: 'Normal',
@@ -1151,7 +1219,10 @@ function initializeGame() {
     };
 
     // --- Limpeza de Event Listeners Antigos (para evitar duplicações) ---
-    // Botões principais
+    // Remove o botão de reiniciar se ele existir de uma partida anterior
+    const oldRestartBtn = getElement('restartButton');
+    if (oldRestartBtn) oldRestartBtn.remove();
+
     if (startGameBtn) startGameBtn.removeEventListener('click', handleStartGame);
     if (feedButton) feedButton.removeEventListener('click', handleFeed);
     if (playButton) playButton.removeEventListener('click', handlePlay);
@@ -1160,36 +1231,31 @@ function initializeGame() {
     if (inventoryButton) inventoryButton.removeEventListener('click', handleInventory);
     if (gamesButton) gamesButton.removeEventListener('click', handleGames);
     if (vaccinateButton) vaccinateButton.removeEventListener('click', handleVaccinate);
-    
-    // Botões de navegação das telas principais
+    if (warmEggButton) warmEggButton.removeEventListener('click', handleWarmEgg); // NOVO
+
     if (shopBackButton) shopBackButton.removeEventListener('click', () => showScreen(tamagotchiScreen));
     if (inventoryBackButton) inventoryBackButton.removeEventListener('click', () => showScreen(tamagotchiScreen));
     if (gamesBackButton) gamesBackButton.removeEventListener('click', () => showScreen(tamagotchiScreen));
     
-    // Botões de seleção de jogos
     if (rockPaperScissorsBtn) rockPaperScissorsBtn.removeEventListener('click', initRPSGame);
     if (numberGuessingBtn) numberGuessingBtn.removeEventListener('click', initNumberGuessingGame);
     if (ticTacToeBtn) ticTacToeBtn.removeEventListener('click', initTicTacToeGame);
 
-    // Botões de Pedra, Papel, Tesoura
     if (rpsRockBtn) rpsRockBtn.removeEventListener('click', () => playRPS('pedra'));
     if (rpsPaperBtn) rpsPaperBtn.removeEventListener('click', () => playRPS('papel'));
     if (rpsScissorsBtn) rpsScissorsBtn.removeEventListener('click', () => playRPS('tesoura'));
     if (rpsPlayAgainBtn) rpsPlayAgainBtn.removeEventListener('click', initRPSGame);
     if (rpsBackToGamesBtn) rpsBackToGamesBtn.removeEventListener('click', handleGames);
 
-    // Botões de Adivinhe o Número
     if (ngSubmitGuessBtn) ngSubmitGuessBtn.removeEventListener('click', submitNumberGuess);
     if (ngPlayAgainBtn) ngPlayAgainBtn.removeEventListener('click', initNumberGuessingGame);
     if (ngBackToGamesBtn) ngBackToGamesBtn.removeEventListener('click', handleGames);
 
-    // Botões do Jogo da Velha
     if (ticTacToePlayAgainBtn) ticTacToePlayAgainBtn.removeEventListener('click', initTicTacToeGame);
     if (ticTacToeBackToGamesBtn) ticTacToeBackToGamesBtn.removeEventListener('click', handleGames);
 
 
     // --- Adição de Event Listeners ---
-    // Botões principais
     if (startGameBtn) startGameBtn.addEventListener('click', handleStartGame);
     if (feedButton) feedButton.addEventListener('click', handleFeed);
     if (playButton) playButton.addEventListener('click', handlePlay);
@@ -1198,34 +1264,29 @@ function initializeGame() {
     if (inventoryButton) inventoryButton.addEventListener('click', handleInventory);
     if (gamesButton) gamesButton.addEventListener('click', handleGames);
     if (vaccinateButton) vaccinateButton.addEventListener('click', handleVaccinate);
+    if (warmEggButton) warmEggButton.addEventListener('click', handleWarmEgg); // NOVO
     
-    // Botões de navegação das telas principais
     if (shopBackButton) shopBackButton.addEventListener('click', () => showScreen(tamagotchiScreen));
     if (inventoryBackButton) inventoryBackButton.addEventListener('click', () => showScreen(tamagotchiScreen));
     if (gamesBackButton) gamesBackButton.addEventListener('click', () => showScreen(tamagotchiScreen));
     
-    // Botões de seleção de jogos
     if (rockPaperScissorsBtn) rockPaperScissorsBtn.addEventListener('click', initRPSGame);
     if (numberGuessingBtn) numberGuessingBtn.addEventListener('click', initNumberGuessingGame);
     if (ticTacToeBtn) ticTacToeBtn.addEventListener('click', initTicTacToeGame);
 
-    // Botões de Pedra, Papel, Tesoura
     if (rpsRockBtn) rpsRockBtn.addEventListener('click', () => playRPS('pedra'));
     if (rpsPaperBtn) rpsPaperBtn.addEventListener('click', () => playRPS('papel'));
     if (rpsScissorsBtn) rpsScissorsBtn.addEventListener('click', () => playRPS('tesoura'));
     if (rpsPlayAgainBtn) rpsPlayAgainBtn.addEventListener('click', initRPSGame);
     if (rpsBackToGamesBtn) rpsBackToGamesBtn.addEventListener('click', handleGames);
 
-    // Botões de Adivinhe o Número
     if (ngSubmitGuessBtn) ngSubmitGuessBtn.addEventListener('click', submitNumberGuess);
     if (ngPlayAgainBtn) ngPlayAgainBtn.addEventListener('click', initNumberGuessingGame);
     if (ngBackToGamesBtn) ngBackToGamesBtn.addEventListener('click', handleGames);
 
-    // Botões do Jogo da Velha
     if (ticTacToePlayAgainBtn) ticTacToePlayAgainBtn.addEventListener('click', initTicTacToeGame);
     if (ticTacToeBackToGamesBtn) ticTacToeBackToGamesBtn.addEventListener('click', handleGames);
     
-    // Logs de depuração
     console.log("Protocolo da URL:", window.location.protocol); 
     console.log("Nome do Repositório (configurado no JS):", GITHUB_REPO_NAME); 
 
