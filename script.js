@@ -2,7 +2,7 @@
 let startScreen, tamagotchiScreen, petNameInput, startGameBtn;
 let petNameDisplay, moodDisplay, statusDisplay, petImage;
 let hungerIcon, funIcon, energyIcon, lifeIcon;
-let levelDisplay, coinsDisplay;
+let levelDisplay, coinsDisplay; // Nível agora será a fase de vida
 let feedButton, playButton, sleepButton, shopButton, inventoryButton, gamesButton, vaccinateButton;
 
 // NOVOS ELEMENTOS HTML PARA LOJA/INVENTÁRIO
@@ -85,7 +85,7 @@ function showScreen(screenElement) {
     }
 }
 
-// Função para obter o caminho da imagem com base no estado e nível
+// Função para obter o caminho da imagem com base no estado, nível e tipo de adulto
 function getPetImagePath(currentPet) {
     let baseDir;
     // Verifica se está rodando localmente (file://) ou em um servidor (http/https)
@@ -103,28 +103,53 @@ function getPetImagePath(currentPet) {
         return baseDir + 'ovo.gif'; // Retorna uma imagem padrão se o pet não estiver inicializado
     }
 
-    if (currentPet.isEgg) {
+    if (!currentPet.isAlive) {
+        finalPath = baseDir + 'morto.png'; // Imagem de morte tem prioridade
+    } else if (currentPet.isEgg) {
         if (currentPet.type === 'ovo.rachando') finalPath = baseDir + 'ovo.rachando.gif';
         else if (currentPet.type === 'ovo.quebrado') finalPath = baseDir + 'ovo.quebrado.gif';
         else finalPath = baseDir + 'ovo.gif'; 
-    } else if (!currentPet.isAlive) {
-        finalPath = baseDir + 'morto.png'; 
     } else if (currentPet.isSleeping) {
-        let prefix = currentPet.level === 1 ? 'bebe.' : 'crianca.';
-        finalPath = baseDir + prefix + 'dormindo.gif';
+        let prefix = '';
+        if (currentPet.level === 1) prefix = 'bebe.';
+        else if (currentPet.level === 2) prefix = 'crianca.';
+        else if (currentPet.level === 3) prefix = 'adulto_padrao.'; // Pode haver variações de adulto dormindo
+        else if (currentPet.level === 4) prefix = 'velho.'; // Pode haver variações de velho dormindo
+        finalPath = baseDir + prefix + 'dormindo.gif'; // Você precisaria criar essas imagens
     } else if (currentPet.isEating) {
-        let prefix = currentPet.level === 1 ? 'bebe.' : 'crianca.';
-        finalPath = baseDir + prefix + 'comendo.gif';
+        let prefix = '';
+        if (currentPet.level === 1) prefix = 'bebe.';
+        else if (currentPet.level === 2) prefix = 'crianca.';
+        else if (currentPet.level === 3) prefix = 'adulto_padrao.'; // Pode haver variações de adulto comendo
+        else if (currentPet.level === 4) prefix = 'velho.'; // Pode haver variações de velho comendo
+        finalPath = baseDir + prefix + 'comendo.gif'; // Você precisaria criar essas imagens
     } else if (currentPet.isBrincando) { 
-        let prefix = currentPet.level === 1 ? 'bebe.' : 'crianca.';
-        finalPath = baseDir + prefix + 'brincando.gif';
+        let prefix = '';
+        if (currentPet.level === 1) prefix = 'bebe.';
+        else if (currentPet.level === 2) prefix = 'crianca.';
+        else if (currentPet.level === 3) prefix = 'adulto_padrao.'; // Pode haver variações de adulto brincando
+        else if (currentPet.level === 4) prefix = 'velho.'; // Pode haver variações de velho brincando
+        finalPath = baseDir + prefix + 'brincando.gif'; // Você precisaria criar essas imagens
     } else if (currentPet.isSick) { 
-        let prefix = currentPet.level === 1 ? 'bebe.' : 'crianca.';
-        finalPath = baseDir + prefix + 'doente.gif';
+        let prefix = '';
+        if (currentPet.level === 1) prefix = 'bebe.';
+        else if (currentPet.level === 2) prefix = 'crianca.';
+        else if (currentPet.level === 3) prefix = 'adulto_padrao.'; // Pode haver variações de adulto doente
+        else if (currentPet.level === 4) prefix = 'velho.'; // Pode haver variações de velho doente
+        finalPath = baseDir + prefix + 'doente.gif'; // Você precisaria criar essas imagens
     } else {
-        // Imagem normal do pet (bebe.gif ou crianca.gif)
-        let prefix = currentPet.level === 1 ? 'bebe.' : 'crianca.';
-        finalPath = baseDir + prefix.slice(0, -1) + '.gif'; 
+        // Imagem normal do pet por nível e tipo adulto
+        if (currentPet.level === 1) {
+            finalPath = baseDir + 'bebe.gif'; 
+        } else if (currentPet.level === 2) {
+            finalPath = baseDir + 'crianca.gif'; 
+        } else if (currentPet.level === 3) {
+            finalPath = baseDir + `adulto_${currentPet.adultType}.gif`; // Usa o tipo adulto
+        } else if (currentPet.level === 4) {
+            finalPath = baseDir + 'velho.gif'; 
+        } else {
+            finalPath = baseDir + 'ovo.gif'; // Fallback ou para Nível 0 antes de chocar
+        }
     }
 
     console.log("Caminho gerado da imagem:", finalPath); 
@@ -137,7 +162,15 @@ function updateDisplay() {
     if (moodDisplay) moodDisplay.textContent = `Humor: ${pet.mood}`;
     if (statusDisplay) statusDisplay.textContent = `Status: ${pet.status}`;
     
-    if (levelDisplay) levelDisplay.textContent = pet.level;
+    if (levelDisplay) {
+        let levelText = '';
+        if (pet.isEgg) levelText = 'Ovo';
+        else if (pet.level === 1) levelText = 'Bebê';
+        else if (pet.level === 2) levelText = 'Criança';
+        else if (pet.level === 3) levelText = `Adulto (${pet.adultType.charAt(0).toUpperCase() + pet.adultType.slice(1)})`; // Capitaliza o tipo
+        else if (pet.level === 4) levelText = 'Velho';
+        levelDisplay.textContent = `Nível: ${levelText} (Idade: ${pet.age})`;
+    }
     if (coinsDisplay) coinsDisplay.textContent = pet.coins;
     
     updatePetImage(); 
@@ -145,7 +178,7 @@ function updateDisplay() {
 }
 
 function updateStatusIcons() {
-    if (pet.isEgg) {
+    if (pet.isEgg || !pet.isAlive) { // Esconde ícones para ovo e morto
         if (hungerIcon) hungerIcon.classList.add('hidden');
         if (funIcon) funIcon.classList.add('hidden');
         if (energyIcon) energyIcon.classList.add('hidden');
@@ -192,14 +225,14 @@ function hatchEgg() {
         showGameMessage(`Está quase!`);
     } else { 
         pet.isEgg = false;
-        pet.level = 1; 
+        pet.level = 1; // Transforma em Bebê
+        pet.age = 1; // Começa a idade em 1 após chocar
         showGameMessage(`${pet.name} chocou! Bem-vindo(a) ao mundo!`, 3000);
         
         petImage.src = getPetImagePath(pet); 
         disableActionButtons(false); 
         
-        clearInterval(gameInterval); 
-        startGameLoop(); 
+        // Não reinicia o intervalo aqui, a lógica principal de idade já está no loop
         return;
     }
     disableActionButtons(true); 
@@ -312,6 +345,33 @@ function checkStatus() {
     }
 }
 
+// --- Funções para determinar o tipo adulto ---
+function determineAdultType() {
+    // Para simplificar, vamos usar uma média dos atributos durante a fase de criança
+    // Você pode armazenar histórico de médias ou somas se quiser uma lógica mais complexa
+    
+    // Supondo que você queira basear no estado atual ou em um histórico simples
+    // Para uma implementação mais robusta, você precisaria registrar os estados ao longo da vida da criança
+    
+    let avgCareScore = (pet.hunger + pet.fun + pet.energy + pet.life) / 4;
+
+    if (pet.hungerHistory && pet.funHistory && pet.energyHistory) {
+        // Exemplo: se tivéssemos um histórico de como ele foi cuidado na infância
+        // Vamos usar uma simplificação para esta versão
+    }
+
+    if (avgCareScore > 90) {
+        return 'feliz'; // Mantido em excelente estado
+    } else if (pet.fun > 80 && avgCareScore > 70) {
+        return 'ativo'; // Brincou muito
+    } else if (pet.hunger > 80 && avgCareScore > 70) {
+        return 'forte'; // Bem alimentado
+    } else {
+        return 'padrao'; // Cuidado médio ou negligência leve
+    }
+}
+
+
 function startGameLoop() {
     if (gameInterval) clearInterval(gameInterval); 
     gameInterval = setInterval(() => {
@@ -321,65 +381,95 @@ function startGameLoop() {
             return;
         }
 
+        if (!pet.isAlive) { // Se o pet estiver morto, não faça nada
+            clearInterval(gameInterval);
+            updateDisplay(); // Garante que a imagem de morto esteja visível
+            return;
+        }
+
         if (pet.isEgg) {
-            pet.hatchProgress += (100 / pet.hatchTimer);
+            pet.hatchProgress += (100 / pet.hatchTimer); // Incrementa progresso de eclosão
             if (pet.hatchProgress >= 100) {
                 pet.hatchProgress = 100;
                 hatchEgg(); 
+                // Após chocar, o nível e idade são definidos e o loop continua
             }
             updateDisplay();
             return; 
         }
 
-        if (pet.isAlive && pet.level === 1 && pet.ageProgress < pet.ageToChild) {
-            pet.ageProgress++;
-            if (pet.ageProgress >= pet.ageToChild) {
-                pet.level = 2; 
-                showGameMessage(`${pet.name} evoluiu para Criança!`, 4000);
-                pet.hunger = Math.min(100, pet.hunger + 10);
-                pet.fun = Math.min(100, pet.fun + 10);
-                pet.energy = Math.min(100, pet.energy + 10);
-            }
+        // Incrementa a idade do Tamagotchi (a cada 1 segundo = 1 unidade de idade)
+        pet.age++; 
+
+        // Lógica de evolução
+        if (pet.age >= pet.evolutionThresholds.child && pet.level === 1) {
+            pet.level = 2; // Evolui para Criança
+            showGameMessage(`${pet.name} cresceu e virou uma Criança!`, 4000);
+            // Recompensa a evolução com um pequeno boost
+            pet.hunger = Math.min(100, pet.hunger + 10);
+            pet.fun = Math.min(100, pet.fun + 10);
+            pet.energy = Math.min(100, pet.energy + 10);
+        } else if (pet.age >= pet.evolutionThresholds.adult && pet.level === 2) {
+            pet.level = 3; // Evolui para Adulto
+            pet.adultType = determineAdultType(); // Define o tipo de adulto
+            showGameMessage(`${pet.name} se tornou um Adulto (${pet.adultType.charAt(0).toUpperCase() + pet.adultType.slice(1)})!`, 4000);
+            pet.hunger = Math.min(100, pet.hunger + 10);
+            pet.fun = Math.min(100, pet.fun + 10);
+            pet.energy = Math.min(100, pet.energy + 10);
+        } else if (pet.age >= pet.evolutionThresholds.elder && pet.level === 3) {
+            pet.level = 4; // Evolui para Velho
+            showGameMessage(`${pet.name} está envelhecendo e se tornou Velho.`, 4000);
+            pet.hunger = Math.min(100, pet.hunger + 5);
+            pet.fun = Math.min(100, pet.fun + 5);
+            pet.energy = Math.min(100, pet.energy + 5);
         }
 
-        if (pet.isAlive) {
-            if (pet.life < 30 && !pet.isSick && Math.random() < 0.01) { 
-                pet.isSick = true;
-                showGameMessage(`${pet.name} parece doente! Use uma vacina!`, 4000);
-            }
+        // Lógica para doença (chance um pouco maior para velhos)
+        let sickChance = (pet.level === 4) ? 0.02 : 0.01; // 2% para velhos, 1% para outros
+        if (pet.life < 30 && !pet.isSick && Math.random() < sickChance) { 
+            pet.isSick = true;
+            showGameMessage(`${pet.name} parece doente! Use um remédio!`, 4000);
+        }
 
-            if (!pet.isSleeping && !pet.isEating && !pet.isBrincando) {
-                pet.hunger = Math.max(0, pet.hunger - 1);
-                pet.fun = Math.max(0, pet.fun - 1);
-                pet.energy = Math.max(0, pet.energy - 0.5);
-                
-                if (pet.isSick) {
-                    pet.life = Math.max(0, pet.life - 2); 
-                } else {
-                    pet.life = Math.max(0, pet.life - 0.2);
-                }
-
-                if (pet.hunger === 0 || pet.fun === 0 || pet.energy === 0) {
-                    pet.life = Math.max(0, pet.life - 1);
-                }
-            }
+        // Lógica de decadência de atributos (mais rápida para velhos)
+        let decayRate = (pet.level === 4) ? 1.5 : 1; // Velhos perdem atributos mais rápido
+        if (!pet.isSleeping && !pet.isEating && !pet.isBrincando) {
+            pet.hunger = Math.max(0, pet.hunger - (1 * decayRate));
+            pet.fun = Math.max(0, pet.fun - (1 * decayRate));
+            pet.energy = Math.max(0, pet.energy - (0.5 * decayRate));
             
-            checkStatus(); 
-            updateDisplay(); 
-
-            if (pet.life === 0) {
-                pet.isAlive = false;
-                showGameMessage(`Oh não! ${pet.name} não aguentou...`, 5000);
-                updatePetImage(); 
-                clearInterval(gameInterval); 
+            if (pet.isSick) {
+                pet.life = Math.max(0, pet.life - (2 * decayRate)); 
+            } else {
+                pet.life = Math.max(0, pet.life - (0.2 * decayRate));
             }
+
+            if (pet.hunger === 0 || pet.fun === 0 || pet.energy === 0) {
+                pet.life = Math.max(0, pet.life - (1 * decayRate));
+            }
+        }
+        
+        checkStatus(); 
+        updateDisplay(); 
+
+        // Condições de Morte
+        if (pet.life <= 0) {
+            pet.isAlive = false;
+            showGameMessage(`Oh não! ${pet.name} não aguentou...`, 5000);
+            updatePetImage(); 
+            clearInterval(gameInterval); 
+        } else if (pet.age >= pet.evolutionThresholds.death) { // Morte por envelhecimento
+            pet.isAlive = false;
+            showGameMessage(`Lamentável! ${pet.name} viveu uma vida plena e faleceu de velhice.`, 5000);
+            updatePetImage();
+            clearInterval(gameInterval);
         } else if (pet.isSleeping) {
-            pet.energy = Math.min(100, pet.energy + 2);
-            pet.life = Math.min(100, pet.life + 0.5);
+            pet.energy = Math.min(100, pet.energy + (2 * decayRate)); // Recarrega energia mais rápido
+            pet.life = Math.min(100, pet.life + (0.5 * decayRate)); // Recarrega vida mais rápido
             checkStatus();
             updateDisplay();
         }
-    }, 1000); 
+    }, 1000); // O loop roda a cada 1 segundo (1 "dia" de idade)
 }
 
 // --- Handlers de Eventos dos Botões ---
@@ -395,23 +485,30 @@ function handleStartGame() {
         hunger: 100, fun: 100, energy: 100, life: 100,
         level: 0, coins: 0, 
         isSleeping: false, isAlive: true, isEating: false, isEgg: true, isSick: false, 
-        hatchProgress: 0, hatchTimer: 60, 
-        ageProgress: 0, ageToChild: 120, 
+        hatchProgress: 0, hatchTimer: 60, // 60 segundos para chocar
+        age: 0, // Idade inicial em 0
+        evolutionThresholds: { // Limiares para evolução (idade em "dias")
+            child: 25,   // Bebê de 1 a 24
+            adult: 50,   // Criança de 25 a 49
+            elder: 75,   // Adulto de 50 a 74
+            death: 100   // Velho de 75 a 99, morte em 100
+        },
+        adultType: 'padrao', // Tipo padrão até ser determinado
         lastSaveTime: Date.now(), inventory: [], 
         mood: 'Esperando...', status: 'Em desenvolvimento', isBrincando: false
     };
 
     updateDisplay();
     showScreen(tamagotchiScreen);
-    showGameMessage(`Um ovo foi colocado! Cuide bem dele.`, 3000);
-    startGameLoop();
+    showGameMessage(`Um ovo foi colocado! Cuide bem dele para que ele choque.`, 3000);
+    startGameLoop(); // Inicia o loop do jogo
 }
 
 function handleFeed() {
     if (pet.isEgg) { showGameMessage('O ovo não precisa ser alimentado!', 1500); return; }
     if (!pet.isAlive) { showGameMessage('Não posso alimentar um Tamagotchi morto...'); return; }
     if (pet.isSleeping) { showGameMessage(`${pet.name} está dormindo! Não o incomode.`); return; }
-    if (pet.isSick) { showGameMessage(`${pet.name} está doente e não quer comer!`); return; } 
+    if (pet.isSick) { showGameMessage(`${pet.name} está doente e não quer comer! Use um remédio.`); return; } 
     if (pet.hunger > 90) { showGameMessage(`${pet.name} não está com tanta fome.`); return; }
 
     pet.isEating = true;
@@ -458,7 +555,7 @@ function handleSleep() {
     if (pet.isEgg) { showGameMessage('Ovo não precisa dormir!', 1500); return; }
     if (!pet.isAlive) { showGameMessage('Não posso fazer um Tamagotchi morto dormir...'); return; }
     if (pet.isSleeping) { showGameMessage(`${pet.name} já está dormindo.`); return; }
-    if (pet.isSick) { showGameMessage(`${pet.name} está doente e precisa de vacina, não de sono!`); return; } 
+    if (pet.isSick) { showGameMessage(`${pet.name} está doente e precisa de remédio, não de sono!`); return; } 
 
     pet.isSleeping = true;
     updatePetImage();
@@ -471,16 +568,16 @@ function handleVaccinate() {
     if (!pet.isAlive) { showGameMessage('Não posso vacinar um Tamagotchi morto...'); return; }
     if (!pet.isSick) { showGameMessage(`${pet.name} não está doente no momento.`); return; }
     if (pet.isSleeping) { showGameMessage(`${pet.name} está dormindo! Não o incomode.`); return; }
-    if (pet.coins < 5) { showGameMessage('Você não tem moedas suficientes para a vacina! (Custa 5 moedas)', 2500); return; }
+    if (pet.coins < 5) { showGameMessage('Você não tem moedas suficientes para o remédio! (Custa 5 moedas)', 2500); return; }
 
-    showGameMessage(`Vacinando ${pet.name}...`);
+    showGameMessage(`Dando remédio para ${pet.name}...`); // Mudei para remédio
     disableActionButtons(true); 
 
     setTimeout(() => {
         pet.isSick = false; 
         pet.life = Math.min(100, pet.life + 15); 
         pet.coins = Math.max(0, pet.coins - 5); 
-        showGameMessage(`${pet.name} foi vacinado e se sente melhor! (-5 Moedas)`);
+        showGameMessage(`${pet.name} tomou o remédio e se sente melhor! (-5 Moedas)`);
         updatePetImage();
         updateDisplay();
     }, 1500);
@@ -977,7 +1074,7 @@ function initializeGame() {
     energyIcon = getElement('energyIcon');
     lifeIcon = getElement('lifeIcon');
 
-    levelDisplay = getElement('nivel');
+    levelDisplay = getElement('nivel'); // Agora exibe Nível/Fase e Idade
     coinsDisplay = getElement('moedas');
 
     feedButton = getElement('feedButton');
@@ -1038,8 +1135,15 @@ function initializeGame() {
         level: 0, coins: 0, 
         isSleeping: false, isAlive: true, isEating: false, isEgg: true, isSick: false, 
         isBrincando: false, 
-        hatchProgress: 0, hatchTimer: 60, 
-        ageProgress: 0, ageToChild: 120, 
+        hatchProgress: 0, hatchTimer: 60, // 60 segundos para chocar
+        age: 0, // Idade inicial em 0
+        evolutionThresholds: { // Limiares para evolução (idade em "dias")
+            child: 25,   // Bebê de 1 a 24
+            adult: 50,   // Criança de 25 a 49
+            elder: 75,   // Adulto de 50 a 74
+            death: 100   // Morte por idade em 100
+        },
+        adultType: 'padrao', // Tipo padrão até ser determinado
         lastSaveTime: Date.now(),
         inventory: [], 
         mood: 'Normal',
