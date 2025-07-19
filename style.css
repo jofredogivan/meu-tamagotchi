@@ -1,204 +1,129 @@
+@charset "UTF-8";
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+:root {
+    --primary-bg: #87CEEB; /* Azul céu */
+    --secondary-bg: #ADD8E6; /* Azul claro */
+    --button-color: #FFD700; /* Dourado */
+    --button-hover-color: #FFC107; /* Laranja dourado */
+    --text-color: #333;
+    --border-color: #6A5ACD; /* Azul ardósia médio */
+    --status-bar-bg: #B0C4DE; /* Azul aço claro */
+    --green-status: #4CAF50;
+    --red-status: #F44336;
+    --orange-status: #FF9800;
+}
+
 body {
+    font-family: 'Press Start 2P', cursive;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    background-color: var(--primary-bg);
     margin: 0;
-    background-color: #333;
-    font-family: 'Press Start 2P', cursive;
-    overflow: hidden; /* Evita barras de rolagem desnecessárias */
+    overflow: hidden; /* Evita scroll desnecessário */
+    color: var(--text-color);
+    font-size: 0.8em;
+    text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.7);
 }
 
-#game-boy-console {
-    width: 320px; /* Largura do console Game Boy */
-    height: 500px; /* Altura do console Game Boy */
-    background-color: #003366; /* AZUL ESCURO PARA O CONSOLE */
+.game-container {
+    background-color: var(--secondary-bg);
+    border: 8px solid var(--border-color);
     border-radius: 20px;
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    width: 90%;
+    max-width: 450px;
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     padding: 20px;
     box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     position: relative;
+    overflow: hidden; /* Para garantir que o pet image gif não transborde */
 }
 
-#game-screen-display {
-    width: 280px; /* Aumenta a largura da tela para dar mais espaço */
-    height: 250px; /* Aumenta a altura da tela */
-    background-color: #add8e6; /* Cor da tela do Game Boy */
-    border: 8px solid #555;
-    border-radius: 5px;
-    margin-bottom: 20px;
-    overflow: hidden; /* Garante que o conteúdo não vaze */
-    position: relative; /* Essencial para o posicionamento de elementos filhos */
-}
-
-.game-screen {
+.screen {
     width: 100%;
-    height: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    text-align: center;
-    background-color: #fff; /* Cor de fundo branca para a tela do Tamagotchi */
-    color: #222;
+    justify-content: center;
     padding: 10px;
     box-sizing: border-box;
-    position: absolute;
-    top: 0;
-    left: 0;
-    font-size: 14px; /* Tamanho da fonte para o conteúdo do jogo */
+    text-align: center;
 }
 
-/* Esconde todas as telas por padrão e mostra apenas a ativa */
-#startScreen, #tamagotchiScreen, #shopScreen, #inventoryScreen, #gamesScreen {
-    display: none;
+.hidden {
+    display: none !important;
 }
 
-/* Estilo para a tela de início */
-#startScreen {
-    background-color: #9bbc0f; /* Verde Game Boy (mantido para a tela de start) */
-    display: flex; /* Exibe a tela de início por padrão, será manipulado pelo JS */
-    color: #222;
-    font-size: 12px;
+/* --- Start Screen --- */
+#startScreen h1 {
+    font-size: 1.5em;
+    margin-bottom: 30px;
+    color: var(--border-color);
 }
 
 #petNameInput {
-    padding: 8px;
-    border: 2px solid #555;
-    border-radius: 4px;
-    background-color: #e0e0e0;
+    padding: 12px 15px;
+    margin-bottom: 25px;
+    border: 3px solid var(--border-color);
+    border-radius: 8px;
     font-family: 'Press Start 2P', cursive;
-    font-size: 12px;
-    color: #333;
+    font-size: 0.9em;
     text-align: center;
-    max-width: 80%; /* Para não vazar em telas menores */
+    background-color: #FFF;
+    color: var(--text-color);
+    width: 80%;
+    max-width: 250px;
+    box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-/* Estilo para todos os botões (base) */
-button {
-    background-color: #4CAF50; /* Verde padrão */
-    color: white;
-    border: none;
+/* --- Tamagotchi Screen --- */
+#tamagotchiScreen {
+    justify-content: flex-start; /* Alinha o conteúdo ao topo */
+}
+
+.status-bar {
+    width: 100%;
+    background-color: var(--status-bar-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
     padding: 10px 15px;
-    border-radius: 8px; /* Bordas mais arredondadas */
-    cursor: pointer;
-    font-family: 'Press Start 2P', cursive;
-    font-size: 10px;
-    margin: 5px; /* Espaçamento entre botões */
-    box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.6); /* Sombra mais pronunciada para efeito "card" */
-    transition: background-color 0.2s, transform 0.1s;
-    min-width: 100px; /* Garante um tamanho mínimo para todos os botões */
-}
-
-button:hover {
-    background-color: #45a049; /* Escurece no hover */
-    transform: translateY(-2px); /* Efeito de "levantar" */
-}
-
-button:active {
-    background-color: #3e8e41; /* Escurece mais no click */
-    box-shadow: inset 1px 1px 5px rgba(0, 0, 0, 0.7); /* Sombra interna para "pressionado" */
-    transform: translateY(0);
-}
-
-button:disabled {
-    background-color: #777;
-    cursor: not-allowed;
-    opacity: 0.7;
-    box-shadow: none;
-    transform: none;
-}
-
-/* Cores específicas para cada botão (ajuste conforme sua preferência) */
-#feedButton { background-color: #FFC107; /* Amarelo */ }
-#feedButton:hover { background-color: #ffb300; }
-
-#playButton { background-color: #2196F3; /* Azul */ }
-#playButton:hover { background-color: #1976d2; }
-
-#sleepButton { background-color: #9C27B0; /* Roxo */ }
-#sleepButton:hover { background-color: #7b1fa2; }
-
-#shopButton { background-color: #FF5722; /* Laranja */ }
-#shopButton:hover { background-color: #e64a19; }
-
-#inventoryButton { background-color: #00BCD4; /* Ciano */ }
-#inventoryButton:hover { background-color: #0097a7; }
-
-#gamesButton { background-color: #CDDC39; /* Verde Limão */ }
-#gamesButton:hover { background-color: #afb42b; }
-
-#vaccinateButton { background-color: #E91E63; /* Rosa forte */ } 
-#vaccinateButton:hover { background-color: #c2185b; }
-
-#petImage {
-    width: 200px; /* Aumenta AINDA MAIS a largura da imagem do pet */
-    height: 200px; /* Aumenta AINDA MAIS a altura da imagem do pet */
-    image-rendering: pixelated; /* Mantém a pixelização para estilo retro */
-    margin-bottom: 10px;
-    display: block; 
-    margin-left: auto; 
-    margin-right: auto; 
-}
-
-#controls {
     display: flex;
-    flex-wrap: wrap; 
+    justify-content: space-around;
+    flex-wrap: wrap; /* Permite quebrar linha em telas pequenas */
+    gap: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.status-bar span {
+    font-size: 0.75em;
+    color: var(--text-color);
+    white-space: nowrap; /* Evita quebra de linha individualmente */
+}
+
+.status-icons {
+    display: flex;
     justify-content: center;
-    margin-top: 20px;
-}
-
-#actions {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px; 
-}
-
-/* CSS para gameMessage */
-#gameMessage {
-    position: absolute;
-    bottom: 10px; 
-    left: 50%;
-    transform: translateX(-50%); 
-    background-color: rgba(0, 0, 0, 0.7); 
-    color: white;
-    padding: 5px 10px; 
-    border-radius: 5px;
-    font-size: 10px; 
-    z-index: 10;
-    white-space: nowrap; 
-    opacity: 0;
-    transition: opacity 0.3s ease-in-out;
-    pointer-events: none; 
-    max-width: 90%; 
-    box-sizing: border-box; 
-}
-
-#gameMessage.visible {
-    opacity: 1;
-}
-
-#status-icons {
-    margin-top: 10px;
-    display: flex;
-    gap: 10px;
+    gap: 15px;
+    margin-bottom: 20px;
+    min-height: 35px; /* Para evitar layout shift */
 }
 
 .status-icon {
-    font-size: 20px; 
-    display: inline-block; 
-}
-
-.status-icon.hidden {
-    display: none;
+    width: 35px;
+    height: 35px;
+    filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.4));
+    transition: transform 0.2s ease-in-out;
 }
 
 .status-icon.blinking {
-    animation: blink-animation 1s infinite alternate;
+    animation: blink-animation 0.8s infinite alternate;
 }
 
 @keyframes blink-animation {
@@ -206,255 +131,507 @@ button:disabled {
     to { opacity: 0.3; }
 }
 
-/* Estilos para popups de jogo (Game Over, Loja, etc.) */
-.game-popup {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: #9bbc0f; 
-    border: 4px solid #222;
-    border-radius: 8px;
-    padding: 20px;
-    text-align: center;
-    color: #222;
-    z-index: 20; 
-    display: none; 
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+/* Para o grupo de status do ovo */
+.egg-status {
+    display: flex;
+    align-items: center;
+    gap: 5px; /* Espaço entre o ícone e o texto */
+    margin-bottom: 15px; /* Espaço abaixo do status */
+    justify-content: center; /* Centraliza no eixo horizontal */
+    font-weight: bold;
+    color: var(--green-status); 
+    font-size: 0.8em;
 }
 
-.game-popup h2 {
-    font-size: 16px;
-    margin-top: 0;
+/* Para o ícone do ovo */
+#eggWarmthIcon {
+    width: 35px; 
+    height: 35px;
+    filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.3)); 
 }
 
-.game-popup button {
+/* Estilo para quando a temperatura estiver baixa (ex: abaixo de 40) */
+#eggWarmthIcon.cold {
+    filter: grayscale(100%) brightness(80%) sepia(100%) hue-rotate(180deg); /* Faz parecer azul/frio */
+    animation: pulse 1s infinite alternate; /* Adiciona animação de pulso */
+    color: var(--orange-status); /* Mudar a cor do texto também */
+}
+
+/* Estilo para quando a temperatura estiver crítica (ex: abaixo de 20) */
+#eggWarmthIcon.critical {
+    filter: grayscale(100%) brightness(50%) sepia(100%) hue-rotate(240deg); /* Faz parecer roxo/muito frio */
+    animation: blink 0.5s infinite alternate; /* Pisca mais rápido */
+    color: var(--red-status); /* Mudar a cor do texto também */
+}
+
+/* Animação de pulso */
+@keyframes pulse {
+    from { transform: scale(1); opacity: 1; }
+    to { transform: scale(1.05); opacity: 0.8; }
+}
+
+/* Animação de piscar */
+@keyframes blink {
+    from { opacity: 1; }
+    to { opacity: 0.3; }
+}
+
+.pet-display {
+    width: 100%;
+    height: 200px; /* Altura fixa para o display do pet */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 25px;
+    background-color: #C0C0C0; /* Fundo cinza claro para a área do pet */
+    border: 3px solid #808080; /* Borda escura */
+    border-radius: 15px;
+    overflow: hidden; /* Garante que GIFs grandes não saiam */
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+#petImage {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain; /* Garante que a imagem se ajuste sem cortar ou distorcer */
+    image-rendering: pixelated; /* Para manter o visual pixelado se for o caso */
+}
+
+.game-info {
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 25px;
+    font-size: 0.75em;
+    color: var(--text-color);
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    margin-top: auto; /* Empurra os botões para baixo */
+}
+
+.action-button, .nav-button, .back-button, .game-selection-button, .play-again-button {
+    background-color: var(--button-color);
+    color: var(--text-color);
+    border: 3px solid var(--border-color);
+    border-radius: 10px;
+    padding: 12px 18px;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.7em;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.3);
+    flex-grow: 1; /* Permite que os botões cresçam */
+    max-width: 48%; /* Duas colunas */
+}
+
+.action-button:hover:not(:disabled), .nav-button:hover:not(:disabled), .back-button:hover:not(:disabled), 
+.game-selection-button:hover:not(:disabled), .play-again-button:hover:not(:disabled) {
+    background-color: var(--button-hover-color);
+    transform: translateY(-2px);
+    box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.3);
+}
+
+.action-button:active:not(:disabled), .nav-button:active:not(:disabled), .back-button:active:not(:disabled), 
+.game-selection-button:active:not(:disabled), .play-again-button:active:not(:disabled) {
+    transform: translateY(1px);
+    box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3);
+}
+
+.action-button:disabled, .nav-button:disabled, .back-button:disabled, 
+.game-selection-button:disabled, .play-again-button:disabled {
+    background-color: #ccc;
+    border-color: #999;
+    color: #666;
+    cursor: not-allowed;
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
+}
+
+.nav-bar {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
     margin-top: 15px;
+    gap: 10px;
 }
 
-/* --- ESTILOS para as Telas de Loja, Inventário e Jogos --- */
+.nav-button {
+    flex-grow: 1;
+    font-size: 0.65em;
+    padding: 10px 12px;
+}
+
+/* Specific button colors */
+#warmEggButton {
+    background-color: #FFC107; /* Cor de aquecimento/sol */
+    color: #333;
+    border: 1px solid #FFA000;
+}
+#warmEggButton:hover:not(:disabled) {
+    background-color: #FFB300;
+}
+
+#feedButton { background-color: #9CCC65; border-color: #689F38; } /* Verde Comida */
+#feedButton:hover:not(:disabled) { background-color: #8BC34A; }
+#playButton { background-color: #FFB74D; border-color: #FB8C00; } /* Laranja Brincar */
+#playButton:hover:not(:disabled) { background-color: #FFA726; }
+#sleepButton { background-color: #64B5F6; border-color: #2196F3; } /* Azul Dormir */
+#sleepButton:hover:not(:disabled) { background-color: #42A5F5; }
+#vaccinateButton { background-color: #BA68C8; border-color: #8E24AA; } /* Roxo Vacinar */
+#vaccinateButton:hover:not(:disabled) { background-color: #AB47BC; }
+#restartButton { background-color: #EF5350; border-color: #D32F2F; } /* Vermelho Reiniciar */
+#restartButton:hover:not(:disabled) { background-color: #E53935; }
+
+
+.game-message {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 0.7em;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    z-index: 100; /* Garante que fique por cima de outros elementos */
+    white-space: nowrap; /* Evita que a mensagem quebre a linha */
+}
+
+.game-message.visible {
+    opacity: 1;
+}
+
+/* --- Shop and Inventory Screens --- */
 #shopScreen, #inventoryScreen, #gamesScreen {
-    background-color: #fff; /* Fundo branco para estas telas */
-    padding: 20px;
-    box-sizing: border-box;
-    overflow-y: auto; /* Permite rolagem se houver muitos itens */
-    justify-content: flex-start; /* Alinha o conteúdo ao topo */
+    justify-content: flex-start;
 }
 
 #shopScreen h2, #inventoryScreen h2, #gamesScreen h2 {
-    margin-top: 0;
-    margin-bottom: 15px;
-    font-size: 16px;
+    font-size: 1.3em;
+    margin-bottom: 25px;
+    color: var(--border-color);
 }
 
-#shopItems, #inventoryItems {
+.items-grid, .games-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* Responsivo */
+    gap: 15px;
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 10px; /* Espaçamento entre os itens */
+    padding: 10px;
+    box-sizing: border-box;
+    max-height: 400px; /* Limita a altura para scroll */
+    overflow-y: auto; /* Adiciona scroll se houver muitos itens */
     margin-bottom: 20px;
 }
 
 .item-card {
+    background-color: #F0F8FF; /* Azul alice */
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    padding: 10px;
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
-    padding: 8px 12px;
-    border: 2px solid #ccc;
-    border-radius: 5px;
-    background-color: #f9f9f9;
-    font-size: 12px;
+    text-align: center;
+    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.2);
 }
 
-.item-card button {
-    margin: 0; /* Remove margem extra dos botões dentro dos cards */
-    padding: 5px 10px;
-    font-size: 9px;
-    min-width: unset; /* Remove min-width para botões menores dentro dos cards */
-    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4); /* Sombra mais suave para botões de item */
-}
-
-.item-card button:hover {
-    transform: translateY(-1px); /* Efeito de "levantar" suave */
-}
-
-.item-name {
+.item-card .item-name {
+    font-size: 0.7em;
     font-weight: bold;
+    margin-bottom: 5px;
 }
 
-.item-price, .item-quantity {
+.item-card .item-price, .item-card .item-quantity {
+    font-size: 0.6em;
+    margin-bottom: 10px;
     color: #555;
 }
 
-#shopBackButton, #inventoryBackButton, #gamesBackButton {
-    background-color: #FF5722; /* Laranja para botões de voltar */
-    margin-top: auto; /* Empurra para o final da tela */
-}
-#shopBackButton:hover, #inventoryBackButton:hover, #gamesBackButton:hover {
-    background-color: #e64a19;
+.item-card button {
+    background-color: #A1887F; /* Marrom claro */
+    color: white;
+    border: 2px solid #8D6E63;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.6em;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
 }
 
-#gamesList {
+.item-card button:hover:not(:disabled) {
+    background-color: #795548;
+}
+
+.back-button {
+    margin-top: auto; /* Empurra para o final */
+    width: auto; /* Permite que o botão se ajuste ao texto */
+    padding: 10px 20px;
+    font-size: 0.7em;
+    background-color: #607D8B; /* Azul acinzentado */
+    border-color: #455A64;
+    color: white;
+}
+.back-button:hover:not(:disabled) {
+    background-color: #546E7A;
+}
+
+
+/* --- Minigames Specific Styles --- */
+.games-list {
+    grid-template-columns: 1fr; /* Um botão por linha para a lista de jogos */
+    gap: 15px;
+}
+
+.game-selection-button {
+    width: 100%;
+    padding: 15px;
+    font-size: 0.8em;
+    background-color: #FF5722; /* Laranja */
+    border-color: #E64A19;
+    color: white;
+}
+.game-selection-button:hover:not(:disabled) {
+    background-color: #F4511E;
+}
+
+.sub-game-screen {
+    width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    width: 100%; /* Ocupa a largura total para alinhar botões */
-}
-
-#gamesList button {
-    width: 100%; /* Faz os botões de jogo ocuparem a largura total */
-}
-
-#rockPaperScissorsBtn {
-    background-color: #4CAF50; /* Verde */
-}
-#rockPaperScissorsBtn:hover {
-    background-color: #45a049;
-}
-
-#numberGuessingBtn {
-    background-color: #FFEB3B; /* Amarelo para Adivinhe o Número */
-    color: #333; /* Cor do texto para contraste */
-}
-#numberGuessingBtn:hover {
-    background-color: #fdd835;
-}
-
-#ticTacToeBtn {
-    background-color: #3F51B5; /* Azul índigo para Jogo da Velha */
-}
-#ticTacToeBtn:hover {
-    background-color: #303F9F;
-}
-
-/* --- Estilos para as Telas de Minigames (Sub-Telas) --- */
-.sub-game-screen {
-    position: absolute; /* Permite posicionar sobre a tela principal */
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #f0f0f0; /* Fundo levemente diferente para sub-telas */
-    color: #222;
-    display: flex; /* Para centralizar conteúdo */
-    flex-direction: column;
-    justify-content: center;
     align-items: center;
-    padding: 10px;
-    box-sizing: border-box;
-    font-size: 12px;
+    gap: 15px;
+    margin-top: 20px;
+    padding: 15px;
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: 10px;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
 }
 
 .sub-game-screen h3 {
-    margin-top: 0;
+    font-size: 1.1em;
+    color: var(--border-color);
     margin-bottom: 10px;
-    font-size: 14px;
 }
 
-.sub-game-screen button {
-    margin-top: 8px; /* Espaçamento entre botões */
-    font-size: 9px;
-    padding: 8px 12px;
-    min-width: unset; /* Permite que os botões se ajustem ao conteúdo */
-    max-width: 90%; /* Limita a largura dos botões */
+.sub-game-screen p {
+    font-size: 0.75em;
+    margin-bottom: 10px;
 }
 
-/* Estilos específicos para Pedra, Papel, Tesoura */
-.rps-choices {
+.play-again-button {
+    background-color: #4CAF50; /* Verde */
+    border-color: #388E3C;
+    color: white;
+    margin-top: 15px;
+}
+.play-again-button:hover:not(:disabled) {
+    background-color: #43A047;
+}
+
+/* RPS Game */
+.rps-buttons {
     display: flex;
-    gap: 5px; /* Reduz o espaçamento entre os botões */
-    margin-top: 10px;
-    flex-wrap: wrap; /* Permite quebrar linha se não couber tudo em uma */
-    justify-content: center; /* Centraliza os botões */
+    gap: 10px;
+    justify-content: center;
+}
+.rps-buttons button {
+    background-color: #00BCD4; /* Ciano */
+    border-color: #0097A7;
+    color: white;
+    padding: 10px 15px;
+    font-size: 0.7em;
+}
+.rps-buttons button:hover:not(:disabled) {
+    background-color: #00ACC1;
 }
 
-.rps-choices button {
-    font-size: 12px; /* Reduz o tamanho da fonte para caber o texto */
-    padding: 8px 10px; /* Ajusta o padding */
-    background-color: #8BC34A; /* Verde mais suave */
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
-    min-width: 70px; /* Define um mínimo para que os botões não fiquem minúsculos */
+/* Number Guessing Game */
+#ngGuessInput {
+    padding: 10px;
+    border: 2px solid var(--border-color);
+    border-radius: 5px;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.8em;
+    width: 150px;
+    text-align: center;
 }
-.rps-choices button:hover {
+#ngSubmitGuessBtn {
+    background-color: #8BC34A; /* Verde */
+    border-color: #689F38;
+    color: white;
+    padding: 10px 15px;
+    font-size: 0.7em;
+}
+#ngSubmitGuessBtn:hover:not(:disabled) {
     background-color: #7CB342;
 }
 
-/* Estilos para Adivinhe o Número */
-#ngGuessInput {
-    width: 60%;
-    padding: 8px;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    border: 2px solid #555;
-    border-radius: 4px;
-    background-color: #e0e0e0;
-    font-family: 'Press Start 2P', cursive;
-    font-size: 12px;
-    text-align: center;
-    color: #333;
-}
-#ngResult {
-    font-weight: bold;
-    margin-top: 5px;
-    margin-bottom: 10px;
-}
 
-/* Estilos para Jogo da Velha */
-#ticTacToeBoard {
+/* Tic Tac Toe Game */
+.tic-tac-toe-board {
     display: grid;
-    grid-template-columns: repeat(3, minmax(50px, 70px)); /* Células responsivas */
-    grid-template-rows: repeat(3, minmax(50px, 70px)); /* Células responsivas */
+    grid-template-columns: repeat(3, 80px); /* Tamanho das células */
+    grid-template-rows: repeat(3, 80px);
     gap: 5px;
-    background-color: #333; /* Cor das linhas */
-    border: 2px solid #333;
-    margin-top: 10px;
-    max-width: 90%; /* Garante que o tabuleiro não ultrapasse o container */
-    margin-left: auto; /* Centraliza o tabuleiro horizontalmente */
-    margin-right: auto; /* Centraliza o tabuleiro horizontalmente */
+    background-color: #333;
+    border: 5px solid #333;
+    border-radius: 5px;
+    margin-bottom: 20px;
 }
 
 .cell {
-    /* Ajusta o tamanho da fonte e alinhamento */
-    font-size: 36px; /* Reduz o tamanho da fonte para o X e O */
+    width: 80px;
+    height: 80px;
+    background-color: #eee;
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #eee;
+    font-size: 3em;
     font-weight: bold;
     cursor: pointer;
-    color: #222;
-    transition: background-color 0.1s;
+    transition: background-color 0.2s ease;
+    border-radius: 3px;
+    color: #333; /* Cor padrão para o texto */
 }
 
 .cell:hover {
     background-color: #ddd;
 }
 
-.cell.player-x { color: #E91E63; } /* Rosa para X */
-.cell.player-o { color: #2196F3; } /* Azul para O */
-.cell.winning-cell { background-color: #8BC34A; color: white !important; } /* Verde para células vencedoras */
-
-#ticTacToeStatus {
-    margin-top: 10px;
-    font-weight: bold;
-    text-align: center; /* Centraliza o status */
-    max-width: 90%; /* Evita que o texto vaze */
-    margin-left: auto; /* Centraliza o texto horizontalmente */
-    margin-right: auto; /* Centraliza o texto horizontalmente */
+.cell.player-x {
+    color: #F44336; /* Vermelho para X */
 }
 
-/* Botões de voltar específicos para os jogos */
-#rpsBackToGamesBtn, #ngBackToGamesBtn, #ticTacToeBackToGamesBtn {
-    background-color: #607D8B; /* Cinza azulado */
-}
-#rpsBackToGamesBtn:hover, #ngBackToGamesBtn:hover, #ticTacToeBackToGamesBtn:hover {
-    background-color: #455A64;
+.cell.player-o {
+    color: #2196F3; /* Azul para O */
 }
 
-/* Botões de jogar novamente */
-#rpsPlayAgainBtn, #ngPlayAgainBtn, #ticTacToePlayAgainBtn {
-    background-color: #FF9800; /* Laranja para jogar novamente */
+.cell.winning-cell {
+    background-color: #FFEB3B; /* Amarelo claro para células vencedoras */
+    animation: winning-pulse 0.5s infinite alternate;
 }
-#rpsPlayAgainBtn:hover, #ngPlayAgainBtn:hover, #ticTacToePlayAgainBtn:hover {
-    background-color: #FB8C00;
+
+@keyframes winning-pulse {
+    from { transform: scale(1); opacity: 1; }
+    to { transform: scale(1.1); opacity: 0.9; }
+}
+
+/* Responsividade */
+@media (max-width: 400px) {
+    .game-container {
+        width: 95%;
+        padding: 15px;
+    }
+
+    #startScreen h1 {
+        font-size: 1.2em;
+    }
+
+    #petNameInput {
+        font-size: 0.8em;
+        padding: 10px;
+    }
+
+    .status-bar span {
+        font-size: 0.65em;
+    }
+
+    .status-icon, #eggWarmthIcon {
+        width: 28px;
+        height: 28px;
+    }
+
+    .egg-status, .game-info {
+        font-size: 0.7em;
+    }
+
+    .action-button, .nav-button, .back-button, .game-selection-button, .play-again-button {
+        padding: 10px 12px;
+        font-size: 0.6em;
+    }
+
+    .nav-bar {
+        flex-direction: column; /* Botões de navegação em coluna */
+        gap: 8px;
+    }
+    .nav-button {
+        max-width: 100%; /* Ocupa a largura total na coluna */
+    }
+
+    .items-grid {
+        grid-template-columns: 1fr; /* Um item por linha em telas muito pequenas */
+    }
+
+    .item-card button {
+        font-size: 0.55em;
+    }
+
+    .sub-game-screen h3 {
+        font-size: 1em;
+    }
+
+    .sub-game-screen p {
+        font-size: 0.65em;
+    }
+
+    .rps-buttons button {
+        font-size: 0.6em;
+        padding: 8px 10px;
+    }
+
+    #ngGuessInput {
+        width: 100px;
+        font-size: 0.7em;
+    }
+    #ngSubmitGuessBtn {
+        font-size: 0.6em;
+    }
+
+    .tic-tac-toe-board {
+        grid-template-columns: repeat(3, 70px);
+        grid-template-rows: repeat(3, 70px);
+    }
+    .cell {
+        width: 70px;
+        height: 70px;
+        font-size: 2.5em;
+    }
+}
+
+/* Landscape mode on small devices */
+@media (max-height: 500px) and (max-width: 800px) {
+    .game-container {
+        min-height: auto;
+        padding: 10px;
+    }
+    .pet-display {
+        height: 150px;
+    }
+    .actions {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .action-button, .nav-button {
+        flex: 1 1 30%; /* Mais flexibilidade */
+        max-width: 30%;
+        font-size: 0.6em;
+        padding: 8px;
+    }
+    .status-bar span, .game-info span {
+        font-size: 0.6em;
+    }
+    .status-icons, .egg-status {
+        margin-bottom: 10px;
+    }
 }
