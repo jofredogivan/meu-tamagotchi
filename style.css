@@ -24,8 +24,8 @@ body {
 }
 
 #game-screen-display {
-    width: 260px; /* Largura da tela do Game Boy */
-    height: 220px; /* Altura da tela do Game Boy */
+    width: 280px; /* Aumenta a largura da tela */
+    height: 250px; /* Aumenta a altura da tela */
     background-color: #add8e6; /* Cor da tela do Game Boy */
     border: 8px solid #555;
     border-radius: 5px;
@@ -108,10 +108,14 @@ button:disabled {
 }
 
 #petImage {
-    width: 80px; /* Tamanho da imagem do pet */
-    height: 80px;
+    width: 120px; /* Aumenta o tamanho da imagem do pet */
+    height: 120px; /* Aumenta o tamanho da imagem do pet */
     image-rendering: pixelated; /* Mantém a pixelização para estilo retro */
     margin-bottom: 10px;
+    /* Adicione estas linhas para centralizar a imagem dentro da tela */
+    display: block; /* Garante que margin auto funcione */
+    margin-left: auto;
+    margin-right: auto;
 }
 
 #controls {
@@ -128,21 +132,24 @@ button:disabled {
     gap: 10px; /* Espaçamento entre os botões de ação */
 }
 
+/* NOVO CSS para gameMessage */
 #gameMessage {
     position: absolute;
-    top: 50%;
+    bottom: 10px; /* Alinhar na parte inferior da tela do jogo */
     left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: rgba(0, 0, 0, 0.7);
+    transform: translateX(-50%); /* Centraliza horizontalmente */
+    background-color: rgba(0, 0, 0, 0.7); /* Fundo semi-transparente */
     color: white;
-    padding: 10px 15px;
+    padding: 5px 10px; /* Padding menor */
     border-radius: 5px;
-    font-size: 12px;
+    font-size: 10px; /* Fonte um pouco menor */
     z-index: 10;
-    white-space: nowrap; /* Impede quebras de linha */
+    white-space: nowrap; /* Garante que o texto não quebre */
     opacity: 0;
     transition: opacity 0.3s ease-in-out;
-    pointer-events: none; /* Permite clicar através da mensagem */
+    pointer-events: none; /* Permite interagir com elementos abaixo */
+    max-width: 90%; /* Evita que a mensagem seja muito larga */
+    box-sizing: border-box; /* Garante que padding não aumente a largura total */
 }
 
 #gameMessage.visible {
