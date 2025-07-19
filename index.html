@@ -1,80 +1,51 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Meu Tamagotchi</title>
-    <link rel="stylesheet" href="style.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-</head>
-<body>
-    <div id="game-boy-console">
-        <div id="game-screen-display">
-            <div id="startScreen" class="game-screen">
-                <h2>Dê um nome ao seu Tamagotchi:</h2>
-                <input type="text" id="petNameInput" placeholder="Ex: Monstrinho" />
-                <br /><br />
-                <button id="startGameBtn">Começar</button>
-            </div>
-
-            <div id="tamagotchiScreen" class="game-screen">
-                <span id="gameMessage"></span> 
-
-                <h3 id="petName">Nome:</h3>
-                <p id="mood">Humor: Normal</p>
-                <p id="status">Status: Bem</p>
-
-                <img id="petImage" src="./imgs/ovo.gif" alt="Seu Tamagotchi" /> 
-
-                <div id="status-icons">
-                    <span id="hungerIcon" class="status-icon hidden" title="Com Fome">🍔</span>
-                    <span id="funIcon" class="status-icon hidden" title="Entediado">⚽</span>
-                    <span id="energyIcon" class="status-icon hidden" title="Cansado">⚡</span>
-                    <span id="lifeIcon" class="status-icon hidden" title="Doente/Vida Baixa">❤️</span>
-                </div>
-
-                <p>Nível: <span id="nivel">1</span> | Moedas: <span id="moedas">0</span></p>
-                
-            </div>
-            
-            <div id="shopScreen" class="game-screen">
-                <h2>Loja de Itens</h2>
-                <div id="shopItems">
-                    </div>
-                <button id="shopBackButton">Voltar</button>
-            </div>
-
-            <div id="inventoryScreen" class="game-screen">
-                <h2>Inventário</h2>
-                <div id="inventoryItems">
-                    </div>
-                <button id="inventoryBackButton">Voltar</button>
-            </div>
-
-            <div id="gamesScreen" class="game-screen">
+<div id="gamesScreen" class="game-screen">
                 <h2>Minigames</h2>
                 <p>Escolha um jogo:</p>
                 <div id="gamesList">
                     <button id="rockPaperScissorsBtn">Pedra, Papel, Tesoura</button>
-                    </div>
+                    <button id="numberGuessingBtn">Adivinhe o Número</button>
+                    <button id="ticTacToeBtn">Jogo da Velha</button>
+                </div>
                 <button id="gamesBackButton">Voltar</button>
-            </div>
-            
-        </div>
 
-        <div id="controls">
-            <div id="actions">
-                <button id="feedButton">Alimentar</button>
-                <button id="playButton">Brincar</button>
-                <button id="sleepButton">Dormir</button>
-                <button id="shopButton">Loja</button>
-                <button id="inventoryButton">Inventário</button>
-                <button id="gamesButton">Jogos</button>
-                <button id="vaccinateButton">Vacinar</button>
-            </div>
-        </div>
-    </div>
+                <div id="rpsGame" class="sub-game-screen" style="display: none;">
+                    <h3>Pedra, Papel, Tesoura</h3>
+                    <p id="rpsResult">Faça sua escolha!</p>
+                    <div class="rps-choices">
+                        <button id="rpsRock">✊ Pedra</button>
+                        <button id="rpsPaper">✋ Papel</button>
+                        <button id="rpsScissors">✌️ Tesoura</button>
+                    </div>
+                    <button id="rpsPlayAgainBtn">Jogar Novamente</button>
+                    <button id="rpsBackToGamesBtn">Voltar para Jogos</button>
+                </div>
 
-    <script src="script.js"></script> 
-</body>
-</html>
+                <div id="numberGuessingGame" class="sub-game-screen" style="display: none;">
+                    <h3>Adivinhe o Número</h3>
+                    <p id="ngInstructions">Estou pensando em um número entre 1 e 100.</p>
+                    <input type="number" id="ngGuessInput" min="1" max="100" placeholder="Seu palpite" />
+                    <button id="ngSubmitGuessBtn">Adivinhar</button>
+                    <p id="ngResult"></p>
+                    <button id="ngPlayAgainBtn">Jogar Novamente</button>
+                    <button id="ngBackToGamesBtn">Voltar para Jogos</button>
+                </div>
+
+                <div id="ticTacToeGame" class="sub-game-screen" style="display: none;">
+                    <h3>Jogo da Velha</h3>
+                    <div id="ticTacToeBoard">
+                        <div class="cell" data-cell-index="0"></div>
+                        <div class="cell" data-cell-index="1"></div>
+                        <div class="cell" data-cell-index="2"></div>
+                        <div class="cell" data-cell-index="3"></div>
+                        <div class="cell" data-cell-index="4"></div>
+                        <div class="cell" data-cell-index="5"></div>
+                        <div class="cell" data-cell-index="6"></div>
+                        <div class="cell" data-cell-index="7"></div>
+                        <div class="cell" data-cell-index="8"></div>
+                    </div>
+                    <p id="ticTacToeStatus"></p>
+                    <button id="ticTacToePlayAgainBtn">Jogar Novamente</button>
+                    <button id="ticTacToeBackToGamesBtn">Voltar para Jogos</button>
+                </div>
+
+            </div>
