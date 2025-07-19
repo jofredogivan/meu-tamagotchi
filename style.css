@@ -1,4 +1,333 @@
-/* --- Estilos para as Telas de Minigames --- */
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #333;
+    font-family: 'Press Start 2P', cursive;
+    overflow: hidden; /* Evita barras de rolagem desnecessárias */
+}
+
+#game-boy-console {
+    width: 320px; /* Largura do console Game Boy */
+    height: 500px; /* Altura do console Game Boy */
+    background-color: #003366; /* AZUL ESCURO PARA O CONSOLE */
+    border-radius: 20px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+#game-screen-display {
+    width: 280px; /* Aumenta a largura da tela para dar mais espaço */
+    height: 250px; /* Aumenta a altura da tela */
+    background-color: #add8e6; /* Cor da tela do Game Boy */
+    border: 8px solid #555;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    overflow: hidden; /* Garante que o conteúdo não vaze */
+    position: relative; /* Essencial para o posicionamento de elementos filhos */
+}
+
+.game-screen {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background-color: #fff; /* Cor de fundo branca para a tela do Tamagotchi */
+    color: #222;
+    padding: 10px;
+    box-sizing: border-box;
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 14px; /* Tamanho da fonte para o conteúdo do jogo */
+}
+
+/* Esconde todas as telas por padrão e mostra apenas a ativa */
+#startScreen, #tamagotchiScreen, #shopScreen, #inventoryScreen, #gamesScreen {
+    display: none;
+}
+
+/* Estilo para a tela de início */
+#startScreen {
+    background-color: #9bbc0f; /* Verde Game Boy (mantido para a tela de start) */
+    display: flex; /* Exibe a tela de início por padrão, será manipulado pelo JS */
+    color: #222;
+    font-size: 12px;
+}
+
+#petNameInput {
+    padding: 8px;
+    border: 2px solid #555;
+    border-radius: 4px;
+    background-color: #e0e0e0;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 12px;
+    color: #333;
+    text-align: center;
+    max-width: 80%; /* Para não vazar em telas menores */
+}
+
+/* Estilo para todos os botões (base) */
+button {
+    background-color: #4CAF50; /* Verde padrão */
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px; /* Bordas mais arredondadas */
+    cursor: pointer;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 10px;
+    margin: 5px; /* Espaçamento entre botões */
+    box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.6); /* Sombra mais pronunciada para efeito "card" */
+    transition: background-color 0.2s, transform 0.1s;
+    min-width: 100px; /* Garante um tamanho mínimo para todos os botões */
+}
+
+button:hover {
+    background-color: #45a049; /* Escurece no hover */
+    transform: translateY(-2px); /* Efeito de "levantar" */
+}
+
+button:active {
+    background-color: #3e8e41; /* Escurece mais no click */
+    box-shadow: inset 1px 1px 5px rgba(0, 0, 0, 0.7); /* Sombra interna para "pressionado" */
+    transform: translateY(0);
+}
+
+button:disabled {
+    background-color: #777;
+    cursor: not-allowed;
+    opacity: 0.7;
+    box-shadow: none;
+    transform: none;
+}
+
+/* Cores específicas para cada botão (ajuste conforme sua preferência) */
+#feedButton { background-color: #FFC107; /* Amarelo */ }
+#feedButton:hover { background-color: #ffb300; }
+
+#playButton { background-color: #2196F3; /* Azul */ }
+#playButton:hover { background-color: #1976d2; }
+
+#sleepButton { background-color: #9C27B0; /* Roxo */ }
+#sleepButton:hover { background-color: #7b1fa2; }
+
+#shopButton { background-color: #FF5722; /* Laranja */ }
+#shopButton:hover { background-color: #e64a19; }
+
+#inventoryButton { background-color: #00BCD4; /* Ciano */ }
+#inventoryButton:hover { background-color: #0097a7; }
+
+#gamesButton { background-color: #CDDC39; /* Verde Limão */ }
+#gamesButton:hover { background-color: #afb42b; }
+
+#vaccinateButton { background-color: #E91E63; /* Rosa forte */ } 
+#vaccinateButton:hover { background-color: #c2185b; }
+
+#petImage {
+    width: 200px; /* Aumenta AINDA MAIS a largura da imagem do pet */
+    height: 200px; /* Aumenta AINDA MAIS a altura da imagem do pet */
+    image-rendering: pixelated; /* Mantém a pixelização para estilo retro */
+    margin-bottom: 10px;
+    display: block; 
+    margin-left: auto; 
+    margin-right: auto; 
+}
+
+#controls {
+    display: flex;
+    flex-wrap: wrap; 
+    justify-content: center;
+    margin-top: 20px;
+}
+
+#actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px; 
+}
+
+/* CSS para gameMessage */
+#gameMessage {
+    position: absolute;
+    bottom: 10px; 
+    left: 50%;
+    transform: translateX(-50%); 
+    background-color: rgba(0, 0, 0, 0.7); 
+    color: white;
+    padding: 5px 10px; 
+    border-radius: 5px;
+    font-size: 10px; 
+    z-index: 10;
+    white-space: nowrap; 
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    pointer-events: none; 
+    max-width: 90%; 
+    box-sizing: border-box; 
+}
+
+#gameMessage.visible {
+    opacity: 1;
+}
+
+#status-icons {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+.status-icon {
+    font-size: 20px; 
+    display: inline-block; 
+}
+
+.status-icon.hidden {
+    display: none;
+}
+
+.status-icon.blinking {
+    animation: blink-animation 1s infinite alternate;
+}
+
+@keyframes blink-animation {
+    from { opacity: 1; }
+    to { opacity: 0.3; }
+}
+
+/* Estilos para popups de jogo (Game Over, Loja, etc.) */
+.game-popup {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #9bbc0f; 
+    border: 4px solid #222;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    color: #222;
+    z-index: 20; 
+    display: none; 
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+}
+
+.game-popup h2 {
+    font-size: 16px;
+    margin-top: 0;
+}
+
+.game-popup button {
+    margin-top: 15px;
+}
+
+/* --- ESTILOS para as Telas de Loja, Inventário e Jogos --- */
+#shopScreen, #inventoryScreen, #gamesScreen {
+    background-color: #fff; /* Fundo branco para estas telas */
+    padding: 20px;
+    box-sizing: border-box;
+    overflow-y: auto; /* Permite rolagem se houver muitos itens */
+    justify-content: flex-start; /* Alinha o conteúdo ao topo */
+}
+
+#shopScreen h2, #inventoryScreen h2, #gamesScreen h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 16px;
+}
+
+#shopItems, #inventoryItems {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Espaçamento entre os itens */
+    margin-bottom: 20px;
+}
+
+.item-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    font-size: 12px;
+}
+
+.item-card button {
+    margin: 0; /* Remove margem extra dos botões dentro dos cards */
+    padding: 5px 10px;
+    font-size: 9px;
+    min-width: unset; /* Remove min-width para botões menores dentro dos cards */
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4); /* Sombra mais suave para botões de item */
+}
+
+.item-card button:hover {
+    transform: translateY(-1px); /* Efeito de "levantar" suave */
+}
+
+.item-name {
+    font-weight: bold;
+}
+
+.item-price, .item-quantity {
+    color: #555;
+}
+
+#shopBackButton, #inventoryBackButton, #gamesBackButton {
+    background-color: #FF5722; /* Laranja para botões de voltar */
+    margin-top: auto; /* Empurra para o final da tela */
+}
+#shopBackButton:hover, #inventoryBackButton:hover, #gamesBackButton:hover {
+    background-color: #e64a19;
+}
+
+#gamesList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%; /* Ocupa a largura total para alinhar botões */
+}
+
+#gamesList button {
+    width: 100%; /* Faz os botões de jogo ocuparem a largura total */
+}
+
+#rockPaperScissorsBtn {
+    background-color: #4CAF50; /* Verde */
+}
+#rockPaperScissorsBtn:hover {
+    background-color: #45a049;
+}
+
+#numberGuessingBtn {
+    background-color: #FFEB3B; /* Amarelo para Adivinhe o Número */
+    color: #333; /* Cor do texto para contraste */
+}
+#numberGuessingBtn:hover {
+    background-color: #fdd835;
+}
+
+#ticTacToeBtn {
+    background-color: #3F51B5; /* Azul índigo para Jogo da Velha */
+}
+#ticTacToeBtn:hover {
+    background-color: #303F9F;
+}
+
+/* --- Estilos para as Telas de Minigames (Sub-Telas) --- */
 .sub-game-screen {
     position: absolute; /* Permite posicionar sobre a tela principal */
     top: 0;
