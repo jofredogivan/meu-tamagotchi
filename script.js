@@ -28,6 +28,8 @@ let currentPlayer; // 'X' ou 'O'
 let gameActive; // Se o jogo está em andamento
 
 // ATENÇÃO CRÍTICA: SUBSTITUA 'meu-tamagotchi' pelo NOME EXATO do seu repositório GitHub!
+// Verifique se o nome do repositório (case-sensitive) está correto.
+// Exemplo: se seu repositório é 'MeuTamagotchi', use 'MeuTamagotchi'.
 const GITHUB_REPO_NAME = 'meu-tamagotchi'; 
 
 let pet = {}; 
@@ -86,13 +88,20 @@ function showScreen(screenElement) {
 // Função para obter o caminho da imagem com base no estado e nível
 function getPetImagePath(currentPet) {
     let baseDir;
+    // Verifica se está rodando localmente (file://) ou em um servidor (http/https)
     if (window.location.protocol === 'file:') {
         baseDir = './imgs/'; 
     } else {
+        // Para GitHub Pages, o caminho precisa incluir o nome do repositório
         baseDir = `/${GITHUB_REPO_NAME}/imgs/`; 
     }
 
     let finalPath;
+
+    // Garante que o pet não seja undefined antes de acessar suas propriedades
+    if (!currentPet) {
+        return baseDir + 'ovo.gif'; // Retorna uma imagem padrão se o pet não estiver inicializado
+    }
 
     if (currentPet.isEgg) {
         if (currentPet.type === 'ovo.rachando') finalPath = baseDir + 'ovo.rachando.gif';
@@ -113,6 +122,7 @@ function getPetImagePath(currentPet) {
         let prefix = currentPet.level === 1 ? 'bebe.' : 'crianca.';
         finalPath = baseDir + prefix + 'doente.gif';
     } else {
+        // Imagem normal do pet (bebe.gif ou crianca.gif)
         let prefix = currentPet.level === 1 ? 'bebe.' : 'crianca.';
         finalPath = baseDir + prefix.slice(0, -1) + '.gif'; 
     }
@@ -737,20 +747,135 @@ function submitNumberGuess() {
 }
 
 
-// --- Jogo: Jogo da Velha (Tic Tac Toe) --- (Placeholder por enquanto)
+// --- Jogo: Jogo da Velha (Tic Tac Toe) ---
+// Variáveis Globais para o Jogo da Velha
+const winningConditions = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6]
+]; // Todas as combinações vencedoras
+
 function initTicTacToeGame() {
     showSubGameScreen(ticTacToeGameScreen);
-    ticTacToeStatus.textContent = 'Jogo da Velha (Em Breve!)';
-    // Desabilitar células e botões de jogar/voltar do Tic Tac Toe por enquanto
+    ticTacToePlayAgainBtn.style.display = 'none'; // Esconde o botão de jogar novamente
+    ticTacToeBackToGamesBtn.style.display = 'none'; // Esconde o botão de voltar
+
+    board = ['', '', '', '', '', '', '', '', '']; // Limpa o tabuleiro
+    currentPlayer = 'X'; // Começa com o jogador 'X'
+    gameActive = true; // O jogo está ativo
+
+    const cells = ticTacToeBoard.querySelectorAll('.cell');
+    cells.forEach((cell, index) => {
+        cell.textContent = ''; // Limpa o texto da célula
+        cell.className = 'cell'; // Limpa classes de jogador e vencedor
+        // Remove listener anterior antes de adicionar um novo para evitar duplicações
+        cell.removeEventListener('click', handleCellClick);
+        cell.addEventListener('click', handleCellClick); // Adiciona o evento de clique
+        cell.style.pointerEvents = 'auto'; // Habilita o clique
+    });
+
+    ticTacToeStatus.textContent = `É a vez do Jogador ${currentPlayer}`;
+}
+
+function handleCellClick(clickedCellEvent) {
+    const clickedCell = clickedCellEvent.target;
+    const clickedCellIndex = parseInt(clickedCell.getAttribute('data-cell-index'));
+
+    // Se a célula já estiver preenchida ou o jogo não estiver ativo, não faz nada
+    if (board[clickedCellIndex] !== '' || !gameActive) {
+        return;
+    }
+
+    // Preenche a célula e atualiza o tabuleiro
+    board[clickedCellIndex] = currentPlayer;
+    clickedCell.textContent = currentPlayer;
+    clickedCell.classList.add(`player-${currentPlayer.toLowerCase()}`); // Adiciona classe para cor
+
+    checkTicTacToeResult();
+}
+
+function checkTicTacToeResult() {
+    let roundWon = false;
+    for (let i = 0; i < winningConditions.length; i++) {
+        const winCondition = winningConditions[i];
+        let a = board[winCondition[0]];
+        let b = board[winCondition[1]];
+        let c = board[winCondition[2]];
+
+        if (a === '' || b === '' || c === '') {
+            continue; // Ignora se alguma célula está vazia
+        }
+        if (a === b && b === c) {
+            roundWon = true;
+            // Adiciona classe para destacar as células vencedoras
+            winningConditions[i].forEach(index => {
+                ticTacToeBoard.children[index].classList.add('winning-cell');
+            });
+            break;
+        }
+    }
+
+    if (roundWon) {
+        ticTacToeStatus.textContent = `Jogador ${currentPlayer} Venceu!`;
+        gameActive = false;
+        disableTicTacToeCells();
+        showGameReward(currentPlayer); // Atribui recompensa
+        ticTacToePlayAgainBtn.style.display = 'block';
+        ticTacToeBackToGamesBtn.style.display = 'block';
+        return;
+    }
+
+    // Verifica se houve empate
+    let roundDraw = !board.includes(''); // Se não houver células vazias, é empate
+    if (roundDraw) {
+        ticTacToeStatus.textContent = 'Empate!';
+        gameActive = false;
+        disableTicTacToeCells();
+        showGameReward('draw'); // Recompensa por empate
+        ticTacToePlayAgainBtn.style.display = 'block';
+        ticTacToeBackToGamesBtn.style.display = 'block';
+        return;
+    }
+
+    // Se o jogo continua, troca o jogador
+    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+    ticTacToeStatus.textContent = `É a vez do Jogador ${currentPlayer}`;
+}
+
+function disableTicTacToeCells() {
     const cells = ticTacToeBoard.querySelectorAll('.cell');
     cells.forEach(cell => {
-        cell.textContent = '';
-        cell.className = 'cell'; // Limpa classes de jogador
-        cell.removeEventListener('click', handleCellClick); // Remove listeners antigos
-        cell.style.pointerEvents = 'none'; // Desabilita clique
+        cell.style.pointerEvents = 'none'; // Desabilita cliques nas células
     });
-    ticTacToePlayAgainBtn.style.display = 'none';
-    ticTacToeBackToGamesBtn.style.display = 'none';
+}
+
+function showGameReward(winner) {
+    let reward = 0;
+    let message = '';
+
+    if (winner === 'X') { // O jogador é 'X'
+        reward = 10;
+        pet.coins += reward;
+        pet.fun = Math.min(100, pet.fun + 20);
+        message = `Você ganhou ${reward} moedas!`;
+    } else if (winner === 'O') { // O Tamagotchi é 'O' (pode ser ajustado para um AI depois)
+        reward = 2; // Menor recompensa se o Tamagotchi "vence"
+        pet.coins += reward;
+        pet.fun = Math.min(100, pet.fun + 5); // Tamagotchi fica um pouco feliz
+        message = `Tamagotchi venceu, você ganhou ${reward} moedas.`;
+    } else if (winner === 'draw') {
+        reward = 5;
+        pet.coins += reward;
+        pet.fun = Math.min(100, pet.fun + 10);
+        message = `Empate! Você ganhou ${reward} moedas.`;
+    }
+    updateDisplay();
+    showGameMessage(message, 2500);
 }
 
 
@@ -875,7 +1000,7 @@ function initializeGame() {
     if (ngPlayAgainBtn) ngPlayAgainBtn.removeEventListener('click', initNumberGuessingGame);
     if (ngBackToGamesBtn) ngBackToGamesBtn.removeEventListener('click', handleGames);
 
-    // Botões do Jogo da Velha (placeholder)
+    // Botões do Jogo da Velha
     if (ticTacToePlayAgainBtn) ticTacToePlayAgainBtn.removeEventListener('click', initTicTacToeGame);
     if (ticTacToeBackToGamesBtn) ticTacToeBackToGamesBtn.removeEventListener('click', handleGames);
 
@@ -899,7 +1024,7 @@ function initializeGame() {
     // Botões de seleção de jogos
     if (rockPaperScissorsBtn) rockPaperScissorsBtn.addEventListener('click', initRPSGame);
     if (numberGuessingBtn) numberGuessingBtn.addEventListener('click', initNumberGuessingGame);
-    if (ticTacToeBtn) ticTacToeBtn.addEventListener('click', initTicTacToeGame); // Este ainda é um placeholder
+    if (ticTacToeBtn) ticTacToeBtn.addEventListener('click', initTicTacToeGame);
 
     // Botões de Pedra, Papel, Tesoura
     if (rpsRockBtn) rpsRockBtn.addEventListener('click', () => playRPS('pedra'));
@@ -913,7 +1038,7 @@ function initializeGame() {
     if (ngPlayAgainBtn) ngPlayAgainBtn.addEventListener('click', initNumberGuessingGame);
     if (ngBackToGamesBtn) ngBackToGamesBtn.addEventListener('click', handleGames);
 
-    // Botões do Jogo da Velha (placeholder)
+    // Botões do Jogo da Velha
     if (ticTacToePlayAgainBtn) ticTacToePlayAgainBtn.addEventListener('click', initTicTacToeGame);
     if (ticTacToeBackToGamesBtn) ticTacToeBackToGamesBtn.addEventListener('click', handleGames);
     
