@@ -5,10 +5,27 @@ let hungerIcon, funIcon, energyIcon, lifeIcon;
 let levelDisplay, coinsDisplay;
 let feedButton, playButton, sleepButton, shopButton, inventoryButton, gamesButton, vaccinateButton;
 
-// NOVOS ELEMENTOS HTML
+// NOVOS ELEMENTOS HTML PARA LOJA/INVENTÁRIO
 let shopScreen, shopItemsContainer, shopBackButton;
 let inventoryScreen, inventoryItemsContainer, inventoryBackButton;
-let gamesScreen, gamesListContainer, gamesBackButton, rockPaperScissorsBtn; // Adicionado rockPaperScissorsBtn
+
+// NOVOS ELEMENTOS HTML PARA MINIGAMES
+let gamesScreen, gamesListContainer, gamesBackButton;
+let rockPaperScissorsBtn, numberGuessingBtn, ticTacToeBtn; // Botões para escolher o jogo
+
+// Pedra, Papel, Tesoura
+let rpsGameScreen, rpsResult, rpsRockBtn, rpsPaperBtn, rpsScissorsBtn, rpsPlayAgainBtn, rpsBackToGamesBtn;
+
+// Adivinhe o Número
+let numberGuessingGameScreen, ngInstructions, ngGuessInput, ngSubmitGuessBtn, ngResult, ngPlayAgainBtn, ngBackToGamesBtn;
+let secretNumber; // Variável para o número secreto
+let attempts; // Contador de tentativas
+
+// Jogo da Velha (Tic Tac Toe)
+let ticTacToeGameScreen, ticTacToeBoard, ticTacToeStatus, ticTacToePlayAgainBtn, ticTacToeBackToGamesBtn;
+let board; // Representa o tabuleiro (array)
+let currentPlayer; // 'X' ou 'O'
+let gameActive; // Se o jogo está em andamento
 
 // ATENÇÃO CRÍTICA: SUBSTITUA 'meu-tamagotchi' pelo NOME EXATO do seu repositório GitHub!
 const GITHUB_REPO_NAME = 'meu-tamagotchi'; 
@@ -47,15 +64,22 @@ function showGameMessage(message, duration = 3000) {
 function hideAllScreens() {
     if (startScreen) startScreen.style.display = 'none';
     if (tamagotchiScreen) tamagotchiScreen.style.display = 'none';
-    if (shopScreen) shopScreen.style.display = 'none'; // NOVA TELA
-    if (inventoryScreen) inventoryScreen.style.display = 'none'; // NOVA TELA
-    if (gamesScreen) gamesScreen.style.display = 'none'; // NOVA TELA
+    if (shopScreen) shopScreen.style.display = 'none'; 
+    if (inventoryScreen) inventoryScreen.style.display = 'none'; 
+    if (gamesScreen) gamesScreen.style.display = 'none'; 
+}
+
+// Função para esconder todas as sub-telas de jogos
+function hideAllSubGameScreens() {
+    if (rpsGameScreen) rpsGameScreen.style.display = 'none';
+    if (numberGuessingGameScreen) numberGuessingGameScreen.style.display = 'none';
+    if (ticTacToeGameScreen) ticTacToeGameScreen.style.display = 'none';
 }
 
 function showScreen(screenElement) {
     hideAllScreens();
     if (screenElement) {
-        screenElement.style.display = 'flex'; // Usamos 'flex' para alinhar o conteúdo verticalmente
+        screenElement.style.display = 'flex'; 
     }
 }
 
@@ -363,7 +387,7 @@ function handleStartGame() {
         isSleeping: false, isAlive: true, isEating: false, isEgg: true, isSick: false, 
         hatchProgress: 0, hatchTimer: 60, 
         ageProgress: 0, ageToChild: 120, 
-        lastSaveTime: Date.now(), inventory: [], // Inicializa inventário como um array vazio
+        lastSaveTime: Date.now(), inventory: [], 
         mood: 'Esperando...', status: 'Em desenvolvimento', isBrincando: false
     };
 
@@ -465,7 +489,7 @@ function handleShop() {
 
 function renderShopItems() {
     if (!shopItemsContainer) return;
-    shopItemsContainer.innerHTML = ''; // Limpa os itens existentes
+    shopItemsContainer.innerHTML = ''; 
 
     shopItems.forEach(item => {
         const itemCard = document.createElement('div');
@@ -497,17 +521,16 @@ function buyItem(itemId) {
 
     pet.coins -= itemToBuy.price;
     
-    // Adiciona o item ao inventário
     const existingItem = pet.inventory.find(invItem => invItem.id === itemId);
     if (existingItem) {
         existingItem.quantity++;
     } else {
-        pet.inventory.push({ ...itemToBuy, quantity: 1 }); // Adiciona uma cópia com quantidade
+        pet.inventory.push({ ...itemToBuy, quantity: 1 }); 
     }
 
     updateDisplay();
     showGameMessage(`Você comprou ${itemToBuy.name}! (-${itemToBuy.price} Moedas)`, 2000);
-    renderShopItems(); // Atualiza a loja (caso queiramos desabilitar botões etc.)
+    renderShopItems(); 
 }
 
 // --- Lógica do Inventário ---
@@ -523,7 +546,7 @@ function handleInventory() {
 
 function renderInventoryItems() {
     if (!inventoryItemsContainer) return;
-    inventoryItemsContainer.innerHTML = ''; // Limpa os itens existentes
+    inventoryItemsContainer.innerHTML = ''; 
 
     if (pet.inventory.length === 0) {
         inventoryItemsContainer.innerHTML = '<p style="text-align: center; width: 100%;">Seu inventário está vazio!</p>';
@@ -537,7 +560,7 @@ function renderInventoryItems() {
             <span class="item-name">${item.name}</span>
             <span class="item-quantity">x${item.quantity}</span>
             <button data-item-id="${item.id}" ${item.type === 'food' || item.type === 'medicine' || item.type === 'toy' ? '' : 'disabled'}>Usar</button>
-        `; // Desabilita se não for usável
+        `;
         inventoryItemsContainer.appendChild(itemCard);
 
         const useButton = itemCard.querySelector('button');
@@ -557,7 +580,6 @@ function useItem(itemId) {
         return;
     }
     
-    // Lógica para usar o item
     let message = '';
     let usedSuccessfully = false;
 
@@ -580,7 +602,7 @@ function useItem(itemId) {
     } else if (itemToUse.type === 'medicine') {
         if (!pet.isSick) { showGameMessage(`${pet.name} não está doente!`, 1500); return; }
         pet.life = Math.min(100, pet.life + (itemToUse.effect.life || 0));
-        pet.isSick = false; // Cura a doença
+        pet.isSick = false; 
         message = `${pet.name} tomou o remédio e se sente melhor!`;
         usedSuccessfully = true;
     } else {
@@ -590,11 +612,11 @@ function useItem(itemId) {
     if (usedSuccessfully) {
         itemToUse.quantity--;
         if (itemToUse.quantity <= 0) {
-            pet.inventory = pet.inventory.filter(item => item.id !== itemId); // Remove se acabou
+            pet.inventory = pet.inventory.filter(item => item.id !== itemId); 
         }
         showGameMessage(message, 2000);
         updateDisplay();
-        renderInventoryItems(); // Atualiza a lista do inventário
+        renderInventoryItems(); 
     }
 }
 
@@ -605,19 +627,135 @@ function handleGames() {
     if (pet.isSleeping) { showGameMessage(`${pet.name} está dormindo! Não o incomode.`); return; }
     if (pet.isEating || pet.isBrincando || pet.isSick) { showGameMessage(`${pet.name} está ocupado!`); return; }
     
+    // Mostra a tela principal de seleção de jogos e esconde as sub-telas
+    hideAllSubGameScreens();
     showScreen(gamesScreen);
+    // Esconde os botões de voltar dos sub-jogos e mostra os de seleção
+    if (gamesListContainer) gamesListContainer.style.display = 'flex';
+    if (gamesBackButton) gamesBackButton.style.display = 'block';
 }
 
-// Exemplo de minigame: Pedra, Papel, Tesoura
-function handleRockPaperScissors() {
-    showGameMessage('Jogo não implementado ainda. Ganhe 5 moedas!', 2000); // Placeholder
-    pet.coins += 5; // Recompensa instantânea por agora
+function showSubGameScreen(subScreenElement) {
+    hideAllSubGameScreens(); // Esconde todos os outros jogos
+    if (gamesListContainer) gamesListContainer.style.display = 'none'; // Esconde a lista de jogos
+    if (gamesBackButton) gamesBackButton.style.display = 'none'; // Esconde o botão de voltar geral
+    if (subScreenElement) subScreenElement.style.display = 'flex'; // Mostra o jogo específico
+}
+
+// --- Jogo: Pedra, Papel, Tesoura (RPS) ---
+function initRPSGame() {
+    showSubGameScreen(rpsGameScreen);
+    rpsResult.textContent = 'Faça sua escolha!';
+    // Reabilita os botões de escolha e esconde os de "jogar novamente" e "voltar"
+    rpsRockBtn.disabled = false;
+    rpsPaperBtn.disabled = false;
+    rpsScissorsBtn.disabled = false;
+    rpsPlayAgainBtn.style.display = 'none';
+    rpsBackToGamesBtn.style.display = 'none';
+}
+
+function playRPS(playerChoice) {
+    // Desabilita botões de escolha
+    rpsRockBtn.disabled = true;
+    rpsPaperBtn.disabled = true;
+    rpsScissorsBtn.disabled = true;
+
+    const choices = ['pedra', 'papel', 'tesoura'];
+    const tamagotchiChoice = choices[Math.floor(Math.random() * choices.length)];
+
+    let result = '';
+    let reward = 0;
+
+    if (playerChoice === tamagotchiChoice) {
+        result = `Empate! Tamagotchi escolheu ${tamagotchiChoice}.`;
+        reward = 1; // Pequena recompensa por empate
+    } else if (
+        (playerChoice === 'pedra' && tamagotchiChoice === 'tesoura') ||
+        (playerChoice === 'papel' && tamagotchiChoice === 'pedra') ||
+        (playerChoice === 'tesoura' && tamagotchiChoice === 'papel')
+    ) {
+        result = `Você Venceu! Tamagotchi escolheu ${tamagotchiChoice}.`;
+        reward = 5;
+        pet.fun = Math.min(100, pet.fun + 10); // Aumenta um pouco a diversão
+    } else {
+        result = `Você Perdeu! Tamagotchi escolheu ${tamagotchiChoice}.`;
+        reward = 0;
+        pet.fun = Math.max(0, pet.fun - 5); // Diminui um pouco a diversão
+    }
+
+    pet.coins += reward;
     updateDisplay();
-    // Aqui você implementaria a lógica real do jogo
+    rpsResult.textContent = result + ` Você ganhou ${reward} moedas!`;
+
+    // Mostra os botões de "jogar novamente" e "voltar"
+    rpsPlayAgainBtn.style.display = 'block';
+    rpsBackToGamesBtn.style.display = 'block';
+}
+
+// --- Jogo: Adivinhe o Número (Number Guessing) ---
+function initNumberGuessingGame() {
+    showSubGameScreen(numberGuessingGameScreen);
+    secretNumber = Math.floor(Math.random() * 100) + 1; // Número entre 1 e 100
+    attempts = 0;
+    ngInstructions.textContent = 'Estou pensando em um número entre 1 e 100. Tente adivinhar!';
+    ngGuessInput.value = '';
+    ngResult.textContent = '';
+    ngSubmitGuessBtn.disabled = false; // Habilita o botão de submissão
+    ngGuessInput.disabled = false; // Habilita o input
+    ngPlayAgainBtn.style.display = 'none';
+    ngBackToGamesBtn.style.display = 'none';
+    console.log("Número secreto:", secretNumber); // Para depuração
+}
+
+function submitNumberGuess() {
+    const guess = parseInt(ngGuessInput.value);
+
+    if (isNaN(guess) || guess < 1 || guess > 100) {
+        ngResult.textContent = 'Por favor, insira um número válido entre 1 e 100.';
+        return;
+    }
+
+    attempts++;
+
+    if (guess === secretNumber) {
+        ngResult.textContent = `Parabéns! Você adivinhou o número ${secretNumber} em ${attempts} tentativas!`;
+        const reward = Math.max(1, 15 - attempts); // Recompensa baseada em tentativas
+        pet.coins += reward;
+        pet.fun = Math.min(100, pet.fun + 15);
+        showGameMessage(`Você ganhou ${reward} moedas!`, 2000);
+        updateDisplay();
+        ngSubmitGuessBtn.disabled = true; // Desabilita o botão após acertar
+        ngGuessInput.disabled = true; // Desabilita o input
+        ngPlayAgainBtn.style.display = 'block';
+        ngBackToGamesBtn.style.display = 'block';
+    } else if (guess < secretNumber) {
+        ngResult.textContent = `Tente um número MAIOR. Tentativas: ${attempts}`;
+    } else {
+        ngResult.textContent = `Tente um número MENOR. Tentativas: ${attempts}`;
+    }
+    ngGuessInput.value = ''; // Limpa o input
+}
+
+
+// --- Jogo: Jogo da Velha (Tic Tac Toe) --- (Placeholder por enquanto)
+function initTicTacToeGame() {
+    showSubGameScreen(ticTacToeGameScreen);
+    ticTacToeStatus.textContent = 'Jogo da Velha (Em Breve!)';
+    // Desabilitar células e botões de jogar/voltar do Tic Tac Toe por enquanto
+    const cells = ticTacToeBoard.querySelectorAll('.cell');
+    cells.forEach(cell => {
+        cell.textContent = '';
+        cell.className = 'cell'; // Limpa classes de jogador
+        cell.removeEventListener('click', handleCellClick); // Remove listeners antigos
+        cell.style.pointerEvents = 'none'; // Desabilita clique
+    });
+    ticTacToePlayAgainBtn.style.display = 'none';
+    ticTacToeBackToGamesBtn.style.display = 'none';
 }
 
 
 // --- Função de Inicialização do Jogo ---
+// Esta função é chamada uma vez quando o DOM é carregado ou para reiniciar o jogo.
 function initializeGame() {
     // Inicializa as referências aos elementos HTML
     startScreen = getElement('startScreen');
@@ -646,7 +784,7 @@ function initializeGame() {
     gamesButton = getElement('gamesButton');
     vaccinateButton = getElement('vaccinateButton'); 
 
-    // Referências para as novas telas
+    // Referências para as novas telas de Loja/Inventário
     shopScreen = getElement('shopScreen');
     shopItemsContainer = getElement('shopItems');
     shopBackButton = getElement('shopBackButton');
@@ -655,30 +793,49 @@ function initializeGame() {
     inventoryItemsContainer = getElement('inventoryItems');
     inventoryBackButton = getElement('inventoryBackButton');
 
+    // Referências para as novas telas de Minigames
     gamesScreen = getElement('gamesScreen');
-    gamesListContainer = getElement('gamesList'); // Pode não ser usado diretamente, mas bom ter
+    gamesListContainer = getElement('gamesList'); 
     gamesBackButton = getElement('gamesBackButton');
-    rockPaperScissorsBtn = getElement('rockPaperScissorsBtn'); // Referência ao botão do jogo
+    rockPaperScissorsBtn = getElement('rockPaperScissorsBtn'); 
+    numberGuessingBtn = getElement('numberGuessingBtn');
+    ticTacToeBtn = getElement('ticTacToeBtn');
+
+    // Referências para elementos de Pedra, Papel, Tesoura
+    rpsGameScreen = getElement('rpsGame');
+    rpsResult = getElement('rpsResult');
+    rpsRockBtn = getElement('rpsRock');
+    rpsPaperBtn = getElement('rpsPaper');
+    rpsScissorsBtn = getElement('rpsScissors');
+    rpsPlayAgainBtn = getElement('rpsPlayAgainBtn');
+    rpsBackToGamesBtn = getElement('rpsBackToGamesBtn');
+
+    // Referências para elementos de Adivinhe o Número
+    numberGuessingGameScreen = getElement('numberGuessingGame');
+    ngInstructions = getElement('ngInstructions');
+    ngGuessInput = getElement('ngGuessInput');
+    ngSubmitGuessBtn = getElement('ngSubmitGuessBtn');
+    ngResult = getElement('ngResult');
+    ngPlayAgainBtn = getElement('ngPlayAgainBtn');
+    ngBackToGamesBtn = getElement('ngBackToGamesBtn');
+
+    // Referências para elementos do Jogo da Velha (Tic Tac Toe)
+    ticTacToeGameScreen = getElement('ticTacToeGame');
+    ticTacToeBoard = getElement('ticTacToeBoard');
+    ticTacToeStatus = getElement('ticTacToeStatus');
+    ticTacToePlayAgainBtn = getElement('ticTacToePlayAgainBtn');
+    ticTacToeBackToGamesBtn = getElement('ticTacToeBackToGamesBtn');
+
 
     // Estado inicial do pet para um novo jogo
     pet = {
         name: '',
-        hunger: 100,
-        fun: 100,
-        energy: 100,
-        life: 100,
-        level: 0, 
-        coins: 0,
-        isSleeping: false,
-        isAlive: true,
-        isEating: false,
-        isEgg: true,
-        isSick: false, 
-        isBrincando: false, // Garante que começa como false
-        hatchProgress: 0,
-        hatchTimer: 60, 
-        ageProgress: 0,
-        ageToChild: 120, 
+        hunger: 100, fun: 100, energy: 100, life: 100,
+        level: 0, coins: 0, 
+        isSleeping: false, isAlive: true, isEating: false, isEgg: true, isSick: false, 
+        isBrincando: false, 
+        hatchProgress: 0, hatchTimer: 60, 
+        ageProgress: 0, ageToChild: 120, 
         lastSaveTime: Date.now(),
         inventory: [], 
         mood: 'Normal',
@@ -686,6 +843,7 @@ function initializeGame() {
     };
 
     // --- Limpeza de Event Listeners Antigos (para evitar duplicações) ---
+    // Botões principais
     if (startGameBtn) startGameBtn.removeEventListener('click', handleStartGame);
     if (feedButton) feedButton.removeEventListener('click', handleFeed);
     if (playButton) playButton.removeEventListener('click', handlePlay);
@@ -694,15 +852,36 @@ function initializeGame() {
     if (inventoryButton) inventoryButton.removeEventListener('click', handleInventory);
     if (gamesButton) gamesButton.removeEventListener('click', handleGames);
     if (vaccinateButton) vaccinateButton.removeEventListener('click', handleVaccinate);
-    // Novos botões de navegação
+    
+    // Botões de navegação das telas principais
     if (shopBackButton) shopBackButton.removeEventListener('click', () => showScreen(tamagotchiScreen));
     if (inventoryBackButton) inventoryBackButton.removeEventListener('click', () => showScreen(tamagotchiScreen));
     if (gamesBackButton) gamesBackButton.removeEventListener('click', () => showScreen(tamagotchiScreen));
-    // Botão de minigame
-    if (rockPaperScissorsBtn) rockPaperScissorsBtn.removeEventListener('click', handleRockPaperScissors);
+    
+    // Botões de seleção de jogos
+    if (rockPaperScissorsBtn) rockPaperScissorsBtn.removeEventListener('click', initRPSGame);
+    if (numberGuessingBtn) numberGuessingBtn.removeEventListener('click', initNumberGuessingGame);
+    if (ticTacToeBtn) ticTacToeBtn.removeEventListener('click', initTicTacToeGame);
+
+    // Botões de Pedra, Papel, Tesoura
+    if (rpsRockBtn) rpsRockBtn.removeEventListener('click', () => playRPS('pedra'));
+    if (rpsPaperBtn) rpsPaperBtn.removeEventListener('click', () => playRPS('papel'));
+    if (rpsScissorsBtn) rpsScissorsBtn.removeEventListener('click', () => playRPS('tesoura'));
+    if (rpsPlayAgainBtn) rpsPlayAgainBtn.removeEventListener('click', initRPSGame);
+    if (rpsBackToGamesBtn) rpsBackToGamesBtn.removeEventListener('click', handleGames);
+
+    // Botões de Adivinhe o Número
+    if (ngSubmitGuessBtn) ngSubmitGuessBtn.removeEventListener('click', submitNumberGuess);
+    if (ngPlayAgainBtn) ngPlayAgainBtn.removeEventListener('click', initNumberGuessingGame);
+    if (ngBackToGamesBtn) ngBackToGamesBtn.removeEventListener('click', handleGames);
+
+    // Botões do Jogo da Velha (placeholder)
+    if (ticTacToePlayAgainBtn) ticTacToePlayAgainBtn.removeEventListener('click', initTicTacToeGame);
+    if (ticTacToeBackToGamesBtn) ticTacToeBackToGamesBtn.removeEventListener('click', handleGames);
 
 
     // --- Adição de Event Listeners ---
+    // Botões principais
     if (startGameBtn) startGameBtn.addEventListener('click', handleStartGame);
     if (feedButton) feedButton.addEventListener('click', handleFeed);
     if (playButton) playButton.addEventListener('click', handlePlay);
@@ -711,12 +890,32 @@ function initializeGame() {
     if (inventoryButton) inventoryButton.addEventListener('click', handleInventory);
     if (gamesButton) gamesButton.addEventListener('click', handleGames);
     if (vaccinateButton) vaccinateButton.addEventListener('click', handleVaccinate);
-    // Novos botões de navegação
+    
+    // Botões de navegação das telas principais
     if (shopBackButton) shopBackButton.addEventListener('click', () => showScreen(tamagotchiScreen));
     if (inventoryBackButton) inventoryBackButton.addEventListener('click', () => showScreen(tamagotchiScreen));
     if (gamesBackButton) gamesBackButton.addEventListener('click', () => showScreen(tamagotchiScreen));
-    // Botão de minigame
-    if (rockPaperScissorsBtn) rockPaperScissorsBtn.addEventListener('click', handleRockPaperScissors);
+    
+    // Botões de seleção de jogos
+    if (rockPaperScissorsBtn) rockPaperScissorsBtn.addEventListener('click', initRPSGame);
+    if (numberGuessingBtn) numberGuessingBtn.addEventListener('click', initNumberGuessingGame);
+    if (ticTacToeBtn) ticTacToeBtn.addEventListener('click', initTicTacToeGame); // Este ainda é um placeholder
+
+    // Botões de Pedra, Papel, Tesoura
+    if (rpsRockBtn) rpsRockBtn.addEventListener('click', () => playRPS('pedra'));
+    if (rpsPaperBtn) rpsPaperBtn.addEventListener('click', () => playRPS('papel'));
+    if (rpsScissorsBtn) rpsScissorsBtn.addEventListener('click', () => playRPS('tesoura'));
+    if (rpsPlayAgainBtn) rpsPlayAgainBtn.addEventListener('click', initRPSGame);
+    if (rpsBackToGamesBtn) rpsBackToGamesBtn.addEventListener('click', handleGames);
+
+    // Botões de Adivinhe o Número
+    if (ngSubmitGuessBtn) ngSubmitGuessBtn.addEventListener('click', submitNumberGuess);
+    if (ngPlayAgainBtn) ngPlayAgainBtn.addEventListener('click', initNumberGuessingGame);
+    if (ngBackToGamesBtn) ngBackToGamesBtn.addEventListener('click', handleGames);
+
+    // Botões do Jogo da Velha (placeholder)
+    if (ticTacToePlayAgainBtn) ticTacToePlayAgainBtn.addEventListener('click', initTicTacToeGame);
+    if (ticTacToeBackToGamesBtn) ticTacToeBackToGamesBtn.addEventListener('click', handleGames);
     
     // Logs de depuração
     console.log("Protocolo da URL:", window.location.protocol); 
