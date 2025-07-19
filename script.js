@@ -85,7 +85,8 @@ function getPetImagePath(currentPet) {
     }
     
     // Imagem padrão (normal) para o nível atual
-    return baseDir + prefix.slice(0, -1) + suffix; // Remove o '.' extra do prefixo
+    // O slice(0, -1) remove o '.' extra do prefixo 'bebe.' ou 'crianca.' para formar 'bebe.gif' ou 'crianca.gif'
+    return baseDir + prefix.slice(0, -1) + suffix; 
 }
 
 // Lógica de Atualização do Display
