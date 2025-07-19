@@ -6,6 +6,10 @@ let hungerIcon, funIcon, energyIcon, lifeIcon;
 let levelDisplay, coinsDisplay;
 let feedButton, playButton, sleepButton, shopButton, inventoryButton, gamesButton;
 
+// Mova GITHUB_REPO_NAME para o escopo global
+// ATENÇÃO CRÍTICA: SUBSTITUA 'meu-tamagotchi' pelo NOME EXATO do seu repositório GitHub!
+const GITHUB_REPO_NAME = 'meu-tamagotchi'; // <<< VERIFIQUE ESTA STRING NOVAMENTE!
+
 let pet = {}; // Objeto pet será inicializado em initializeGame()
 let gameInterval; // Para o loop principal do jogo
 
@@ -46,18 +50,13 @@ function showScreen(screenElement) {
 
 // Função para obter o caminho da imagem com base no estado e nível
 function getPetImagePath(currentPet) {
-    // ATENÇÃO CRÍTICA: SUBSTITUA 'meu-tamagotchi' pelo NOME EXATO do seu repositório GitHub!
-    // Ex: Se o seu repositório for 'tamagotchi-game', use 'tamagotchi-game' (sem as barras)
-    const GITHUB_REPO_NAME = 'meu-tamagotchi'; // <<< ALTERAR APENAS ESTA STRING!
-
     let baseDir;
     // Verifica se estamos no ambiente local (file://) ou no GitHub Pages (http/https)
     if (window.location.protocol === 'file:') {
         // Para ambiente LOCAL: O caminho é relativo à pasta do script
-        baseDir = './imgs/';
+        baseDir = './imgs/'; 
     } else {
         // Para GitHub Pages: Construa o caminho completo usando o nome do repositório
-        // Isso resolve o erro 404 pois ele vai procurar em /meu-tamagotchi/imgs/
         baseDir = `/${GITHUB_REPO_NAME}/imgs/`; 
     }
 
@@ -523,6 +522,10 @@ function initializeGame() {
     if (inventoryButton) inventoryButton.addEventListener('click', handleInventory);
     if (gamesButton) gamesButton.addEventListener('click', handleGames);
     
+    // Logs de depuração
+    console.log("Protocolo da URL:", window.location.protocol); 
+    console.log("Nome do Repositório (configurado no JS):", GITHUB_REPO_NAME); 
+
     showScreen(startScreen); // Inicia na tela de nome
     updateDisplay(); // Atualiza o display inicial (mostrará o ovo na imagem padrão)
 }
