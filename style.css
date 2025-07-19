@@ -362,15 +362,18 @@ button:disabled {
 /* Estilos específicos para Pedra, Papel, Tesoura */
 .rps-choices {
     display: flex;
-    gap: 10px;
+    gap: 5px; /* Reduz o espaçamento entre os botões */
     margin-top: 10px;
+    flex-wrap: wrap; /* Permite quebrar linha se não couber tudo em uma */
+    justify-content: center; /* Centraliza os botões */
 }
 
 .rps-choices button {
-    font-size: 18px; /* Emojis maiores */
-    padding: 10px 15px;
+    font-size: 12px; /* Reduz o tamanho da fonte para caber o texto */
+    padding: 8px 10px; /* Ajusta o padding */
     background-color: #8BC34A; /* Verde mais suave */
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+    min-width: 70px; /* Define um mínimo para que os botões não fiquem minúsculos */
 }
 .rps-choices button:hover {
     background-color: #7CB342;
@@ -399,22 +402,24 @@ button:disabled {
 /* Estilos para Jogo da Velha */
 #ticTacToeBoard {
     display: grid;
-    grid-template-columns: repeat(3, 60px); /* 3 colunas de 60px */
-    grid-template-rows: repeat(3, 60px); /* 3 linhas de 60px */
+    /* Calcula o tamanho da célula para se ajustar ao container */
+    /* (largura da tela - padding da sub-tela - 2*gap) / 3 células */
+    grid-template-columns: repeat(3, minmax(50px, 70px)); /* Células responsivas */
+    grid-template-rows: repeat(3, minmax(50px, 70px)); /* Células responsivas */
     gap: 5px;
     background-color: #333; /* Cor das linhas */
     border: 2px solid #333;
     margin-top: 10px;
+    max-width: 90%; /* Garante que o tabuleiro não ultrapasse o container */
 }
 
 .cell {
-    width: 60px;
-    height: 60px;
-    background-color: #eee;
+    /* Ajusta o tamanho da fonte e alinhamento */
+    font-size: 36px; /* Reduz o tamanho da fonte para o X e O */
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 40px; /* Tamanho do X e O */
+    background-color: #eee;
     font-weight: bold;
     cursor: pointer;
     color: #222;
@@ -432,6 +437,8 @@ button:disabled {
 #ticTacToeStatus {
     margin-top: 10px;
     font-weight: bold;
+    text-align: center; /* Centraliza o status */
+    max-width: 90%; /* Evita que o texto vaze */
 }
 
 /* Botões de voltar específicos para os jogos */
