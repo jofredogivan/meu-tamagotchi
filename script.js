@@ -176,41 +176,49 @@ function getPetImageSrc() {
     }
     if (pet.isSleeping) {
         // Imagens específicas para dormir por estágio
-        if (pet.evolutionStage === 'baby') return getPetImagePath('bebe.dormindo.gif');
-        if (pet.evolutionStage === 'child') return getPetImagePath('crianca.dormindo.gif');
-        if (pet.evolutionStage === 'adult') return getPetImagePath('adulto.dormindo.gif'); // Você precisaria criar essa imagem
-        if (pet.evolutionStage === 'elder') return getPetImagePath('velho.dormindo.gif'); // Você precisaria criar essa imagem
-        return getPetImagePath('dormindo.gif'); // Imagem genérica para dormir se não houver estágio específico
+        if (pet.evolutionStage === 'baby') return getPetImagePath('bebe.dormindo.png');
+        if (pet.evolutionStage === 'child') return getPetImagePath('crianca.dormindo.png');
+        if (pet.evolutionStage === 'adult') return getPetImagePath('adulto.dormindo.png'); // Você precisaria criar essa imagem
+        if (pet.evolutionStage === 'elder') return getPetImagePath('velho.dormindo.png'); // Você precisaria criar essa imagem
+        return getPetImagePath('dormindo.png'); // Imagem genérica para dormir se não houver estágio específico
     }
     if (pet.isSick) {
         // Imagens específicas para doente por estágio
-        if (pet.evolutionStage === 'baby') return getPetImagePath('bebe.doente.gif');
-        if (pet.evolutionStage === 'child') return getPetImagePath('crianca.doente.gif');
-        if (pet.evolutionStage === 'adult') return getPetImagePath('adulto.doente.gif'); // Você precisaria criar essa imagem
-        if (pet.evolutionStage === 'elder') return getPetImagePath('velho.doente.gif'); // Você precisaria criar essa imagem
-        return getPetImagePath('doente.gif'); // Imagem genérica para doente
+        if (pet.evolutionStage === 'baby') return getPetImagePath('bebe.doente.png');
+        if (pet.evolutionStage === 'child') return getPetImagePath('crianca.doente.png');
+        if (pet.evolutionStage === 'adult') return getPetImagePath('adulto.doente.png'); // Você precisaria criar essa imagem
+        if (pet.evolutionStage === 'elder') return getPetImagePath('velho.doente.png'); // Você precisaria criar essa imagem
+        return getPetImagePath('doente.png'); // Imagem genérica para doente
     }
 
     switch (pet.evolutionStage) {
         case 'egg':
-            if (pet.isHatching) return getPetImagePath('ovo_rachando.gif');
-            if (pet.eggWarmth < 40) return getPetImagePath('ovo_frio.gif'); // Imagem de ovo frio
-            if (pet.eggWarmth > 100) return getPetImagePath('ovo_queimando.gif'); // Imagem de ovo queimando (se implementar)
-            return getPetImagePath('ovo.gif');
+            if (pet.isHatching) return getPetImagePath('ovo.rachando.png');
+            if (pet.eggWarmth < 40) return getPetImagePath('ovo.frio.png'); // Imagem de ovo frio
+            if (pet.eggWarmth > 100) return getPetImagePath('ovo.quente.png'); // Imagem de ovo queimando (se implementar)
+            return getPetImagePath('ovo.png');
         case 'baby':
-            if (pet.hunger < 50) return getPetImagePath('bebe.comendo.gif'); // Você pode adicionar mais condições para fome/brincadeira
-            if (pet.fun < 50) return getPetImagePath('bebe.brincando.gif');
-            return getPetImagePath('bebe.gif');
+            if (pet.hunger < 50) return getPetImagePath('bebe.comendo.png'); // Você pode adicionar mais condições para fome/brincadeira
+            if (pet.fun < 50) return getPetImagePath('bebe.brincando.png');
+            return getPetImagePath('bebe.png');
         case 'child':
-            if (pet.hunger < 50) return getPetImagePath('crianca.comendo.gif');
-            if (pet.fun < 50) return getPetImagePath('crianca.brincando.gif');
-            return getPetImagePath('crianca.gif');
+            if (pet.hunger < 50) return getPetImagePath('crianca.comendo.png');
+            if (pet.fun < 50) return getPetImagePath('crianca.brincando.png');
+            return getPetImagePath('crianca.png');
         case 'adult':
-            return getPetImagePath('adulto_padrao.gif'); // Imagem de adulto padrão
+            return getPetImagePath('adulto.feliz.png'); // Imagem de adulto padrão
         case 'elder':
-            return getPetImagePath('velho.gif'); // Imagem de velho
+            return getPetImagePath('velho.feliz.png'); // Imagem de velho
         default:
-            return getPetImagePath('ovo.gif');
+             return getPetImagePath('adulto.preguicoso.png'); // Imagem de adulto padrão
+        case 'elder':
+            return getPetImagePath('velho.preguicoso.png'); // Imagem de velho
+        default:
+             return getPetImagePath('adulto.comilona.png'); // Imagem de adulto padrão
+        case 'elder':
+            return getPetImagePath('velha.comilona.png'); // Imagem de velho
+        default:
+            return getPetImagePath('ovo.png');
     }
 }
 
@@ -434,7 +442,7 @@ function evolvePet() {
     if (pet.evolutionStage === 'egg' && pet.ageDays >= evolutionThresholds.baby) {
         // Animação de rachar o ovo
         pet.isHatching = true;
-        petImage.src = getPetImagePath('ovo_rachando.gif');
+        petImage.src = getPetImagePath('ovo.rachando.png');
         showMessage('O ovo está rachando!', 3000);
 
         setTimeout(() => {
