@@ -3,7 +3,7 @@ const startScreen = document.getElementById('startScreen');
 const tamagotchiScreen = document.getElementById('tamagotchiScreen');
 const shopScreen = document.getElementById('shopScreen');
 const inventoryScreen = document.getElementById('inventoryScreen');
-const gamesScreen = document.getElementById('gamesScreen'); // Nova tela de seleção de minigames
+const gamesScreen = document.getElementById('gamesScreen');
 
 const petNameInput = document.getElementById('petNameInput');
 const startGameBtn = document.getElementById('startGameBtn');
@@ -21,48 +21,47 @@ const sleepButton = document.getElementById('sleepButton');
 const vaccinateButton = document.getElementById('vaccinateButton');
 const shopButton = document.getElementById('shopButton');
 const inventoryButton = document.getElementById('inventoryButton');
-const gamesButton = document.getElementById('gamesButton'); // Botão para minigames
-const actionsContainer = document.getElementById('actions'); // Contêiner para os botões de ação
+const gamesButton = document.getElementById('gamesButton');
+const passDayButton = document.getElementById('passDayButton');
+const actionsContainer = document.getElementById('actions');
 
 const gameMessage = document.getElementById('gameMessage');
+const alertIconsContainer = document.getElementById('alertIcons');
 
-// Ícones de status
-const hungerIcon = document.getElementById('hungerIcon');
-const funIcon = document.getElementById('funIcon');
-const energyIcon = document.getElementById('energyIcon');
-const lifeIcon = document.getElementById('lifeIcon');
+const statusIconsContainer = document.querySelector('.status-icons');
 
-// Elementos para o cuidado do ovo
 const eggStatusGroup = document.getElementById('eggStatusGroup');
-const eggWarmthIcon = document.getElementById('eggWarmthIcon');
 const eggWarmthDisplay = document.getElementById('eggWarmthDisplay');
 const warmEggButton = document.getElementById('warmEggButton');
 
 
 // --- Variáveis do Jogo ---
-const GITHUB_REPO_NAME = 'meu-tamagotchi'; // **Mude isso para o nome exato do seu repositório GitHub**
+const GITHUB_REPO_NAME = 'meu-tamagotchi';
 
 let pet = {
     name: '',
-    level: 0, // 0 = Ovo, 1 = Bebê, 2 = Criança, 3 = Adulto, 4 = Velho
-    hunger: 100, // 0-100 (100 = satisfeito)
-    fun: 100,    // 0-100 (100 = divertido)
-    energy: 100, // 0-100 (100 = energizado)
-    health: 100, // 0-100 (100 = saudável)
+    level: 0,
+    hunger: 100,
+    fun: 100,
+    energy: 100,
+    health: 100,
     isSleeping: false,
     isSick: false,
     ageDays: 0,
     moedas: 0,
-    eggWarmth: 100, // 0-100 (100 = temperatura ideal para o ovo)
+    eggWarmth: 100,
     isHatching: false,
-    evolutionStage: 'egg' // 'egg', 'baby', 'child', 'adult', 'elder', 'dead'
+    isHot: false,
+    evolutionStage: 'egg',
+    personality: 'default',
+    currentAction: null
 };
 
 const evolutionThresholds = {
-    baby: 3,   // Dias para evoluir de ovo para bebê
-    child: 7,  // Dias para evoluir de bebê para criança
-    adult: 15, // Dias para evoluir de criança para adulto
-    elder: 25  // Dias para evoluir de adulto para velho
+    baby: 2,
+    child: 9,
+    adult: 16,
+    elder: 23
 };
 
 const itemPrices = {
@@ -79,7 +78,6 @@ let inventory = {
 
 let gameInterval;
 let statusUpdateInterval;
-let petEvolutionTimeout;
 
 // --- Funções Auxiliares de Caminho de Imagem ---
 function getPetImagePath(imageName) {
@@ -87,23 +85,15 @@ function getPetImagePath(imageName) {
     if (isGitHubPages && GITHUB_REPO_NAME) {
         return `/${GITHUB_REPO_NAME}/imgs/${imageName}`;
     }
-    return `imgs/${imageName}`; // Caminho para execução local
-}
-
-function getIconPath(iconName) {
-    const isGitHubPages = window.location.hostname.endsWith('github.io');
-    if (isGitHubPages && GITHUB_REPO_NAME) {
-        return `/${GITHUB_REPO_NAME}/imgs/${iconName}`;
-    }
-    return `imgs/${iconName}`;
+    return `imgs/${imageName}`;
 }
 
 // --- Funções do Jogo ---
 
 function showScreen(screenToShow) {
-    const screens = [startScreen, tamagotchiScreen, shopScreen, inventoryScreen, gamesScreen, rpsGame, numberGuessingGame, ticTacToeGame];
+    const screens = [startScreen, tamagotchiScreen, shopScreen, inventoryScreen, gamesScreen, document.getElementById('rpsGame'), document.getElementById('numberGuessingGame'), document.getElementById('ticTacToeGame')];
     screens.forEach(screen => {
-        if (screen) { // Garante que o elemento existe
+        if (screen) {
             screen.classList.add('hidden');
         }
     });
@@ -115,21 +105,32 @@ function showScreen(screenToShow) {
 function updateDisplay() {
     petNameDisplay.textContent = `Nome: ${pet.name}`;
     moodDisplay.textContent = `Humor: ${getMood()}`;
-    statusDisplay.textContent = `Status: ${getStatus()}`;
     nivelDisplay.textContent = `Nível: ${getEvolutionStageText()} (Idade: ${pet.ageDays} dias)`;
     moedasDisplay.textContent = `Moedas: ${pet.moedas}`;
 
-    // Atualiza a imagem do pet
     petImage.src = getPetImageSrc();
 
-    // Atualiza visibilidade e estado dos ícones de status
-    updateStatusIcons();
+    let statusText = '';
+    if (pet.isSick) statusText += 'Doente 😞 ';
+    if (pet.isSleeping) statusText += 'Dormindo 😴 ';
+    if (pet.evolutionStage === 'egg') {
+        if (pet.eggWarmth < 30) statusText += 'Ovo Frio 🥶 ';
+        else if (pet.eggWarmth < 60) statusText += 'Ovo Esfriando 🤔 ';
+        else statusText += 'Ovo 🥚 ';
+    } else {
+        if (pet.hunger < 30) statusText += 'Fome 🍔 ';
+        if (pet.fun < 30) statusText += 'Entediado 🙁 ';
+        if (pet.energy < 30 && !pet.isSleeping) statusText += 'Cansado 😪 ';
+    }
+    statusDisplay.textContent = `Status: ${statusText.trim()}`;
 
-    // Atualiza o display do ovo
+    if (statusIconsContainer) {
+        statusIconsContainer.classList.add('hidden');
+    }
+
     updateEggDisplay();
-
-    // Gerencia a visibilidade dos botões de ação
     updateActionButtonsVisibility();
+    checkAlerts();
 }
 
 function getMood() {
@@ -138,24 +139,6 @@ function getMood() {
     if (pet.hunger < 30 || pet.fun < 30 || pet.energy < 30) return 'Triste 😟';
     if (pet.hunger > 80 && pet.fun > 80 && pet.energy > 80) return 'Radiante 😄';
     return 'Normal 🙂';
-}
-
-function getStatus() {
-    if (pet.isSick) return 'Doente';
-    if (pet.isSleeping) return 'Dormindo';
-    if (pet.evolutionStage === 'egg' && pet.isHatching) return 'Ovo está rachando!';
-    if (pet.evolutionStage === 'egg') {
-        if (pet.eggWarmth < 30) return 'Ovo Frio!';
-        if (pet.eggWarmth < 60) return 'Ovo Esfriando...';
-        return 'Ovo';
-    }
-    if (pet.hunger < 20) return 'Morrendo de Fome!';
-    if (pet.hunger < 50) return 'Com Fome';
-    if (pet.fun < 20) return 'Entediado!';
-    if (pet.fun < 50) return 'Um pouco entediado';
-    if (pet.energy < 20) return 'Exausto!';
-    if (pet.energy < 50) return 'Cansado';
-    return 'Bem';
 }
 
 function getEvolutionStageText() {
@@ -174,118 +157,64 @@ function getPetImageSrc() {
     if (pet.evolutionStage === 'dead') {
         return getPetImagePath('morto.png');
     }
+    
+    if (pet.currentAction) {
+        const stage = pet.evolutionStage;
+        if (pet.currentAction === 'eating') {
+            if (stage === 'baby') return getPetImagePath('bebe_comendo.png');
+            if (stage === 'child') return getPetImagePath('crianca_comendo.png');
+            if (stage === 'adult') return getPetImagePath('adulto_comilao.png');
+            if (stage === 'elder') return getPetImagePath('velha_comilona.png');
+        } else if (pet.currentAction === 'playing') {
+            if (stage === 'baby') return getPetImagePath('bebe_brincando.png');
+            if (stage === 'child') return getPetImagePath('crianca_brincando.png');
+            if (stage === 'adult') return getPetImagePath('adulto_feliz.png');
+            if (stage === 'elder') return getPetImagePath('velho_feliz.png');
+        }
+    }
+
     if (pet.isSleeping) {
-        // Imagens específicas para dormir por estágio
-        if (pet.evolutionStage === 'baby') return getPetImagePath('bebe.dormindo.png');
-        if (pet.evolutionStage === 'child') return getPetImagePath('crianca.dormindo.png');
-        if (pet.evolutionStage === 'adult') return getPetImagePath('adulto.dormindo.png'); // Você precisaria criar essa imagem
-        if (pet.evolutionStage === 'elder') return getPetImagePath('velho.dormindo.png'); // Você precisaria criar essa imagem
-        return getPetImagePath('dormindo.png'); // Imagem genérica para dormir se não houver estágio específico
+        const stage = pet.evolutionStage;
+        if (stage === 'baby') return getPetImagePath('bebe_dormindo.png');
+        if (stage === 'child') return getPetImagePath('crianca_dormindo.png');
+        if (stage === 'adult') return getPetImagePath('adulto_preguicoso.png');
+        if (stage === 'elder') return getPetImagePath('velho_dormindo.png');
+        return getPetImagePath('dormindo.png');
     }
+    
     if (pet.isSick) {
-        // Imagens específicas para doente por estágio
-        if (pet.evolutionStage === 'baby') return getPetImagePath('bebe.doente.png');
-        if (pet.evolutionStage === 'child') return getPetImagePath('crianca.doente.png');
-        if (pet.evolutionStage === 'adult') return getPetImagePath('adulto.doente.png'); // Você precisaria criar essa imagem
-        if (pet.evolutionStage === 'elder') return getPetImagePath('velho.doente.png'); // Você precisaria criar essa imagem
-        return getPetImagePath('doente.png'); // Imagem genérica para doente
+        const stage = pet.evolutionStage;
+        if (stage === 'baby') return getPetImagePath('bebe_doente.png');
+        if (stage === 'child') return getPetImagePath('crianca_doente.png');
+        if (stage === 'elder') return getPetImagePath('velho_doente.png');
+        return getPetImagePath('doente.png');
     }
+    
+    const stage = pet.evolutionStage;
+    if (stage === 'egg') {
+        if (pet.isHatching) return getPetImagePath('ovo_rachando.png');
+        if (pet.isHot) return getPetImagePath('ovo_quente.png');
+        if (pet.eggWarmth < 40) return getPetImagePath('ovo_frio.png');
+        return getPetImagePath('ovo.png');
+    }
+    
+    if (stage === 'baby') return getPetImagePath('bebe.png');
+    if (stage === 'child') return getPetImagePath('crianca.png');
+    if (stage === 'adult') return getPetImagePath('adulto_feliz.png');
+    if (stage === 'elder') return getPetImagePath('velho_feliz.png');
 
-    switch (pet.evolutionStage) {
-        case 'egg':
-            if (pet.isHatching) return getPetImagePath('ovo.rachando.png');
-            if (pet.eggWarmth < 40) return getPetImagePath('ovo.frio.png'); // Imagem de ovo frio
-            if (pet.eggWarmth > 100) return getPetImagePath('ovo.quente.png'); // Imagem de ovo queimando (se implementar)
-            return getPetImagePath('ovo.png');
-        case 'baby':
-            if (pet.hunger < 50) return getPetImagePath('bebe.comendo.png'); // Você pode adicionar mais condições para fome/brincadeira
-            if (pet.fun < 50) return getPetImagePath('bebe.brincando.png');
-            return getPetImagePath('bebe.png');
-        case 'child':
-            if (pet.hunger < 50) return getPetImagePath('crianca.comendo.png');
-            if (pet.fun < 50) return getPetImagePath('crianca.brincando.png');
-            return getPetImagePath('crianca.png');
-        case 'adult':
-            return getPetImagePath('adulto.feliz.png'); // Imagem de adulto padrão
-        case 'elder':
-            return getPetImagePath('velho.feliz.png'); // Imagem de velho
-        default:
-             return getPetImagePath('adulto.preguicoso.png'); // Imagem de adulto padrão
-        case 'elder':
-            return getPetImagePath('velho.preguicoso.png'); // Imagem de velho
-        default:
-             return getPetImagePath('adulto.comilona.png'); // Imagem de adulto padrão
-        case 'elder':
-            return getPetImagePath('velha.comilona.png'); // Imagem de velho
-        default:
-            return getPetImagePath('ovo.png');
-    }
-}
-
-function updateStatusIcons() {
-    // Esconde todos os ícones primeiro
-    hungerIcon.classList.add('hidden');
-    funIcon.classList.add('hidden');
-    energyIcon.classList.add('hidden');
-    lifeIcon.classList.add('hidden');
-
-    // Remove classes de blinking e cold/critical
-    hungerIcon.classList.remove('blinking');
-    funIcon.classList.remove('blinking');
-    energyIcon.classList.remove('blinking');
-    lifeIcon.classList.remove('blinking');
-    eggWarmthIcon.classList.remove('cold', 'critical');
-    eggStatusGroup.classList.add('hidden'); // Esconde o grupo do ovo por padrão
-
-    if (pet.evolutionStage === 'dead') return;
-
-    // Mostra e anima o ícone de fome
-    if (pet.hunger < 70) {
-        hungerIcon.classList.remove('hidden');
-        if (pet.hunger < 30) hungerIcon.classList.add('blinking');
-    }
-    // Mostra e anima o ícone de diversão
-    if (pet.fun < 70) {
-        funIcon.classList.remove('hidden');
-        if (pet.fun < 30) funIcon.classList.add('blinking');
-    }
-    // Mostra e anima o ícone de energia
-    if (pet.energy < 70 && !pet.isSleeping) { // Não mostra o ícone de energia baixa se estiver dormindo
-        energyIcon.classList.remove('hidden');
-        if (pet.energy < 30) energyIcon.classList.add('blinking');
-    }
-    // Mostra e anima o ícone de saúde
-    if (pet.isSick) {
-        lifeIcon.classList.remove('hidden');
-        lifeIcon.classList.add('blinking');
-    }
-
-    // Mostra e atualiza o display de aquecimento do ovo
-    if (pet.evolutionStage === 'egg') {
-        eggStatusGroup.classList.remove('hidden');
-        eggWarmthDisplay.textContent = `Aquecimento: ${pet.eggWarmth}%`;
-        if (pet.eggWarmth < 40) {
-            eggWarmthIcon.classList.add('cold');
-        }
-        if (pet.eggWarmth < 20) {
-            eggWarmthIcon.classList.add('critical');
-        }
-    }
+    return getPetImagePath('ovo.png');
 }
 
 function updateEggDisplay() {
     if (pet.evolutionStage === 'egg') {
         eggStatusGroup.classList.remove('hidden');
-        eggWarmthDisplay.textContent = `Aquecimento: ${pet.eggWarmth}%`;
-        eggWarmthIcon.classList.remove('cold', 'critical'); // Limpa estados anteriores
-        
-        if (pet.eggWarmth < 40 && pet.eggWarmth >= 20) {
-            eggWarmthIcon.classList.add('cold');
-        } else if (pet.eggWarmth < 20) {
-            eggWarmthIcon.classList.add('critical');
+        if (typeof pet.eggWarmth !== 'number' || isNaN(pet.eggWarmth)) {
+            pet.eggWarmth = 100; // Reseta o valor se for inválido
         }
+        eggWarmthDisplay.textContent = `Aquecimento: ${pet.eggWarmth.toFixed(0)}%`;
     } else {
-        eggStatusGroup.classList.add('hidden'); // Esconde o status do ovo para outros estágios
+        eggStatusGroup.classList.add('hidden');
     }
 }
 
@@ -294,55 +223,97 @@ function updateActionButtonsVisibility() {
     const isSleeping = pet.isSleeping;
     const isDead = pet.evolutionStage === 'dead';
 
-    // Oculta todos os botões por padrão, exceto os de navegação
     feedButton.classList.add('hidden');
     playButton.classList.add('hidden');
     sleepButton.classList.add('hidden');
     vaccinateButton.classList.add('hidden');
     warmEggButton.classList.add('hidden');
+    passDayButton.classList.add('hidden');
 
-    // Remove o botão de reiniciar se estiver lá
     let restartBtn = document.getElementById('restartButton');
     if (restartBtn) {
         restartBtn.remove();
     }
 
     if (isDead) {
-        // Mostra apenas o botão de reiniciar se estiver morto
         restartBtn = document.createElement('button');
         restartBtn.id = 'restartButton';
         restartBtn.className = 'action-button';
         restartBtn.textContent = 'Reiniciar Jogo';
         restartBtn.addEventListener('click', restartGame);
         actionsContainer.appendChild(restartBtn);
-        // Oculta os botões de navegação quando morto
+
         shopButton.classList.add('hidden');
         inventoryButton.classList.add('hidden');
         gamesButton.classList.add('hidden');
     } else if (isEgg) {
         warmEggButton.classList.remove('hidden');
-        // Oculta os botões de navegação para o ovo
         shopButton.classList.add('hidden');
         inventoryButton.classList.add('hidden');
         gamesButton.classList.add('hidden');
+        
+        if(pet.eggWarmth >= 100) {
+            passDayButton.classList.remove('hidden');
+            passDayButton.textContent = 'Chocar o Ovo';
+        } else {
+            passDayButton.classList.add('hidden');
+        }
+        
     } else if (isSleeping) {
-        // Mostrar apenas o botão de acordar
         sleepButton.classList.remove('hidden');
         sleepButton.textContent = 'Acordar';
-        // Oculta os botões de navegação quando dormindo
         shopButton.classList.add('hidden');
         inventoryButton.classList.add('hidden');
         gamesButton.classList.add('hidden');
+        passDayButton.classList.add('hidden');
     } else {
-        // Mostra os botões de ação normais e os de navegação
         feedButton.classList.remove('hidden');
         playButton.classList.remove('hidden');
         sleepButton.classList.remove('hidden');
-        sleepButton.textContent = 'Dormir'; // Garante que o texto esteja correto
+        sleepButton.textContent = 'Dormir';
         vaccinateButton.classList.remove('hidden');
         shopButton.classList.remove('hidden');
         inventoryButton.classList.remove('hidden');
         gamesButton.classList.remove('hidden');
+        passDayButton.classList.remove('hidden');
+        passDayButton.textContent = 'Passar o Dia';
+    }
+}
+
+function checkAlerts() {
+    alertIconsContainer.innerHTML = '';
+    if (pet.evolutionStage !== 'egg') {
+        if (pet.hunger < 30) {
+            const hungryIcon = document.createElement('span');
+            hungryIcon.textContent = '🍔';
+            hungryIcon.classList.add('blinking');
+            alertIconsContainer.appendChild(hungryIcon);
+        }
+        if (pet.fun < 30) {
+            const boredIcon = document.createElement('span');
+            boredIcon.textContent = '🙁';
+            boredIcon.classList.add('blinking');
+            alertIconsContainer.appendChild(boredIcon);
+        }
+        if (pet.energy < 30) {
+            const tiredIcon = document.createElement('span');
+            tiredIcon.textContent = '😪';
+            tiredIcon.classList.add('blinking');
+            alertIconsContainer.appendChild(tiredIcon);
+        }
+        if (pet.isSick) {
+            const sickIcon = document.createElement('span');
+            sickIcon.textContent = '🤒';
+            sickIcon.classList.add('blinking');
+            alertIconsContainer.appendChild(sickIcon);
+        }
+    } else {
+        if (pet.eggWarmth < 30) {
+            const coldIcon = document.createElement('span');
+            coldIcon.textContent = '🥶';
+            coldIcon.classList.add('blinking');
+            alertIconsContainer.appendChild(coldIcon);
+        }
     }
 }
 
@@ -361,10 +332,9 @@ function feedPet(amount = 20) {
         return;
     }
     pet.hunger = Math.min(100, pet.hunger + amount);
-    pet.health = Math.min(100, pet.health + 5); // Pequeno boost na saúde
-    pet.moedas += 1; // Ganha uma moeda ao alimentar
+    pet.health = Math.min(100, pet.health + 5);
+    pet.moedas += 1;
     showMessage(`${pet.name} comeu e está mais feliz! +1 moeda!`);
-    updateDisplay();
 }
 
 function playWithPet(amount = 20) {
@@ -377,10 +347,9 @@ function playWithPet(amount = 20) {
         return;
     }
     pet.fun = Math.min(100, pet.fun + amount);
-    pet.energy = Math.max(0, pet.energy - 10); // Gasta energia ao brincar
-    pet.moedas += 2; // Ganha duas moedas ao brincar
+    pet.energy = Math.max(0, pet.energy - 10);
+    pet.moedas += 2;
     showMessage(`${pet.name} brincou e se divertiu muito! +2 moedas!`);
-    updateDisplay();
 }
 
 function toggleSleep() {
@@ -392,20 +361,20 @@ function toggleSleep() {
     pet.isSleeping = !pet.isSleeping;
     if (pet.isSleeping) {
         showMessage(`${pet.name} foi dormir... Zzzzz`);
-        clearInterval(gameInterval); // Pausa o jogo
+        clearInterval(gameInterval);
         statusUpdateInterval = setInterval(() => {
-            pet.energy = Math.min(100, pet.energy + 5); // Recupera energia mais rápido
-            pet.health = Math.min(100, pet.health + 2); // Recupera saúde lentamente
+            pet.energy = Math.min(100, pet.energy + 5);
+            pet.health = Math.min(100, pet.health + 2);
             updateDisplay();
             if (pet.energy >= 100) {
                 showMessage(`${pet.name} acordou revigorado!`);
-                toggleSleep(); // Acorda automaticamente quando a energia está cheia
+                toggleSleep();
             }
-        }, 1000); // Atualiza a cada 1 segundo enquanto dorme
+        }, 1000);
     } else {
         showMessage(`${pet.name} acordou!`);
-        clearInterval(statusUpdateInterval); // Limpa o intervalo de atualização de status
-        startGameLoop(); // Reinicia o loop principal do jogo
+        clearInterval(statusUpdateInterval);
+        startGameLoop();
     }
     updateDisplay();
 }
@@ -415,11 +384,11 @@ function vaccinatePet() {
         showMessage('Não é o momento certo para vacinar!');
         return;
     }
-    const vaccinePrice = 5; // Preço da vacina
+    const vaccinePrice = 5;
     if (pet.moedas >= vaccinePrice) {
         pet.moedas -= vaccinePrice;
         pet.isSick = false;
-        pet.health = Math.min(100, pet.health + 30); // Grande boost na saúde
+        pet.health = Math.min(100, pet.health + 30);
         showMessage(`${pet.name} foi vacinado e está se sentindo melhor!`);
     } else {
         showMessage('Você não tem moedas suficientes para vacinar!');
@@ -433,25 +402,20 @@ function warmEgg(amount = 10) {
         return;
     }
     pet.eggWarmth = Math.min(100, pet.eggWarmth + amount);
-    pet.moedas += 1; // Ganha moeda por cuidar do ovo
+    pet.moedas += 1;
     showMessage('Você aqueceu o ovo! +1 moeda!');
+
+    pet.isHot = true;
     updateDisplay();
+    setTimeout(() => {
+        pet.isHot = false;
+        updateDisplay();
+    }, 2000);
 }
 
 function evolvePet() {
-    if (pet.evolutionStage === 'egg' && pet.ageDays >= evolutionThresholds.baby) {
-        // Animação de rachar o ovo
-        pet.isHatching = true;
-        petImage.src = getPetImagePath('ovo.rachando.png');
-        showMessage('O ovo está rachando!', 3000);
-
-        setTimeout(() => {
-            pet.evolutionStage = 'baby';
-            pet.level = 1;
-            pet.isHatching = false; // Termina a animação
-            showMessage(`${pet.name} nasceu! É um bebê!`, 3000);
-            updateDisplay();
-        }, 3000); // Tempo para a animação do ovo rachando
+    if (pet.evolutionStage === 'egg') {
+        // A lógica de chocar agora está no passDay()
     } else if (pet.evolutionStage === 'baby' && pet.ageDays >= evolutionThresholds.child) {
         pet.evolutionStage = 'child';
         pet.level = 2;
@@ -459,95 +423,115 @@ function evolvePet() {
     } else if (pet.evolutionStage === 'child' && pet.ageDays >= evolutionThresholds.adult) {
         pet.evolutionStage = 'adult';
         pet.level = 3;
+        if (pet.hunger < 50) {
+            pet.personality = 'comilao';
+        } else if (pet.fun < 50) {
+            pet.personality = 'preguicoso';
+        } else {
+            pet.personality = 'feliz';
+        }
         showMessage(`${pet.name} cresceu! Agora é um adulto!`, 3000);
     } else if (pet.evolutionStage === 'adult' && pet.ageDays >= evolutionThresholds.elder) {
         pet.evolutionStage = 'elder';
         pet.level = 4;
-        showMessage(`${pet.name} cresceu! Agora é um velhinho!`, 3000);
+        showMessage(`${pet.name} envelheceu! Agora é um velhinho!`, 3000);
     }
     updateDisplay();
 }
 
 function checkPetStatus() {
-    if (pet.evolutionStage === 'dead') return; // Não verifica status se estiver morto
+    if (pet.evolutionStage === 'dead') return;
 
-    // Decrementa stats apenas se não estiver dormindo ou for um ovo
     if (!pet.isSleeping && pet.evolutionStage !== 'egg') {
         pet.hunger = Math.max(0, pet.hunger - 2);
         pet.fun = Math.max(0, pet.fun - 2);
         pet.energy = Math.max(0, pet.energy - 2);
     }
     
-    // Decrementa aquecimento do ovo
     if (pet.evolutionStage === 'egg') {
-        pet.eggWarmth = Math.max(0, pet.eggWarmth - 1);
-        if (pet.eggWarmth <= 0 && !pet.isHatching) {
-            showMessage('O ovo está congelando! Aqueça-o!', 2000);
-        }
+        pet.eggWarmth = Math.max(0, pet.eggWarmth - 2);
     }
 
-
-    // Verifica a saúde e doença
     if (pet.hunger < 20 || pet.fun < 20 || pet.energy < 20 || pet.eggWarmth <= 0) {
-        if (Math.random() < 0.1) { // 10% de chance de ficar doente se o status estiver muito baixo
+        if (Math.random() < 0.1) {
             pet.isSick = true;
-            showMessage(`${pet.name} está ficando doente!`, 2000);
         }
     }
 
     if (pet.isSick) {
-        pet.health = Math.max(0, pet.health - 5); // Perde saúde mais rápido se doente
+        pet.health = Math.max(0, pet.health - 5);
     } else {
-        pet.health = Math.min(100, pet.health + 1); // Recupera saúde lentamente se saudável
+        pet.health = Math.min(100, pet.health + 1);
     }
 
-    // Morte
-    if (pet.health <= 0 || (pet.evolutionStage === 'egg' && pet.eggWarmth <= 0 && pet.ageDays > 0)) {
+    if (pet.health <= 0 || (pet.evolutionStage === 'egg' && pet.eggWarmth <= 0)) {
         pet.evolutionStage = 'dead';
         showMessage(`${pet.name} faleceu. 😢`, 5000);
-        clearInterval(gameInterval); // Para o loop do jogo
+        clearInterval(gameInterval);
         petImage.src = getPetImagePath('morto.png');
-        updateActionButtonsVisibility(); // Atualiza para mostrar apenas o restart
+        updateActionButtonsVisibility();
         return;
     }
+    
+    // Log para depuração e para mostrar a lógica de morte ao usuário
+    console.log(`[Status de Debug] ${pet.name} - Fome: ${pet.hunger}, Diversão: ${pet.fun}, Energia: ${pet.energy}, Saúde: ${pet.health}, Aquecimento: ${pet.eggWarmth}`);
+
 
     updateDisplay();
 }
 
 function passDay() {
-    pet.ageDays++;
-    // Adiciona moedas por dia vivo (excluindo ovo e morto)
-    if (pet.evolutionStage !== 'egg' && pet.evolutionStage !== 'dead') {
-        pet.moedas += 5;
+    if(pet.evolutionStage === 'dead' || pet.isSleeping) {
+        showMessage('Não é possível passar o dia agora.');
+        return;
     }
-    evolvePet();
+    
+    if (pet.evolutionStage === 'egg') {
+        if (pet.eggWarmth >= 100) {
+            pet.isHatching = true;
+            showMessage('O ovo está rachando!', 3000);
+            updateDisplay();
+            
+            setTimeout(() => {
+                petImage.src = getPetImagePath('ovo_quebrado.png');
+                showMessage('O ovo quebrou!', 2000);
+                
+                setTimeout(() => {
+                    pet.evolutionStage = 'baby';
+                    pet.level = 1;
+                    pet.ageDays = 1;
+                    pet.isHatching = false;
+                    showMessage(`${pet.name} nasceu! É um bebê!`, 3000);
+                    updateDisplay();
+                }, 2000);
+            }, 3000);
+        } else {
+            showMessage('O ovo precisa estar totalmente aquecido para chocar!');
+        }
+    } else {
+        pet.ageDays++;
+        pet.moedas += 5;
+        evolvePet();
+        showMessage(`Um novo dia começou! ${pet.name} ganhou 5 moedas!`);
+    }
     updateDisplay();
 }
 
 function startGameLoop() {
-    // Limpa qualquer intervalo existente para evitar duplicidade
     if (gameInterval) clearInterval(gameInterval);
     if (statusUpdateInterval) clearInterval(statusUpdateInterval);
 
-    // Loop principal do jogo: a cada 2 segundos
     gameInterval = setInterval(() => {
         checkPetStatus();
-    }, 2000);
-
-    // Loop para passar os dias: a cada 10 segundos
-    // Pode ser ajustado para um dia real ou mais longo para um ciclo de vida mais lento
-    setInterval(() => {
-        passDay();
-    }, 10000); // 10 segundos = 1 dia do pet
+    }, 5000);
 }
 
 function initializeGame() {
     pet.name = petNameInput.value.trim();
     if (pet.name === '') {
-        pet.name = 'Seu Tamago'; // Nome padrão
+        pet.name = 'Seu Tamago';
     }
 
-    // Reseta o estado do pet para o início de um novo jogo
     pet = {
         name: pet.name,
         level: 0,
@@ -561,8 +545,16 @@ function initializeGame() {
         moedas: 0,
         eggWarmth: 100,
         isHatching: false,
-        evolutionStage: 'egg'
+        isHot: false,
+        evolutionStage: 'egg',
+        personality: 'default',
+        currentAction: null
     };
+    
+    // Prevenção de bug com valor NaN
+    if (typeof pet.eggWarmth !== 'number') {
+        pet.eggWarmth = 100;
+    }
 
     inventory = {
         "ração premium": 0,
@@ -572,13 +564,12 @@ function initializeGame() {
 
     showScreen(tamagotchiScreen);
     updateDisplay();
-    startGameLoop(); // Inicia os loops do jogo
+    startGameLoop();
 }
 
 function restartGame() {
-    // Redefine todas as variáveis para o estado inicial
     pet = {
-        name: '', // Será definido na tela inicial
+        name: '',
         level: 0,
         hunger: 100,
         fun: 100,
@@ -590,7 +581,10 @@ function restartGame() {
         moedas: 0,
         eggWarmth: 100,
         isHatching: false,
-        evolutionStage: 'egg'
+        isHot: false,
+        evolutionStage: 'egg',
+        personality: 'default',
+        currentAction: null
     };
 
     inventory = {
@@ -599,17 +593,14 @@ function restartGame() {
         "vacina forte": 0
     };
 
-    // Limpa quaisquer intervalos de jogo
     clearInterval(gameInterval);
     clearInterval(statusUpdateInterval);
-    clearTimeout(petEvolutionTimeout); // Limpa qualquer timeout de evolução pendente
 
-    // Limpa o campo de nome do pet na tela inicial
     petNameInput.value = '';
+    alertIconsContainer.innerHTML = '';
 
-    // Volta para a tela inicial
     showScreen(startScreen);
-    updateDisplay(); // Atualiza para o estado inicial
+    updateDisplay();
 }
 
 // --- Funções da Loja ---
@@ -620,7 +611,7 @@ function showShop() {
 
 function renderShopItems() {
     const shopItemsDiv = document.getElementById('shopItems');
-    shopItemsDiv.innerHTML = ''; // Limpa itens anteriores
+    shopItemsDiv.innerHTML = '';
 
     for (const item in itemPrices) {
         const itemCard = document.createElement('div');
@@ -647,8 +638,8 @@ function buyItem(item) {
         pet.moedas -= price;
         inventory[item]++;
         showMessage(`Você comprou ${item}!`);
-        updateDisplay(); // Atualiza moedas no display principal
-        renderShopItems(); // Re-renderiza a loja para refletir a moeda atualizada
+        updateDisplay();
+        renderShopItems();
     } else {
         showMessage('Moedas insuficientes!');
     }
@@ -662,7 +653,7 @@ function showInventory() {
 
 function renderInventoryItems() {
     const inventoryItemsDiv = document.getElementById('inventoryItems');
-    inventoryItemsDiv.innerHTML = ''; // Limpa itens anteriores
+    inventoryItemsDiv.innerHTML = '';
 
     let hasItems = false;
     for (const item in inventory) {
@@ -700,18 +691,18 @@ function useItem(item) {
     if (inventory[item] > 0) {
         inventory[item]--;
         if (item === "ração premium") {
-            feedPet(40); // Rações premium alimentam mais
+            feedPet(40);
             showMessage(`${pet.name} comeu a ração premium!`);
         } else if (item === "brinquedo de bolinhas") {
-            playWithPet(40); // Brinquedos de bolinhas divertem mais
+            playWithPet(40);
             showMessage(`${pet.name} brincou com o brinquedo de bolinhas!`);
         } else if (item === "vacina forte") {
             pet.isSick = false;
-            pet.health = Math.min(100, pet.health + 50); // Vacina forte cura mais
+            pet.health = Math.min(100, pet.health + 50);
             showMessage(`${pet.name} tomou a vacina forte!`);
         }
         updateDisplay();
-        renderInventoryItems(); // Re-renderiza o inventário
+        renderInventoryItems();
     } else {
         showMessage('Você não tem este item!');
     }
@@ -722,7 +713,6 @@ const rpsGame = document.getElementById('rpsGame');
 const numberGuessingGame = document.getElementById('numberGuessingGame');
 const ticTacToeGame = document.getElementById('ticTacToeGame');
 
-// Pedra, Papel e Tesoura
 const rpsResult = document.getElementById('rpsResult');
 const rpsRockBtn = document.getElementById('rpsRock');
 const rpsPaperBtn = document.getElementById('rpsPaper');
@@ -783,7 +773,6 @@ function playRPS(playerChoice) {
     updateDisplay();
 }
 
-// Adivinhe o Número
 const ngGuessInput = document.getElementById('ngGuessInput');
 const ngSubmitGuessBtn = document.getElementById('ngSubmitGuessBtn');
 const ngResult = document.getElementById('ngResult');
@@ -837,7 +826,6 @@ function submitGuess() {
     updateDisplay();
 }
 
-// Jogo da Velha (Tic Tac Toe)
 const ticTacToeBoard = document.getElementById('ticTacToeBoard');
 const ticTacToeStatus = document.getElementById('ticTacToeStatus');
 const ticTacToeCells = document.querySelectorAll('.tic-tac-toe-board .cell');
@@ -845,13 +833,13 @@ const ticTacToePlayAgainBtn = document.getElementById('ticTacToePlayAgainBtn');
 const ticTacToeBackToGamesBtn = document.getElementById('ticTacToeBackToGamesBtn');
 
 let board;
-let currentPlayer; // 'X' para jogador, 'O' para AI
+let currentPlayer;
 let gameActive;
 
 const WINNING_COMBINATIONS = [
-    [0, 1, 2], [3, 4, 5], [6, 7, 8], // Linhas
-    [0, 3, 6], [1, 4, 7], [2, 5, 8], // Colunas
-    [0, 4, 8], [2, 4, 6]             // Diagonais
+    [0, 1, 2], [3, 4, 5], [6, 7, 8],
+    [0, 3, 6], [1, 4, 7], [2, 5, 8],
+    [0, 4, 8], [2, 4, 6]
 ];
 
 function showTicTacToeGame() {
@@ -862,13 +850,13 @@ function showTicTacToeGame() {
 
 function startTicTacToe() {
     board = ['', '', '', '', '', '', '', '', ''];
-    currentPlayer = 'X'; // Sempre começa com o jogador
+    currentPlayer = 'X';
     gameActive = true;
     ticTacToeStatus.textContent = "Sua vez (X)";
     ticTacToeCells.forEach(cell => {
         cell.textContent = '';
         cell.classList.remove('player-x', 'player-o', 'winning-cell');
-        cell.addEventListener('click', handleCellClick, { once: true }); // Garante que o click só funciona uma vez por célula
+        cell.addEventListener('click', handleCellClick, { once: true });
     });
     ticTacToePlayAgainBtn.classList.add('hidden');
 }
@@ -883,9 +871,54 @@ function handleCellClick(event) {
 
     makeMove(clickedCell, clickedCellIndex, currentPlayer);
     
-    if (gameActive) { // Verifica se o jogo ainda está ativo após o movimento do jogador
-        setTimeout(aiMove, 500); // AI joga após um pequeno atraso
+    if (gameActive) {
+        setTimeout(aiMove, 500);
     }
+}
+
+function aiMove() {
+    const bestMove = getBestAIMove();
+    if (bestMove !== -1) {
+        const cell = ticTacToeCells[bestMove];
+        makeMove(cell, bestMove, 'O');
+    }
+}
+
+function getBestAIMove() {
+    for (let i = 0; i < board.length; i++) {
+        if (board[i] === '') {
+            board[i] = 'O';
+            if (checkWin('O')) {
+                board[i] = '';
+                return i;
+            }
+            board[i] = '';
+        }
+    }
+
+    for (let i = 0; i < board.length; i++) {
+        if (board[i] === '') {
+            board[i] = 'X';
+            if (checkWin('X')) {
+                board[i] = '';
+                return i;
+            }
+            board[i] = '';
+        }
+    }
+
+    if (board[4] === '') return 4;
+
+    const corners = [0, 2, 6, 8];
+    for (let i of corners) {
+        if (board[i] === '') return i;
+    }
+
+    const availableCells = board.map((cell, index) => cell === '' ? index : null).filter(val => val !== null);
+    if (availableCells.length > 0) {
+        return availableCells[Math.floor(Math.random() * availableCells.length)];
+    }
+    return -1;
 }
 
 function makeMove(cell, index, player) {
@@ -909,59 +942,6 @@ function makeMove(cell, index, player) {
     currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
     ticTacToeStatus.textContent = `${currentPlayer === 'X' ? 'Sua' : 'Vez do computador'} vez (${currentPlayer})`;
 }
-
-function aiMove() {
-    // Implementação simples: AI tenta ganhar, bloquear, ou joga aleatoriamente
-    let bestMove = getBestAIMove();
-
-    if (gameActive && bestMove !== -1) {
-        const cell = ticTacToeCells[bestMove];
-        makeMove(cell, bestMove, currentPlayer);
-    }
-}
-
-function getBestAIMove() {
-    // 1. Tentar ganhar
-    for (let i = 0; i < board.length; i++) {
-        if (board[i] === '') {
-            board[i] = 'O';
-            if (checkWin('O')) {
-                board[i] = ''; // Desfaz o movimento de teste
-                return i;
-            }
-            board[i] = '';
-        }
-    }
-
-    // 2. Tentar bloquear o jogador
-    for (let i = 0; i < board.length; i++) {
-        if (board[i] === '') {
-            board[i] = 'X';
-            if (checkWin('X')) {
-                board[i] = '';
-                return i;
-            }
-            board[i] = '';
-        }
-    }
-
-    // 3. Preferir o centro
-    if (board[4] === '') return 4;
-
-    // 4. Preferir cantos
-    const corners = [0, 2, 6, 8];
-    for (let i of corners) {
-        if (board[i] === '') return i;
-    }
-
-    // 5. Jogada aleatória
-    const availableCells = board.map((cell, index) => cell === '' ? index : null).filter(val => val !== null);
-    if (availableCells.length > 0) {
-        return availableCells[Math.floor(Math.random() * availableCells.length)];
-    }
-    return -1; // Sem movimentos disponíveis (deve ser um empate ou vitória já)
-}
-
 
 function checkWin(player) {
     return WINNING_COMBINATIONS.some(combination => {
@@ -1007,26 +987,51 @@ function endGame(win, winner = null) {
     updateDisplay();
 }
 
-
 // --- Event Listeners ---
 startGameBtn.addEventListener('click', initializeGame);
-feedButton.addEventListener('click', () => feedPet());
-playButton.addEventListener('click', () => playWithPet());
+
+feedButton.addEventListener('click', () => {
+    if (pet.evolutionStage !== 'dead' && !pet.isSleeping && pet.evolutionStage !== 'egg') {
+        pet.currentAction = 'eating';
+        updateDisplay();
+        feedPet();
+        setTimeout(() => {
+            pet.currentAction = null;
+            updateDisplay();
+        }, 1500);
+    } else {
+        feedPet();
+    }
+});
+
+playButton.addEventListener('click', () => {
+    if (pet.evolutionStage !== 'dead' && !pet.isSleeping && pet.evolutionStage !== 'egg') {
+        pet.currentAction = 'playing';
+        updateDisplay();
+        playWithPet();
+        setTimeout(() => {
+            pet.currentAction = null;
+            updateDisplay();
+        }, 1500);
+    } else {
+        playWithPet();
+    }
+});
+
 sleepButton.addEventListener('click', toggleSleep);
 vaccinateButton.addEventListener('click', vaccinatePet);
 warmEggButton.addEventListener('click', warmEgg);
+passDayButton.addEventListener('click', passDay);
 
-// Navegação
 shopButton.addEventListener('click', showShop);
 document.getElementById('shopBackButton').addEventListener('click', () => showScreen(tamagotchiScreen));
 
 inventoryButton.addEventListener('click', showInventory);
 document.getElementById('inventoryBackButton').addEventListener('click', () => showScreen(tamagotchiScreen));
 
-gamesButton.addEventListener('click', () => showScreen(gamesScreen)); // Abre a tela de seleção de minigames
-document.getElementById('gamesBackButton').addEventListener('click', () => showScreen(tamagotchiScreen)); // Volta da seleção de minigames
+gamesButton.addEventListener('click', () => showScreen(gamesScreen));
+document.getElementById('gamesBackButton').addEventListener('click', () => showScreen(tamagotchiScreen));
 
-// Event Listeners para Minigames
 document.getElementById('rockPaperScissorsBtn').addEventListener('click', showRPSGame);
 rpsRockBtn.addEventListener('click', () => playRPS('pedra'));
 rpsPaperBtn.addEventListener('click', () => playRPS('papel'));
@@ -1047,5 +1052,4 @@ ticTacToeBackToGamesBtn.addEventListener('click', () => showScreen(gamesScreen))
 // --- Inicialização ao carregar a página ---
 document.addEventListener('DOMContentLoaded', () => {
     showScreen(startScreen);
-    updateDisplay(); // Para garantir que os valores iniciais e botões estejam corretos
 });
