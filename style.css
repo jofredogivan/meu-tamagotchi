@@ -1,637 +1,265 @@
-@charset "UTF-8";
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-
-:root {
-    --primary-bg: #87CEEB; /* Azul céu */
-    --secondary-bg: #ADD8E6; /* Azul claro */
-    --button-color: #FFD700; /* Dourado */
-    --button-hover-color: #FFC107; /* Laranja dourado */
-    --text-color: #333;
-    --border-color: #6A5ACD; /* Azul ardósia médio */
-    --status-bar-bg: #B0C4DE; /* Azul aço claro */
-    --green-status: #4CAF50;
-    --red-status: #F4436;
-    --orange-status: #FF9800;
-}
-
 body {
     font-family: 'Press Start 2P', cursive;
+    background: linear-gradient(135deg, #2c3e50, #4a69bd);
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: var(--primary-bg);
     margin: 0;
-    overflow: hidden; /* Evita scroll desnecessário */
-    color: var(--text-color);
-    font-size: 0.8em;
-    text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.7);
+    font-size: 10px;
+    color: #fff;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
 }
 
 .game-container {
-    background-color: var(--secondary-bg);
-    border: 8px solid var(--border-color);
-    border-radius: 20px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-    width: 90%;
-    max-width: 450px;
-    min-height: 600px;
+    width: 350px;
+    height: 600px;
+    background: linear-gradient(45deg, #34495e, #556c84);
+    border: 10px solid #2c3e50;
+    border-radius: 30px;
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.8), 
+        inset 0 0 50px rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 20px;
+    box-sizing: border-box;
+    transform: perspective(1000px) rotateX(5deg) rotateY(-5deg);
+    transition: transform 0.3s ease;
+}
+
+.game-container:hover {
+    transform: perspective(1000px) rotateX(0deg) rotateY(0deg);
+}
+
+.screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 20px;
     box-sizing: border-box;
-    position: relative;
-    overflow: hidden; /* Para garantir que o pet image gif não transborde */
-}
-
-.screen {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 10px;
-    box-sizing: border-box;
-    text-align: center;
+    transition: all 0.5s ease-in-out;
 }
 
 .hidden {
-    display: none !important;
+    transform: translateY(100%);
+    opacity: 0;
+    pointer-events: none;
 }
 
-/* --- Start Screen --- */
-#startScreen h1 {
-    font-size: 1.5em;
-    margin-bottom: 30px;
-    color: var(--border-color);
+#startScreen {
+    background-color: #556c84;
+    justify-content: center;
 }
 
-#petNameInput {
-    padding: 12px 15px;
-    margin-bottom: 25px;
-    border: 3px solid var(--border-color);
-    border-radius: 8px;
-    font-family: 'Press Start 2P', cursive;
-    font-size: 0.9em;
-    text-align: center;
-    background-color: #FFF;
-    color: var(--text-color);
-    width: 80%;
-    max-width: 250px;
-    box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.2);
-}
-
-/* --- Tamagotchi Screen --- */
 #tamagotchiScreen {
-    justify-content: flex-start; /* Alinha o conteúdo ao topo */
-}
-
-.status-bar {
-    width: 100%;
-    background-color: var(--status-bar-bg);
-    border: 2px solid var(--border-color);
-    border-radius: 10px;
-    padding: 10px 15px;
-    display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap; /* Permite quebrar linha em telas pequenas */
-    gap: 8px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-}
-
-.status-bar span {
-    font-size: 0.75em;
-    color: var(--text-color);
-    white-space: nowrap; /* Evita quebra de linha individualmente */
-}
-
-.status-icons {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin-bottom: 20px;
-    min-height: 35px; /* Para evitar layout shift */
-}
-
-.status-icon {
-    width: 35px;
-    height: 35px;
-    filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.4));
-    transition: transform 0.2s ease-in-out;
-}
-
-.status-icon.blinking {
-    animation: blink-animation 0.8s infinite alternate;
-}
-
-@keyframes blink-animation {
-    from { opacity: 1; }
-    to { opacity: 0.3; }
-}
-
-/* Para o grupo de status do ovo */
-.egg-status {
-    display: flex;
-    align-items: center;
-    gap: 5px; /* Espaço entre o ícone e o texto */
-    margin-bottom: 15px; /* Espaço abaixo do status */
-    justify-content: center; /* Centraliza no eixo horizontal */
-    font-weight: bold;
-    color: var(--green-status); 
-    font-size: 0.8em;
-}
-
-/* Para o ícone do ovo */
-#eggWarmthIcon {
-    width: 35px; 
-    height: 35px;
-    filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.3)); 
-}
-
-/* Estilo para quando a temperatura estiver baixa (ex: abaixo de 40) */
-#eggWarmthIcon.cold {
-    filter: grayscale(100%) brightness(80%) sepia(100%) hue-rotate(180deg); /* Faz parecer azul/frio */
-    animation: pulse 1s infinite alternate; /* Adiciona animação de pulso */
-    color: var(--orange-status); /* Mudar a cor do texto também */
-}
-
-/* Estilo para quando a temperatura estiver crítica (ex: abaixo de 20) */
-#eggWarmthIcon.critical {
-    filter: grayscale(100%) brightness(50%) sepia(100%) hue-rotate(240deg); /* Faz parecer roxo/muito frio */
-    animation: blink 0.5s infinite alternate; /* Pisca mais rápido */
-    color: var(--red-status); /* Mudar a cor do texto também */
-}
-
-/* Animação de pulso */
-@keyframes pulse {
-    from { transform: scale(1); opacity: 1; }
-    to { transform: scale(1.05); opacity: 0.8; }
-}
-
-/* Animação de piscar */
-@keyframes blink {
-    from { opacity: 1; }
-    to { opacity: 0.3; }
-}
-
-.pet-display {
-    width: 100%;
-    height: 200px; /* Altura fixa para o display do pet */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 25px;
-    background-color: #C0C0C0; /* Fundo cinza claro para a área do pet */
-    border: 3px solid #808080; /* Borda escura */
-    border-radius: 15px;
-    overflow: hidden; /* Garante que GIFs grandes não saiam */
-    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
-}
-
-#petImage {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain; /* Garante que a imagem se ajuste sem cortar ou distorcer */
-    image-rendering: pixelated; /* Para manter o visual pixelado se for o caso */
+    background-color: #b3c7b3; /* Cor da tela do tamagotchi, mantida */
+    flex-direction: column;
+    justify-content: flex-start;
 }
 
 .game-info {
     width: 100%;
     display: flex;
-    justify-content: space-around;
-    margin-bottom: 25px;
-    font-size: 0.75em;
-    color: var(--text-color);
+    justify-content: space-between;
+    padding: 10px 20px;
+    border-bottom: 2px solid #808080;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+    color: #333;
 }
 
-.actions {
+.pet-container {
+    background-color: #d1d1a1;
+    border: 5px solid #b0b080;
+    border-radius: 10px;
+    width: 80%;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 10px auto;
+    box-sizing: border-box;
+}
+
+#petImage {
+    max-width: 90%;
+    max-height: 90%;
+    image-rendering: pixelated;
+    transition: transform 0.2s ease-in-out;
+}
+
+.status-info {
+    width: 100%;
+    text-align: center;
+    margin-top: 10px;
+    color: #333;
+}
+
+.status-group {
+    margin-top: 5px;
+    color: #333;
+}
+
+.alert-icons {
+    position: absolute;
+    top: 35%;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 5px;
+}
+
+.alert-icons span {
+    font-size: 20px;
+}
+
+.blinking {
+    animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+    50% { opacity: 0; }
+}
+
+.action-buttons, .main-menu-buttons, .games-menu {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 12px;
-    width: 100%;
-    margin-top: auto; /* Empurra os botões para baixo */
-}
-
-.action-button, .nav-button, .back-button, .game-selection-button, .play-again-button {
-    background-color: var(--button-color);
-    color: var(--text-color);
-    border: 3px solid var(--border-color);
-    border-radius: 10px;
-    padding: 12px 18px;
-    font-family: 'Press Start 2P', cursive;
-    font-size: 0.7em;
-    cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.1s ease;
-    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.3);
-    flex-grow: 1; /* Permite que os botões cresçam */
-    max-width: 48%; /* Duas colunas */
-}
-
-.action-button:hover:not(:disabled), .nav-button:hover:not(:disabled), .back-button:hover:not(:disabled), 
-.game-selection-button:hover:not(:disabled), .play-again-button:hover:not(:disabled) {
-    background-color: var(--button-hover-color);
-    transform: translateY(-2px);
-    box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.3);
-}
-
-.action-button:active:not(:disabled), .nav-button:active:not(:disabled), .back-button:active:not(:disabled), 
-.game-selection-button:active:not(:disabled), .play-again-button:active:not(:disabled) {
-    transform: translateY(1px);
-    box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3);
-}
-
-.action-button:disabled, .nav-button:disabled, .back-button:disabled, 
-.game-selection-button:disabled, .play-again-button:disabled {
-    background-color: #ccc;
-    border-color: #999;
-    color: #666;
-    cursor: not-allowed;
-    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
-}
-
-.nav-bar {
-    display: flex;
-    justify-content: space-around;
-    width: 100%;
-    margin-top: 15px;
     gap: 10px;
+    margin-top: 15px;
+    padding: 0 20px;
+    box-sizing: border-box;
 }
 
-.nav-button {
-    flex-grow: 1;
-    font-size: 0.65em;
-    padding: 10px 12px;
+.action-button, .menu-button, .game-button, .main-button {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 8px;
+    padding: 8px 12px;
+    background-color: #e67e22;
+    color: #fff;
+    border: 2px solid #d35400;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    text-transform: uppercase;
+    box-shadow: 0 4px 0 #d35400;
 }
 
-/* Specific button colors */
-#warmEggButton {
-    background-color: #FFC107; /* Cor de aquecimento/sol */
-    color: #333;
-    border: 1px solid #FFA000;
-}
-#warmEggButton:hover:not(:disabled) {
-    background-color: #FFB300;
+.action-button:hover, .menu-button:hover, .game-button:hover, .main-button:hover {
+    background-color: #f39c12;
 }
 
-#feedButton { background-color: #9CCC65; border-color: #689F38; } /* Verde Comida */
-#feedButton:hover:not(:disabled) { background-color: #8BC34A; }
-#playButton { background-color: #FFB74D; border-color: #FB8C00; } /* Laranja Brincar */
-#playButton:hover:not(:disabled) { background-color: #FFA726; }
-#sleepButton { background-color: #64B5F6; border-color: #2196F3; } /* Azul Dormir */
-#sleepButton:hover:not(:disabled) { background-color: #42A5F5; }
-#vaccinateButton { background-color: #BA68C8; border-color: #8E24AA; } /* Roxo Vacinar */
-#vaccinateButton:hover:not(:disabled) { background-color: #AB47BC; }
-#restartButton { background-color: #EF5350; border-color: #D32F2F; } /* Vermelho Reiniciar */
-#restartButton:hover:not(:disabled) { background-color: #E53935; }
-
-
-.game-message {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: rgba(0, 0, 0, 0.7);
-    color: white;
-    padding: 10px 15px;
-    border-radius: 8px;
-    font-size: 0.7em;
-    opacity: 0;
-    transition: opacity 0.3s ease-in-out;
-    z-index: 100; /* Garante que fique por cima de outros elementos */
-    white-space: nowrap; /* Evita que a mensagem quebre a linha */
+.action-button:active, .menu-button:active, .game-button:active, .main-button:active {
+    transform: scale(0.95) translateY(4px);
+    box-shadow: 0 0 0 #d35400;
 }
 
-.game-message.visible {
-    opacity: 1;
+.main-button {
+    margin-top: 20px;
+    font-size: 12px;
+    background-color: #3498db;
+    border: 2px solid #2980b9;
+    box-shadow: 0 4px 0 #2980b9;
 }
 
-/* --- Shop and Inventory Screens --- */
-#shopScreen, #inventoryScreen, #gamesScreen {
-    justify-content: flex-start;
+.main-button:hover {
+    background-color: #5dade2;
 }
 
-#shopScreen h2, #inventoryScreen h2, #gamesScreen h2 {
-    font-size: 1.3em;
-    margin-bottom: 25px;
-    color: var(--border-color);
+.main-button:active {
+    box-shadow: 0 0 0 #2980b9;
 }
 
-.items-grid, .games-list {
+.items-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* Responsivo */
-    gap: 15px;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 10px;
     width: 100%;
+    max-height: 300px;
+    overflow-y: auto;
     padding: 10px;
     box-sizing: border-box;
-    max-height: 400px; /* Limita a altura para scroll */
-    overflow-y: auto; /* Adiciona scroll se houver muitos itens */
-    margin-bottom: 20px;
+    color: #333;
 }
 
 .item-card {
-    background-color: #F0F8FF; /* Azul alice */
-    border: 2px solid var(--border-color);
-    border-radius: 10px;
-    padding: 10px;
+    background-color: #fff;
+    padding: 8px;
+    border: 2px solid #404040;
+    border-radius: 5px;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.2);
-}
-
-.item-card .item-name {
-    font-size: 0.7em;
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-
-.item-card .item-price, .item-card .item-quantity {
-    font-size: 0.6em;
-    margin-bottom: 10px;
-    color: #555;
+    font-size: 8px;
 }
 
 .item-card button {
-    background-color: #A1887F; /* Marrom claro */
-    color: white;
-    border: 2px solid #8D6E63;
-    border-radius: 8px;
-    padding: 8px 12px;
-    font-family: 'Press Start 2P', cursive;
-    font-size: 0.6em;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
+    margin-top: 5px;
+    font-size: 7px;
 }
 
-.item-card button:hover:not(:disabled) {
-    background-color: #795548;
-}
-
-.back-button {
-    margin-top: auto; /* Empurra para o final */
-    width: auto; /* Permite que o botão se ajuste ao texto */
-    padding: 10px 20px;
-    font-size: 0.7em;
-    background-color: #607D8B; /* Azul acinzentado */
-    border-color: #455A64;
-    color: white;
-}
-.back-button:hover:not(:disabled) {
-    background-color: #546E7A;
-}
-
-
-/* --- Minigames Specific Styles --- */
-.games-list {
-    grid-template-columns: 1fr; /* Um botão por linha para a lista de jogos */
-    gap: 15px;
-}
-
-.game-selection-button {
-    width: 100%;
-    padding: 15px;
-    font-size: 0.8em;
-    background-color: #FF5722; /* Laranja */
-    border-color: #E64A19;
-    color: white;
-}
-.game-selection-button:hover:not(:disabled) {
-    background-color: #F4511E;
-}
-
-.sub-game-screen {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 15px;
-    margin-top: 20px;
-    padding: 15px;
-    background-color: rgba(255, 255, 255, 0.7);
-    border-radius: 10px;
-    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
-}
-
-.sub-game-screen h3 {
-    font-size: 1.1em;
-    color: var(--border-color);
-    margin-bottom: 10px;
-}
-
-.sub-game-screen p {
-    font-size: 0.75em;
-    margin-bottom: 10px;
-}
-
-.play-again-button {
-    background-color: #4CAF50; /* Verde */
-    border-color: #388E3C;
-    color: white;
-    margin-top: 15px;
-}
-.play-again-button:hover:not(:disabled) {
-    background-color: #43A047;
-}
-
-/* RPS Game */
-.rps-buttons {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-}
-.rps-buttons button {
-    background-color: #00BCD4; /* Ciano */
-    border-color: #0097A7;
-    color: white;
-    padding: 10px 15px;
-    font-size: 0.7em;
-}
-.rps-buttons button:hover:not(:disabled) {
-    background-color: #00ACC1;
-}
-
-/* Number Guessing Game */
-#ngGuessInput {
-    padding: 10px;
-    border: 2px solid var(--border-color);
+#gameMessage {
+    background-color: #333;
+    color: #fff;
+    padding: 5px 10px;
     border-radius: 5px;
-    font-family: 'Press Start 2P', cursive;
-    font-size: 0.8em;
-    width: 150px;
-    text-align: center;
-}
-#ngSubmitGuessBtn {
-    background-color: #8BC34A; /* Verde */
-    border-color: #689F38;
-    color: white;
-    padding: 10px 15px;
-    font-size: 0.7em;
-}
-#ngSubmitGuessBtn:hover:not(:disabled) {
-    background-color: #7CB342;
+    font-size: 8px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 10;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
+#gameMessage.visible {
+    opacity: 1;
+}
 
-/* Tic Tac Toe Game */
+.game-actions button {
+    padding: 10px;
+    font-size: 10px;
+}
+
 .tic-tac-toe-board {
     display: grid;
-    grid-template-columns: repeat(3, 80px); /* Tamanho das células */
-    grid-template-rows: repeat(3, 80px);
-    gap: 5px;
-    background-color: #333;
-    border: 5px solid #333;
-    border-radius: 5px;
-    margin-bottom: 20px;
+    grid-template-columns: repeat(3, 1fr);
+    width: 200px;
+    height: 200px;
+    margin: 10px auto;
+    border: 2px solid #000;
 }
 
 .cell {
-    width: 80px;
-    height: 80px;
-    background-color: #eee;
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+    border: 1px solid #000;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 3em;
-    font-weight: bold;
+    font-size: 36px;
     cursor: pointer;
-    transition: background-color 0.2s ease;
-    border-radius: 3px;
-    color: #333; /* Cor padrão para o texto */
-}
-
-.cell:hover {
-    background-color: #ddd;
 }
 
 .cell.player-x {
-    color: #F4436; /* Vermelho para X */
+    color: #ff4d4d;
 }
 
 .cell.player-o {
-    color: #2196F3; /* Azul para O */
+    color: #4d4dff;
 }
 
 .cell.winning-cell {
-    background-color: #FFEB3B; /* Amarelo claro para células vencedoras */
-    animation: winning-pulse 0.5s infinite alternate;
-}
-
-@keyframes winning-pulse {
-    from { transform: scale(1); opacity: 1; }
-    to { transform: scale(1.1); opacity: 0.9; }
-}
-
-/* Responsividade */
-@media (max-width: 400px) {
-    .game-container {
-        width: 95%;
-        padding: 15px;
-    }
-
-    #startScreen h1 {
-        font-size: 1.2em;
-    }
-
-    #petNameInput {
-        font-size: 0.8em;
-        padding: 10px;
-    }
-
-    .status-bar span {
-        font-size: 0.65em;
-    }
-
-    .status-icon, #eggWarmthIcon {
-        width: 28px;
-        height: 28px;
-    }
-
-    .egg-status, .game-info {
-        font-size: 0.7em;
-    }
-
-    .action-button, .nav-button, .back-button, .game-selection-button, .play-again-button {
-        padding: 10px 12px;
-        font-size: 0.6em;
-    }
-
-    .nav-bar {
-        flex-direction: column; /* Botões de navegação em coluna */
-        gap: 8px;
-    }
-    .nav-button {
-        max-width: 100%; /* Ocupa a largura total na coluna */
-    }
-
-    .items-grid {
-        grid-template-columns: 1fr; /* Um item por linha em telas muito pequenas */
-    }
-
-    .item-card button {
-        font-size: 0.55em;
-    }
-
-    .sub-game-screen h3 {
-        font-size: 1em;
-    }
-
-    .sub-game-screen p {
-        font-size: 0.65em;
-    }
-
-    .rps-buttons button {
-        font-size: 0.6em;
-        padding: 8px 10px;
-    }
-
-    #ngGuessInput {
-        width: 100px;
-        font-size: 0.7em;
-    }
-    #ngSubmitGuessBtn {
-        font-size: 0.6em;
-    }
-
-    .tic-tac-toe-board {
-        grid-template-columns: repeat(3, 70px);
-        grid-template-rows: repeat(3, 70px);
-    }
-    .cell {
-        width: 70px;
-        height: 70px;
-        font-size: 2.5em;
-    }
-}
-
-/* Landscape mode on small devices */
-@media (max-height: 500px) and (max-width: 800px) {
-    .game-container {
-        min-height: auto;
-        padding: 10px;
-    }
-    .pet-display {
-        height: 150px;
-    }
-    .actions {
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-    .action-button, .nav-button {
-        flex: 1 1 30%; /* Mais flexibilidade */
-        max-width: 30%;
-        font-size: 0.6em;
-        padding: 8px;
-    }
-    .status-bar span, .game-info span {
-        font-size: 0.6em;
-    }
-    .status-icons, .egg-status {
-        margin-bottom: 10px;
-    }
+    background-color: #aaffaa;
 }
