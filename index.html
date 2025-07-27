@@ -1,129 +1,121 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meu Tamagotchi</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
 <body>
+
     <div class="game-container">
+        
         <div id="startScreen" class="screen">
-            <h1>Crie Seu Tamagotchi</h1>
+            <h1>Meu Tamagotchi</h1>
             <input type="text" id="petNameInput" placeholder="Dê um nome ao seu pet">
-            <button id="startGameBtn" class="action-button">Começar</button>
+            <button id="startGameBtn" class="main-button">Começar</button>
         </div>
 
         <div id="tamagotchiScreen" class="screen hidden">
-            <div class="status-bar">
-                <span id="petName">Nome:</span>
-                <span id="mood">Humor:</span>
-                <span id="status">Status:</span>
+            <div class="game-info">
+                <span id="petName">Nome: Tamago</span>
+                <span id="nivel">Nível: 0</span>
+                <span id="moedas">Moedas: 0</span>
             </div>
 
-            <div class="status-icons">
-                <img src="./imgs/fome_icon.png" alt="Fome" id="hungerIcon" class="status-icon hidden">
-                <img src="./imgs/diversao_icon.png" alt="Diversão" id="funIcon" class="status-icon hidden">
-                <img src="./imgs/energia_icon.png" alt="Energia" id="energyIcon" class="status-icon hidden">
-                <img src="./imgs/vida_icon.png" alt="Vida/Doença" id="lifeIcon" class="status-icon hidden">
+            <div class="pet-container">
+                <img id="petImage" src="imgs/ovo.png" alt="Seu Tamagotchi">
             </div>
 
-            <div class="status-group egg-status hidden" id="eggStatusGroup">
-                <img src="./imgs/ovo.quente.png" alt="Ovo Quente" id="eggWarmthIcon" class="status-icon">
-                <span id="eggWarmthDisplay">Aquecimento: 100%</span>
-            </div>
-
-            <div class="pet-display">
-                <img src="./imgs/ovo.png" alt="Seu Tamagotchi" id="petImage">
+            <div class="status-info">
+                <span id="mood">Humor: Normal 🙂</span>
+                <span id="status">Status: Ovo 🥚</span>
             </div>
             
-            <div class="game-info">
-                <span id="nivel">Nível: Ovo (Idade: 0 dias)</span>
-                <span>Moedas: <span id="moedas">0</span></span>
+            <div id="eggStatusGroup" class="status-group">
+                <span id="eggWarmthDisplay">Aquecimento: 100%</span>
             </div>
+            
+            <div id="alertIcons" class="alert-icons"></div>
 
-            <div class="actions" id="actions">
-                <button id="warmEggButton" class="action-button hidden">Aquecer Ovo</button>
-                <button id="feedButton" class="action-button">Alimentar</button>
-                <button id="playButton" class="action-button">Brincar</button>
-                <button id="sleepButton" class="action-button">Dormir</button>
-                <button id="vaccinateButton" class="action-button">Vacinar (5 Moedas)</button>
-                
-                <div class="nav-bar">
-                    <button id="shopButton" class="nav-button">Loja</button>
-                    <button id="inventoryButton" class="nav-button">Inventário</button>
-                    <button id="gamesButton" class="nav-button">Minigames</button>
-                </div>
-                </div>
-            <div id="gameMessage" class="game-message"></div>
+            <div id="gameMessage"></div>
+
+            <div id="actions" class="action-buttons">
+                <button id="feedButton" class="action-button hidden">Alimentar</button>
+                <button id="playButton" class="action-button hidden">Brincar</button>
+                <button id="sleepButton" class="action-button hidden">Dormir</button>
+                <button id="vaccinateButton" class="action-button hidden">Vacinar</button>
+                <button id="warmEggButton" class="action-button hidden">Aquecer</button>
+            </div>
+            
+            <div class="main-menu-buttons">
+                <button id="shopButton" class="menu-button hidden">Loja</button>
+                <button id="inventoryButton" class="menu-button hidden">Inventário</button>
+                <button id="gamesButton" class="menu-button hidden">Jogos</button>
+                <button id="passDayButton" class="menu-button hidden">Passar o Dia</button>
+            </div>
         </div>
 
         <div id="shopScreen" class="screen hidden">
             <h2>Loja</h2>
-            <div id="shopItems" class="items-grid">
-                </div>
-            <button id="shopBackButton" class="back-button">Voltar</button>
+            <div id="shopItems" class="items-grid"></div>
+            <button id="shopBackButton" class="main-button">Voltar</button>
         </div>
-
         <div id="inventoryScreen" class="screen hidden">
             <h2>Inventário</h2>
-            <div id="inventoryItems" class="items-grid">
-                </div>
-            <button id="inventoryBackButton" class="back-button">Voltar</button>
+            <div id="inventoryItems" class="items-grid"></div>
+            <button id="inventoryBackButton" class="main-button">Voltar</button>
         </div>
-
         <div id="gamesScreen" class="screen hidden">
             <h2>Minigames</h2>
-            <div id="gamesList" class="games-list">
-                <button id="rockPaperScissorsBtn" class="game-selection-button">Pedra, Papel e Tesoura</button>
-                <button id="numberGuessingBtn" class="game-selection-button">Adivinhe o Número</button>
-                <button id="ticTacToeBtn" class="game-selection-button">Jogo da Velha</button>
+            <div class="games-menu">
+                <button id="rockPaperScissorsBtn" class="game-button">Pedra, Papel, Tesoura</button>
+                <button id="numberGuessingBtn" class="game-button">Adivinhe o Número</button>
+                <button id="ticTacToeBtn" class="game-button">Jogo da Velha</button>
             </div>
-            <button id="gamesBackButton" class="back-button">Voltar</button>
-
-            <div id="rpsGame" class="sub-game-screen hidden">
-                <h3>Pedra, Papel e Tesoura</h3>
-                <p id="rpsResult">Faça sua escolha!</p>
-                <div class="rps-buttons">
-                    <button id="rpsRock">Pedra</button>
-                    <button id="rpsPaper">Papel</button>
-                    <button id="rpsScissors">Tesoura</button>
-                </div>
-                <button id="rpsPlayAgainBtn" class="play-again-button hidden">Jogar Novamente</button>
-                <button id="rpsBackToGamesBtn" class="back-button hidden">Voltar para Minigames</button>
+            <button id="gamesBackButton" class="main-button">Voltar</button>
+        </div>
+        <div id="rpsGame" class="screen hidden">
+            <h3>Pedra, Papel, Tesoura</h3>
+            <p id="rpsResult">Faça sua escolha!</p>
+            <div class="game-actions">
+                <button id="rpsRock">Pedra</button>
+                <button id="rpsPaper">Papel</button>
+                <button id="rpsScissors">Tesoura</button>
             </div>
-
-            <div id="numberGuessingGame" class="sub-game-screen hidden">
-                <h3>Adivinhe o Número</h3>
-                <p id="ngInstructions">Estou pensando em um número entre 1 e 100.</p>
-                <input type="number" id="ngGuessInput" min="1" max="100" placeholder="Seu palpite">
-                <button id="ngSubmitGuessBtn">Adivinhar</button>
-                <p id="ngResult"></p>
-                <button id="ngPlayAgainBtn" class="play-again-button hidden">Jogar Novamente</button>
-                <button id="ngBackToGamesBtn" class="back-button hidden">Voltar para Minigames</button>
+            <button id="rpsPlayAgainBtn" class="main-button hidden">Jogar Novamente</button>
+            <button id="rpsBackToGamesBtn" class="main-button">Voltar aos Jogos</button>
+        </div>
+        <div id="numberGuessingGame" class="screen hidden">
+            <h3>Adivinhe o Número</h3>
+            <p id="ngInstructions">Estou pensando em um número entre 1 e 100.</p>
+            <input type="number" id="ngGuessInput" placeholder="Seu palpite">
+            <button id="ngSubmitGuessBtn">Adivinhar</button>
+            <p id="ngResult"></p>
+            <button id="ngPlayAgainBtn" class="main-button hidden">Jogar Novamente</button>
+            <button id="ngBackToGamesBtn" class="main-button">Voltar aos Jogos</button>
+        </div>
+        <div id="ticTacToeGame" class="screen hidden">
+            <h3>Jogo da Velha</h3>
+            <p id="ticTacToeStatus"></p>
+            <div id="ticTacToeBoard" class="tic-tac-toe-board">
+                <div class="cell" data-cell-index="0"></div>
+                <div class="cell" data-cell-index="1"></div>
+                <div class="cell" data-cell-index="2"></div>
+                <div class="cell" data-cell-index="3"></div>
+                <div class="cell" data-cell-index="4"></div>
+                <div class="cell" data-cell-index="5"></div>
+                <div class="cell" data-cell-index="6"></div>
+                <div class="cell" data-cell-index="7"></div>
+                <div class="cell" data-cell-index="8"></div>
             </div>
-
-            <div id="ticTacToeGame" class="sub-game-screen hidden">
-                <h3>Jogo da Velha</h3>
-                <p id="ticTacToeStatus"></p>
-                <div id="ticTacToeBoard" class="tic-tac-toe-board">
-                    <div class="cell" data-cell-index="0"></div>
-                    <div class="cell" data-cell-index="1"></div>
-                    <div class="cell" data-cell-index="2"></div>
-                    <div class="cell" data-cell-index="3"></div>
-                    <div class="cell" data-cell-index="4"></div>
-                    <div class="cell" data-cell-index="5"></div>
-                    <div class="cell" data-cell-index="6"></div>
-                    <div class="cell" data-cell-index="7"></div>
-                    <div class="cell" data-cell-index="8"></div>
-                </div>
-                <button id="ticTacToePlayAgainBtn" class="play-again-button hidden">Jogar Novamente</button>
-                <button id="ticTacToeBackToGamesBtn" class="back-button hidden">Voltar para Minigames</button>
-            </div>
+            <button id="ticTacToePlayAgainBtn" class="main-button hidden">Jogar Novamente</button>
+            <button id="ticTacToeBackToGamesBtn" class="main-button">Voltar aos Jogos</button>
         </div>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>
